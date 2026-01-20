@@ -109,11 +109,18 @@
       <h3>Poser une question ou décrire un problème</h3>
       <input id="name" type="text" placeholder="Nom / Fonction" />
       <select id="role">
-        <option>Organisateur logistique</option>
-        <option>Logisticien</option>
-        <option>Chauffeur poids lourd</option>
-        <option>Mécanicien poids lourd</option>
-        <option>Étudiant</option>
+        <option value="Logisticien">Logisticien</option>
+        <option value="Organisateur">Organisateur logistique</option>
+        <option value="Chauffeur">Chauffeur poids lourd</option>
+        <option value="Mecanicien">Mécanicien poids lourd</option>
+        <option value="Etudiant">Étudiant</option>
+      </select>
+      <select id="view">
+        <option value="Logisticien">Voir : Logisticiens</option>
+        <option value="Organisateur">Voir : Organisateurs</option>
+        <option value="Chauffeur">Voir : Chauffeurs</option>
+        <option value="Mecanicien">Voir : Mécaniciens</option>
+        <option value="ALL">Voir : Tous (admin)</option>
       </select>
       <textarea id="content" rows="4" placeholder="Décrivez votre question ou problème..."></textarea>
       <input id="image" type="file" accept="image/*" />
@@ -139,6 +146,8 @@
 </footer>
 
 <script>
+  let allMessages = [];
+
   function addMessage() {
     const name = document.getElementById('name').value;
     const role = document.getElementById('role').value;
@@ -147,31 +156,55 @@
 
     if (!name || !content) return alert('Veuillez remplir les champs requis');
 
-    const msgBox = document.createElement('div');
-    msgBox.className = 'message';
-
-    msgBox.innerHTML = `<strong>${name}</strong> <small>(${role})</small><p>${content}</p>`;
+    const message = { name, role, content, image: null };
 
     if (imageInput.files[0]) {
-      const img = document.createElement('img');
-      img.style.maxWidth = '100%';
-      img.style.marginTop = '10px';
-      img.src = URL.createObjectURL(imageInput.files[0]);
-      msgBox.appendChild(img);
+      message.image = URL.createObjectURL(imageInput.files[0]);
     }
 
-    const reply = document.createElement('div');
-    reply.className = 'reply';
-    reply.innerHTML = '<em>Réponses possibles ici (simulation)</em>';
-    msgBox.appendChild(reply);
-
-    document.getElementById('messages').prepend(msgBox);
+    allMessages.unshift(message);
+    renderMessages();
 
     document.getElementById('name').value = '';
     document.getElementById('content').value = '';
     imageInput.value = '';
   }
+
+  function renderMessages() {
+    const container = document.getElementById('messages');
+    const view = document.getElementById('view').value;
+    container.innerHTML = '';
+
+    allMessages.forEach(msg => {
+      if (view !== 'ALL' && msg.role !== view) return;
+
+      const msgBox = document.createElement('div');
+      msgBox.className = 'message';
+      msgBox.innerHTML = `<strong>${msg.name}</strong> <small>(${msg.role})</small><p>${msg.content}</p>`;
+
+      if (msg.image) {
+        const img = document.createElement('img');
+        img.src = msg.image;
+        img.style.maxWidth = '100%';
+        img.style.marginTop = '10px';
+        msgBox.appendChild(img);
+      }
+
+      const reply = document.createElement('div');
+      reply.className = 'reply';
+      reply.innerHTML = '<em>Réponses possibles ici</em>';
+      msgBox.appendChild(reply);
+
+      container.appendChild(msgBox);
+    });
+  }
+
+  document.addEventListener('change', e => {
+    if (e.target.id === 'view') renderMessages();
+  });
 </script>
 
 </body>
+</html>
+
 </html>
