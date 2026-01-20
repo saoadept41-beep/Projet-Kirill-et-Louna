@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LogiConnect – Plateforme d’échange logistique</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f2027;
+      color: #fff;
+    }
+
+    header {
+      padding: 80px 10%;
+      background: linear-gradient(135deg, #0f2027, #203a43);
+      text-align: center;
+    }
+
+    h1 { font-size: 2.8rem; margin-bottom: 20px; }
+    h2 { color: #4facfe; margin-bottom: 15px; }
+
+    section {
+      padding: 60px 10%;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    p { line-height: 1.6; margin-bottom: 15px; }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .box {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #4facfe;
+      color: #000;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .messages {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .message {
+      background: rgba(0,0,0,0.4);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .message small { opacity: 0.7; }
+
+    .reply {
+      margin-top: 10px;
+      padding-left: 15px;
+      border-left: 2px solid #4facfe;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      padding: 40px;
+      text-align: center;
+      background: #000;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>LogiConnect</h1>
+  <p>Plateforme dédiée aux questions, problèmes et échanges entre organisateurs logistiques, logisticiens, chauffeurs poids lourds et mécaniciens.</p>
+</header>
+
+<section>
+  <h2>Objectif du projet</h2>
+  <p>LogiConnect permet aux étudiants et professionnels de la logistique de poser des questions concrètes liées à leur métier, de partager des problèmes rencontrés sur le terrain et d’obtenir des réponses adaptées par d’autres membres.</p>
+</section>
+
+<section>
+  <h2>Espace questions & problèmes professionnels</h2>
+  <div class="container">
+
+    <div class="box">
+      <h3>Poser une question ou décrire un problème</h3>
+      <input id="name" type="text" placeholder="Nom / Fonction" />
+      <select id="role">
+        <option>Organisateur logistique</option>
+        <option>Logisticien</option>
+        <option>Chauffeur poids lourd</option>
+        <option>Mécanicien poids lourd</option>
+        <option>Étudiant</option>
+      </select>
+      <textarea id="content" rows="4" placeholder="Décrivez votre question ou problème..."></textarea>
+      <input id="image" type="file" accept="image/*" />
+      <button onclick="addMessage()">Publier</button>
+    </div>
+
+    <div class="box">
+      <h3>Questions publiées</h3>
+      <div class="messages" id="messages"></div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Signalement de bugs ou réclamations</h2>
+  <p>Pour signaler un bug, un problème technique ou une réclamation concernant la plateforme, vous pouvez nous contacter directement.</p>
+  <a href="mailto:saoadept41@gmail.com?subject=Bug ou réclamation - LogiConnect" style="color:#4facfe; font-size:1.1rem;">Envoyer un message au responsable du projet</a>
+</section>
+
+<footer>
+  © Projet LogiConnect – Plateforme d’échange logistique
+</footer>
+
+<script>
+  function addMessage() {
+    const name = document.getElementById('name').value;
+    const role = document.getElementById('role').value;
+    const content = document.getElementById('content').value;
+    const imageInput = document.getElementById('image');
+
+    if (!name || !content) return alert('Veuillez remplir les champs requis');
+
+    const msgBox = document.createElement('div');
+    msgBox.className = 'message';
+
+    msgBox.innerHTML = `<strong>${name}</strong> <small>(${role})</small><p>${content}</p>`;
+
+    if (imageInput.files[0]) {
+      const img = document.createElement('img');
+      img.style.maxWidth = '100%';
+      img.style.marginTop = '10px';
+      img.src = URL.createObjectURL(imageInput.files[0]);
+      msgBox.appendChild(img);
+    }
+
+    const reply = document.createElement('div');
+    reply.className = 'reply';
+    reply.innerHTML = '<em>Réponses possibles ici (simulation)</em>';
+    msgBox.appendChild(reply);
+
+    document.getElementById('messages').prepend(msgBox);
+
+    document.getElementById('name').value = '';
+    document.getElementById('content').value = '';
+    imageInput.value = '';
+  }
+</script>
+
+</body>
+</html>
