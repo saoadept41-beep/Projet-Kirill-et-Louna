@@ -6,129 +6,56 @@
   <title>LogiConnect – Plateforme d’échange logistique</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #0f2027;
-      color: #fff;
-    }
-
-    header {
-      padding: 80px 10%;
-      background: linear-gradient(135deg, #0f2027, #203a43);
-      text-align: center;
-    }
-
-    h1 { font-size: 2.8rem; margin-bottom: 20px; }
-    h2 { color: #4facfe; margin-bottom: 15px; }
-
-    section {
-      padding: 60px 10%;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    p { line-height: 1.6; margin-bottom: 15px; }
-
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-    }
-
-    .box {
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 12px;
-    }
-
-    input, textarea, select, button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-    }
-
-    button {
-      background: #4facfe;
-      color: #000;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    .messages {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .message {
-      background: rgba(0,0,0,0.4);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-
-    .message small { opacity: 0.7; }
-
-    .reply {
-      margin-top: 10px;
-      padding-left: 15px;
-      border-left: 2px solid #4facfe;
-      font-size: 0.9rem;
-    }
-
-    footer {
-      padding: 40px;
-      text-align: center;
-      background: #000;
-      opacity: 0.7;
-    }
-
-    @media (max-width: 900px) {
-      .container { grid-template-columns: 1fr; }
-    }
+    body { font-family: Arial, Helvetica, sans-serif; background:#0f2027; color:#fff; }
+    header { padding:60px 10%; background:#203a43; text-align:center; }
+    h1 { font-size:2.5rem; margin-bottom:10px; }
+    section { padding:50px 10%; border-top:1px solid rgba(255,255,255,0.1); }
+    .container { display:grid; grid-template-columns:1fr 1fr; gap:30px; }
+    .box { background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; }
+    input, textarea, select, button { width:100%; margin-top:10px; padding:10px; border-radius:8px; border:none; }
+    button { background:#4facfe; color:#000; cursor:pointer; }
+    .messages { max-height:400px; overflow-y:auto; }
+    .message { background:rgba(0,0,0,0.4); padding:15px; border-radius:10px; margin-bottom:15px; }
+    .reply { margin-top:10px; padding-left:10px; border-left:2px solid #4facfe; font-size:0.9rem; }
+    footer { padding:30px; text-align:center; background:#000; opacity:0.7; }
+    @media(max-width:900px){ .container{grid-template-columns:1fr;} }
   </style>
 </head>
 <body>
 
 <header>
   <h1>LogiConnect</h1>
-  <p>Plateforme dédiée aux questions, problèmes et échanges entre organisateurs logistiques, logisticiens, chauffeurs poids lourds et mécaniciens.</p>
+  <p>Plateforme de questions et problèmes par métier logistique</p>
 </header>
 
 <section>
-  <h2>Objectif du projet</h2>
-  <p>LogiConnect permet aux étudiants et professionnels de la logistique de poser des questions concrètes liées à leur métier, de partager des problèmes rencontrés sur le terrain et d’obtenir des réponses adaptées par d’autres membres.</p>
-</section>
-
-<section>
-  <h2>Espace questions & problèmes professionnels</h2>
   <div class="container">
 
     <div class="box">
-      <h3>Poser une question ou décrire un problème</h3>
-      <input id="name" type="text" placeholder="Nom / Fonction" />
+      <h3>Publier un message</h3>
+      <input id="name" placeholder="Nom" />
       <select id="role">
         <option value="Logisticien">Logisticien</option>
         <option value="Organisateur">Organisateur logistique</option>
         <option value="Chauffeur">Chauffeur poids lourd</option>
-        <option value="Mecanicien">Mécanicien poids lourd</option>
+        <option value="Mecanicien">Mécanicien</option>
         <option value="Etudiant">Étudiant</option>
       </select>
-      <select id="view">
-        <option value="Logisticien">Voir : Logisticiens</option>
-        <option value="Organisateur">Voir : Organisateurs</option>
-        <option value="Chauffeur">Voir : Chauffeurs</option>
-        <option value="Mecanicien">Voir : Mécaniciens</option>
-        <option value="ALL">Voir : Tous (admin)</option>
-      </select>
-      <textarea id="content" rows="4" placeholder="Décrivez votre question ou problème..."></textarea>
+      <textarea id="content" rows="4" placeholder="Question ou problème..."></textarea>
       <input id="image" type="file" accept="image/*" />
-      <button onclick="addMessage()">Publier</button>
+      <button onclick="addMessage()">Envoyer</button>
     </div>
 
     <div class="box">
-      <h3>Questions publiées</h3>
+      <h3>Messages</h3>
+      <select id="view" onchange="renderMessages()">
+        <option value="ALL">Tous (admin)</option>
+        <option value="Logisticien">Logisticiens</option>
+        <option value="Organisateur">Organisateurs</option>
+        <option value="Chauffeur">Chauffeurs</option>
+        <option value="Mecanicien">Mécaniciens</option>
+        <option value="Etudiant">Étudiants</option>
+      </select>
       <div class="messages" id="messages"></div>
     </div>
 
@@ -136,33 +63,33 @@
 </section>
 
 <section>
-  <h2>Signalement de bugs ou réclamations</h2>
-  <p>Pour signaler un bug, un problème technique ou une réclamation concernant la plateforme, vous pouvez nous contacter directement.</p>
-  <a href="mailto:saoadept41@gmail.com?subject=Bug ou réclamation - LogiConnect" style="color:#4facfe; font-size:1.1rem;">Envoyer un message au responsable du projet</a>
+  <h3>Bug ou réclamation</h3>
+  <a href="mailto:saoadept41@gmail.com?subject=Bug ou réclamation - LogiConnect" style="color:#4facfe">Contacter l’administrateur</a>
 </section>
 
-<footer>
-  © Projet LogiConnect – Plateforme d’échange logistique
-</footer>
+<footer>© LogiConnect</footer>
 
 <script>
-  let allMessages = [];
+  let messagesData = [];
 
   function addMessage() {
-    const name = document.getElementById('name').value;
+    const name = document.getElementById('name').value.trim();
     const role = document.getElementById('role').value;
-    const content = document.getElementById('content').value;
+    const content = document.getElementById('content').value.trim();
     const imageInput = document.getElementById('image');
 
-    if (!name || !content) return alert('Veuillez remplir les champs requis');
-
-    const message = { name, role, content, image: null };
-
-    if (imageInput.files[0]) {
-      message.image = URL.createObjectURL(imageInput.files[0]);
+    if (!name || !content) {
+      alert('Nom et message obligatoires');
+      return;
     }
 
-    allMessages.unshift(message);
+    const msg = { name, role, content, image: null };
+
+    if (imageInput.files.length > 0) {
+      msg.image = URL.createObjectURL(imageInput.files[0]);
+    }
+
+    messagesData.unshift(msg);
     renderMessages();
 
     document.getElementById('name').value = '';
@@ -175,36 +102,31 @@
     const view = document.getElementById('view').value;
     container.innerHTML = '';
 
-    allMessages.forEach(msg => {
+    messagesData.forEach(msg => {
       if (view !== 'ALL' && msg.role !== view) return;
 
-      const msgBox = document.createElement('div');
-      msgBox.className = 'message';
-      msgBox.innerHTML = `<strong>${msg.name}</strong> <small>(${msg.role})</small><p>${msg.content}</p>`;
+      const div = document.createElement('div');
+      div.className = 'message';
+
+      div.innerHTML = '<strong>' + msg.name + '</strong> (' + msg.role + ')<p>' + msg.content + '</p>';
 
       if (msg.image) {
         const img = document.createElement('img');
         img.src = msg.image;
         img.style.maxWidth = '100%';
         img.style.marginTop = '10px';
-        msgBox.appendChild(img);
+        div.appendChild(img);
       }
 
       const reply = document.createElement('div');
       reply.className = 'reply';
-      reply.innerHTML = '<em>Réponses possibles ici</em>';
-      msgBox.appendChild(reply);
+      reply.textContent = 'Zone de réponse (admin / professionnels)';
+      div.appendChild(reply);
 
-      container.appendChild(msgBox);
+      container.appendChild(div);
     });
   }
-
-  document.addEventListener('change', e => {
-    if (e.target.id === 'view') renderMessages();
-  });
 </script>
 
 </body>
-</html>
-
 </html>
