@@ -4,85 +4,200 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>🐉 LogiSupport</title>
+<title>LogiSupport</title>
 
 <link rel="icon" type="image/svg+xml"
 href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-<rect width='100' height='100' fill='black'/>
-<text x='50%' y='62%' font-size='62' text-anchor='middle' fill='%23b300ff'>🐉</text>
+<rect width='100' height='100' fill='%23101014'/>
+<text x='50%' y='62%' font-size='60' text-anchor='middle' fill='%23bfc3c9'>🐺</text>
 </svg>">
 
 <style>
 :root{
---bg:#050008;--panel:#0b0014;--accent:#b300ff;
---accent2:#00ffd5;--blood:#ff003c;--text:#f5f5ff;--muted:#9a8fb3;
+--bg:#0a0c10;
+--panel:#12151c;
+--glass:rgba(255,255,255,.04);
+--border:rgba(255,255,255,.08);
+--accent:#9aa0a8;
+--accent2:#6f7680;
+--text:#e6e8ec;
+--muted:#8a9099;
+--danger:#ff4b5c;
 }
+
 *{box-sizing:border-box}
-body{margin:0;font-family:Segoe UI;background:radial-gradient(circle at top,#16001f,#050008 60%);color:var(--text)}
-header{text-align:center;padding:20px}
-.logo{font-size:2.6rem;font-weight:900;color:var(--accent);text-shadow:0 0 12px rgba(179,0,255,.8)}
-.logo span{color:var(--accent2)}
-nav{display:flex;gap:10px;justify-content:center;margin-bottom:10px}
-nav button{background:#12001f;color:#fff;border:none;padding:10px 16px;border-radius:12px;cursor:pointer}
-nav button.active{background:var(--blood)}
-.box{background:linear-gradient(145deg,#0e001a,#05000d);border-radius:18px;padding:18px;margin:12px;box-shadow:0 0 18px rgba(179,0,255,.3)}
+
+body{
+margin:0;
+font-family:Segoe UI,Arial;
+background:radial-gradient(circle at top,#1a1d24,#0a0c10 60%);
+color:var(--text);
+}
+
+header{
+text-align:center;
+padding:18px;
+border-bottom:1px solid var(--border);
+background:linear-gradient(180deg,#0f1218,#0a0c10);
+}
+
+.logo{
+font-size:2.4rem;
+font-weight:900;
+letter-spacing:.08em;
+color:var(--accent);
+text-shadow:0 0 12px rgba(180,185,195,.35);
+}
+
+nav{
+display:flex;
+justify-content:center;
+gap:10px;
+padding:10px;
+border-bottom:1px solid var(--border);
+}
+
+nav button{
+background:linear-gradient(180deg,#1a1e26,#0e1016);
+color:var(--text);
+border:1px solid var(--border);
+padding:10px 16px;
+border-radius:14px;
+cursor:pointer;
+}
+
+nav button.active{
+background:linear-gradient(180deg,#2a2f38,#1a1e26);
+border-color:#3a404a;
+}
+
+.box{
+max-width:900px;
+margin:14px auto;
+padding:16px;
+border-radius:18px;
+background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+border:1px solid var(--border);
+backdrop-filter:blur(12px);
+box-shadow:0 0 22px rgba(0,0,0,.6);
+}
+
 .hidden{display:none}
-input,textarea,select{width:100%;padding:12px;margin-top:8px;border-radius:12px;border:1px solid rgba(179,0,255,.3);background:#07000e;color:#fff}
-button{width:100%;margin-top:10px;padding:12px;border-radius:14px;border:none;font-weight:700;background:linear-gradient(135deg,#b300ff,#00ffd5);color:#020005;cursor:pointer}
-.messages{height:300px;overflow-y:auto}
-.message{background:#0c0016;border-radius:12px;padding:10px;margin-bottom:8px}
-small{color:var(--muted)}
-.delete{float:right;background:#ff003c;border:none;border-radius:8px;color:#fff;padding:2px 8px;cursor:pointer}
+
+input,textarea,select{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:12px;
+border:1px solid var(--border);
+background:#0e1016;
+color:var(--text);
+}
+
+button.main{
+margin-top:10px;
+padding:12px;
+border-radius:14px;
+border:1px solid #3a404a;
+font-weight:700;
+background:linear-gradient(135deg,#aeb3bb,#6f7680);
+color:#0a0c10;
+cursor:pointer;
+}
+
+.messages{
+height:320px;
+overflow-y:auto;
+padding:8px;
+border-radius:14px;
+background:rgba(0,0,0,.25);
+border:1px solid var(--border);
+}
+
+.message{
+max-width:75%;
+padding:10px 14px;
+border-radius:14px;
+margin-bottom:10px;
+background:linear-gradient(180deg,#1a1e26,#0e1016);
+border:1px solid var(--border);
+}
+
+.message.me{
+margin-left:auto;
+background:linear-gradient(180deg,#262b34,#161a20);
+}
+
+.message small{
+display:block;
+margin-top:4px;
+color:var(--muted);
+font-size:.8rem;
+}
+
+.delete{
+float:right;
+background:var(--danger);
+border:none;
+border-radius:8px;
+color:#fff;
+padding:2px 8px;
+cursor:pointer;
+}
 </style>
 </head>
 
 <body>
-<header><div class="logo">🐉 <span>Logi</span>Support</div></header>
+
+<header>
+<div class="logo">LogiSupport</div>
+</header>
 
 <nav>
-<button onclick="showTab('auth')" class="active">Вход</button>
-<button onclick="showTab('chat')">Чат</button>
-<button onclick="showTab('files')">Файлы</button>
-<button onclick="showTab('profile')">Профиль</button>
-<button onclick="showTab('admin')">Админ</button>
+<button onclick="showTab('auth')" id="tabAuth" class="active">Вход</button>
+<button onclick="showTab('chat')" id="tabChat">Чат</button>
+<button onclick="showTab('files')" id="tabFiles">Файлы</button>
+<button onclick="showTab('profile')" id="tabProfile">Профиль</button>
+<button onclick="showTab('admin')" id="tabAdmin">Админ</button>
 </nav>
 
 <section id="auth" class="box">
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Пароль">
-<button onclick="login()">Войти</button>
-<button onclick="register()">Регистрация</button>
-<button onclick="guest()">Гость</button>
+<button class="main" onclick="login()">Войти</button>
+<button class="main" onclick="register()">Регистрация</button>
+<button class="main" onclick="guest()">Гость</button>
 </section>
 
 <section id="chat" class="box hidden">
 <select id="chatRoom"></select>
 <div class="messages" id="messages"></div>
 <textarea id="content" placeholder="Сообщение"></textarea>
-<button onclick="sendMessage()">Отправить</button>
+<button class="main" onclick="sendMessage()">Отправить</button>
 </section>
 
 <section id="files" class="box hidden">
 <input type="file" id="fileInput">
-<button onclick="uploadFile()">Загрузить</button>
+<button class="main" onclick="uploadFile()">Загрузить</button>
 <div id="fileList"></div>
 </section>
 
 <section id="profile" class="box hidden">
 <input id="pName" placeholder="Имя">
 <input id="pRole" disabled>
-<button onclick="saveProfile()">Сохранить</button>
+<button class="main" onclick="saveProfile()">Сохранить</button>
 </section>
 
 <section id="admin" class="box hidden">
 <select id="roleUser"></select>
 <select id="newRole">
-<option>Chauffeur</option><option>Logisticien</option>
-<option>Mécanicien</option><option>Organisateur</option>
+<option>Chauffeur</option>
+<option>Logisticien</option>
+<option>Mécanicien</option>
+<option>Organisateur</option>
 <option>Administrateur</option>
 </select>
-<button onclick="setRole()">Сменить роль</button>
-<div id="logs"></div>
+<button class="main" onclick="setRole()">Сменить роль</button>
 </section>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -91,147 +206,217 @@ small{color:var(--muted)}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-const firebaseConfig={PASTE_YOURS};
+const firebaseConfig = {
+  apiKey: "PASTE",
+  authDomain: "PASTE",
+  databaseURL: "PASTE",
+  projectId: "PASTE",
+  storageBucket: "PASTE",
+  messagingSenderId: "PASTE",
+  appId: "PASTE"
+};
+
 firebase.initializeApp(firebaseConfig);
 
-const auth=firebase.auth();
-const db=firebase.database();
-const storage=firebase.storage();
+const auth = firebase.auth();
+const db = firebase.database();
+const storage = firebase.storage();
 
-let currentUser=null;
-let currentRole=null;
-let currentRoom=null;
+let currentUser = null;
+let currentRole = null;
+let currentRoom = null;
 
-/* AUTH */
-function login(){auth.signInWithEmailAndPassword(email.value,password.value);}
-function register(){auth.createUserWithEmailAndPassword(email.value,password.value);}
-function guest(){auth.signInAnonymously();}
+/* ===== TABS ===== */
+function showTab(id){
+document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1)).classList.add("active");
+}
+
+/* ===== AUTH ===== */
+function login(){
+auth.signInWithEmailAndPassword(
+document.getElementById("email").value,
+document.getElementById("password").value
+).catch(alert);
+}
+
+function register(){
+auth.createUserWithEmailAndPassword(
+document.getElementById("email").value,
+document.getElementById("password").value
+).catch(alert);
+}
+
+function guest(){
+auth.signInAnonymously().catch(alert);
+}
 
 auth.onAuthStateChanged(user=>{
 if(!user) return;
-currentUser=user;
-const ref=db.ref("users/"+user.uid);
-ref.once("value",snap=>{
+
+currentUser = user;
+const ref = db.ref("users/"+user.uid);
+
+ref.once("value").then(snap=>{
 if(!snap.exists()){
 ref.set({name:"User",role:"Chauffeur",online:true});
 }
 });
+
 ref.on("value",snap=>{
-const d=snap.val();
-currentRole=d.role;
-pName.value=d.name;
-pRole.value=d.role;
+const d = snap.val();
+if(!d) return;
+
+currentRole = d.role;
+document.getElementById("pName").value = d.name;
+document.getElementById("pRole").value = d.role;
+
 loadRooms();
 loadUsers();
+showTab("chat");
 });
 });
 
-/* TABS */
-function showTab(id){
-document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
-document.getElementById(id).classList.remove("hidden");
-document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");
-}
-
-/* ROOMS */
+/* ===== ROOMS ===== */
 function loadRooms(){
-const sel=chatRoom;
-sel.innerHTML="";
-["Общий",currentRole].forEach(r=>{
-const o=document.createElement("option");
-o.value=r;o.textContent=r;sel.appendChild(o);
+const sel = document.getElementById("chatRoom");
+sel.innerHTML = "";
+
+["Общий", currentRole].forEach(r=>{
+const o = document.createElement("option");
+o.value = r;
+o.textContent = r;
+sel.appendChild(o);
 });
-sel.onchange=()=>{currentRoom=sel.value;loadMessages()};
-currentRoom=sel.value;
+
+sel.onchange = () => {
+currentRoom = sel.value;
+loadMessages();
+};
+
+currentRoom = sel.value;
 loadMessages();
 }
 
-/* MESSAGES */
+/* ===== MESSAGES ===== */
 function sendMessage(){
-const text=content.value.trim();
-if(!text) return;
+const text = document.getElementById("content").value.trim();
+if(!text || !currentRoom) return;
+
 db.ref("messages/"+currentRoom).push({
-uid:currentUser.uid,
-name:pName.value,
-role:currentRole,
-content:text,
-time:new Date().toLocaleString()
+uid: currentUser.uid,
+name: document.getElementById("pName").value,
+role: currentRole,
+content: text,
+time: new Date().toLocaleString()
 });
-content.value="";
+
+document.getElementById("content").value = "";
 }
 
 function loadMessages(){
 if(!currentRoom) return;
-const ref=db.ref("messages/"+currentRoom);
+
+const ref = db.ref("messages/"+currentRoom);
 ref.off();
-ref.on("value",snap=>{
-messages.innerHTML="";
+
+ref.on("value", snap=>{
+const box = document.getElementById("messages");
+box.innerHTML = "";
+
 snap.forEach(c=>{
-const m=c.val();
-const div=document.createElement("div");
-div.className="message";
-div.innerHTML=`<strong>${m.name}</strong> (${m.role})<br>${m.content}<br><small>${m.time}</small>`;
-if(currentRole==="Administrateur"){
-const b=document.createElement("button");
-b.textContent="X";b.className="delete";
-b.onclick=()=>c.ref.remove();
+const m = c.val();
+const div = document.createElement("div");
+
+div.className = "message" + (m.uid === currentUser.uid ? " me" : "");
+div.innerHTML = `
+<strong>${m.name}</strong> (${m.role})<br>
+${m.content}
+<small>${m.time}</small>
+`;
+
+if(currentRole === "Administrateur"){
+const b = document.createElement("button");
+b.textContent = "X";
+b.className = "delete";
+b.onclick = ()=>c.ref.remove();
 div.appendChild(b);
 }
-messages.appendChild(div);
+
+box.appendChild(div);
 });
 });
 }
 
-/* FILES */
+/* ===== FILES ===== */
 function uploadFile(){
-const f=fileInput.files[0];
+const f = document.getElementById("fileInput").files[0];
 if(!f) return;
-const ref=storage.ref("files/"+Date.now()+"_"+f.name);
+
+const ref = storage.ref("files/"+Date.now()+"_"+f.name);
+
 ref.put(f).then(()=>{
 ref.getDownloadURL().then(url=>{
 db.ref("files").push({
-name:f.name,url,
-user:currentUser.uid,time:new Date().toLocaleString()
+name: f.name,
+url,
+user: currentUser.uid,
+time: new Date().toLocaleString()
 });
 });
 });
 }
 
-db.ref("files").on("value",snap=>{
-fileList.innerHTML="";
+db.ref("files").on("value", snap=>{
+const list = document.getElementById("fileList");
+list.innerHTML = "";
+
 snap.forEach(c=>{
-const f=c.val();
-const d=document.createElement("div");
-d.className="message";
-d.innerHTML=`📄 <a href="${f.url}" target="_blank">${f.name}</a><br><small>${f.time}</small>`;
-fileList.appendChild(d);
+const f = c.val();
+const d = document.createElement("div");
+d.className = "message";
+d.innerHTML = `📄 <a href="${f.url}" target="_blank">${f.name}</a>
+<small>${f.time}</small>`;
+list.appendChild(d);
 });
 });
 
-/* PROFILE */
+/* ===== PROFILE ===== */
 function saveProfile(){
-db.ref("users/"+currentUser.uid+"/name").set(pName.value);
+db.ref("users/"+currentUser.uid+"/name")
+.set(document.getElementById("pName").value);
 }
 
-/* ADMIN */
+/* ===== ADMIN ===== */
 function loadUsers(){
-const sel=roleUser;
-sel.innerHTML="";
-db.ref("users").once("value",snap=>{
+const sel = document.getElementById("roleUser");
+sel.innerHTML = "";
+
+db.ref("users").once("value").then(snap=>{
 snap.forEach(c=>{
-const o=document.createElement("option");
-o.value=c.key;
-o.textContent=c.val().name+" ("+c.val().role+")";
+const o = document.createElement("option");
+o.value = c.key;
+o.textContent = c.val().name+" ("+c.val().role+")";
 sel.appendChild(o);
 });
 });
 }
 
 function setRole(){
-if(currentRole!=="Administrateur") return alert("Нет прав");
-db.ref("users/"+roleUser.value+"/role").set(newRole.value);
+if(currentRole !== "Administrateur"){
+alert("Нет прав");
+return;
+}
+
+const uid = document.getElementById("roleUser").value;
+const role = document.getElementById("newRole").value;
+
+db.ref("users/"+uid+"/role").set(role);
 }
 </script>
+
 </body>
 </html>
