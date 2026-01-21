@@ -3,40 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <title>LogiSupport</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 :root{
-  --bg:#0f1115;
-  --panel:#1a1d23;
-  --border:#2a2f38;
-  --text:#e6e8ec;
-  --muted:#9aa0a8;
-  --accent:#b0b5bc;
+  --bg:#0c0f14;
+  --panel:#171b22;
+  --panel2:#1f2530;
+  --border:#2c3340;
+  --text:#e7e9ee;
+  --muted:#9aa3af;
+  --accent:#8f96a3;
+  --danger:#ff5c5c;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Segoe UI,Arial;
-  background:var(--bg);
+  background:radial-gradient(circle at top,#1b202a,#0c0f14 60%);
   color:var(--text);
 }
-
 header{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
   padding:16px;
-  text-align:center;
   border-bottom:1px solid var(--border);
 }
-
-.logo{
-  font-size:2rem;
+.logo-icon{
+  width:42px;height:42px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#aeb4bf,#6e7685);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#0c0f14;
+  font-weight:900;
+}
+.logo-text{
+  font-size:1.8rem;
+  letter-spacing:.1em;
   font-weight:700;
   color:var(--accent);
 }
-
 nav{
   display:flex;
   justify-content:center;
@@ -44,7 +54,6 @@ nav{
   padding:10px;
   border-bottom:1px solid var(--border);
 }
-
 nav button{
   background:var(--panel);
   color:var(--text);
@@ -53,69 +62,68 @@ nav button{
   border-radius:10px;
   cursor:pointer;
 }
-
-nav button.active{
-  background:#2a2f38;
-}
-
+nav button.active{background:var(--panel2)}
 .box{
   max-width:900px;
-  margin:16px auto;
-  padding:16px;
-  background:var(--panel);
+  margin:14px auto;
+  padding:14px;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
   border:1px solid var(--border);
   border-radius:14px;
 }
-
 .hidden{display:none}
-
 input,textarea,select{
   width:100%;
   padding:10px;
-  margin-top:10px;
-  background:#0f1115;
+  margin-top:8px;
+  background:#0c0f14;
   color:var(--text);
   border:1px solid var(--border);
   border-radius:10px;
 }
-
 button.main{
   margin-top:10px;
   padding:10px;
   width:100%;
-  border-radius:10px;
+  background:linear-gradient(135deg,#b3b9c4,#7a8291);
   border:none;
-  background:#b0b5bc;
-  color:#000;
-  font-weight:600;
+  border-radius:10px;
+  font-weight:700;
+  color:#0c0f14;
   cursor:pointer;
 }
-
 .messages{
   height:320px;
   overflow-y:auto;
-  background:#0f1115;
-  padding:10px;
+  padding:8px;
+  background:#0c0f14;
   border-radius:10px;
   border:1px solid var(--border);
 }
-
 .message{
-  margin-bottom:10px;
   padding:10px;
-  background:#1a1d23;
+  margin-bottom:8px;
+  background:var(--panel);
   border-radius:10px;
+  position:relative;
 }
-
-.message.me{
-  background:#242932;
-}
-
+.message.me{background:#232a36}
 .message small{
   display:block;
-  margin-top:4px;
   font-size:.75rem;
   color:var(--muted);
+  margin-top:4px;
+}
+.delete{
+  position:absolute;
+  top:6px;
+  right:6px;
+  background:var(--danger);
+  border:none;
+  border-radius:6px;
+  color:#fff;
+  padding:2px 6px;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -123,13 +131,15 @@ button.main{
 <body>
 
 <header>
-  <div class="logo">LogiSupport</div>
+  <div class="logo-icon">LS</div>
+  <div class="logo-text">LogiSupport</div>
 </header>
 
 <nav>
   <button id="tabAuth" class="active" onclick="showTab('auth')">Вход</button>
-  <button id="tabChat" onclick="showTab('chat')">Чат</button>
+  <button id="tabChat" onclick="showTab('chat')">Чаты</button>
   <button id="tabProfile" onclick="showTab('profile')">Профиль</button>
+  <button id="tabAdmin" class="hidden" onclick="showTab('admin')">Админ</button>
 </nav>
 
 <section id="auth" class="box">
@@ -137,10 +147,10 @@ button.main{
   <input id="password" type="password" placeholder="Пароль">
   <button class="main" onclick="login()">Войти</button>
   <button class="main" onclick="register()">Регистрация</button>
-  <button class="main" onclick="guest()">Гость</button>
 </section>
 
 <section id="chat" class="box hidden">
+  <select id="roomSelect"></select>
   <div class="messages" id="messages"></div>
   <textarea id="content" placeholder="Сообщение"></textarea>
   <button class="main" onclick="sendMessage()">Отправить</button>
@@ -152,7 +162,18 @@ button.main{
   <button class="main" onclick="saveProfile()">Сохранить</button>
 </section>
 
-<!-- Firebase -->
+<section id="admin" class="box hidden">
+  <select id="userSelect"></select>
+  <select id="roleSelect">
+    <option>Chauffeur</option>
+    <option>Logisticien</option>
+    <option>Organisateur</option>
+    <option>Mécanicien</option>
+    <option>Administrateur</option>
+  </select>
+  <button class="main" onclick="setRole()">Сменить роль</button>
+</section>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -166,15 +187,15 @@ const firebaseConfig = {
   messagingSenderId: "753669702381",
   appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
-
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const db = firebase.database();
+const auth=firebase.auth();
+const db=firebase.database();
 
-let currentUser = null;
+const ROLES=["Chauffeur","Logisticien","Organisateur","Mécanicien"];
+let currentUser,currentRole,currentRoom;
 
-/* ===== Tabs ===== */
+/* Tabs */
 function showTab(id){
   document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
@@ -182,72 +203,104 @@ function showTab(id){
   document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1)).classList.add("active");
 }
 
-/* ===== Auth ===== */
-function login(){
-  auth.signInWithEmailAndPassword(email.value, password.value).catch(alert);
-}
-
-function register(){
-  auth.createUserWithEmailAndPassword(email.value, password.value).catch(alert);
-}
-
-function guest(){
-  auth.signInAnonymously().catch(alert);
-}
+/* Auth */
+function login(){auth.signInWithEmailAndPassword(email.value,password.value).catch(alert)}
+function register(){auth.createUserWithEmailAndPassword(email.value,password.value).catch(alert)}
 
 auth.onAuthStateChanged(user=>{
   if(!user) return;
-  currentUser = user;
-
-  const ref = db.ref("users/"+user.uid);
+  currentUser=user;
+  const ref=db.ref("users/"+user.uid);
   ref.once("value").then(s=>{
-    if(!s.exists()){
-      ref.set({name:"User", role:"User"});
-    }
+    if(!s.exists()) ref.set({name:"User",role:"Chauffeur"});
   });
-
-  ref.on("value", s=>{
-    const d = s.val();
-    pName.value = d.name;
-    pRole.value = d.role;
+  ref.on("value",s=>{
+    const d=s.val();
+    currentRole=d.role;
+    pName.value=d.name;
+    pRole.value=d.role;
+    tabAdmin.classList.toggle("hidden",d.role!=="Administrateur");
+    loadRooms();
+    if(d.role==="Administrateur") loadUsers();
   });
-
   showTab("chat");
-  loadMessages();
 });
 
-/* ===== Chat ===== */
-function sendMessage(){
-  const text = content.value.trim();
-  if(!text) return;
-
-  db.ref("messages").push({
-    uid: currentUser.uid,
-    name: pName.value,
-    text,
-    time: new Date().toLocaleString()
-  });
-
-  content.value="";
+/* Rooms */
+function loadRooms(){
+  roomSelect.innerHTML="";
+  addRoom("Global");
+  addRoom(currentRole);
+  if(currentRole==="Administrateur"){
+    ROLES.forEach(addRoom);
+    addRoom("Administrateur");
+  }
+  roomSelect.onchange=()=>{currentRoom=roomSelect.value;loadMessages();}
+  currentRoom=roomSelect.value;
+  loadMessages();
+}
+function addRoom(r){
+  if([...roomSelect.options].some(o=>o.value===r)) return;
+  const o=document.createElement("option");
+  o.value=r;o.textContent=r;
+  roomSelect.appendChild(o);
 }
 
+/* Messages */
+function sendMessage(){
+  if(!content.value.trim()) return;
+  db.ref("messages/"+currentRoom).push({
+    uid:currentUser.uid,
+    name:pName.value,
+    role:currentRole,
+    text:content.value,
+    time:new Date().toLocaleString()
+  });
+  content.value="";
+}
 function loadMessages(){
-  db.ref("messages").on("value", snap=>{
+  const ref=db.ref("messages/"+currentRoom);
+  ref.off();
+  ref.on("value",snap=>{
     messages.innerHTML="";
     snap.forEach(c=>{
       const m=c.val();
-      const div=document.createElement("div");
-      div.className="message"+(m.uid===currentUser.uid?" me":"");
-      div.innerHTML=`<b>${m.name}</b><br>${m.text}<small>${m.time}</small>`;
-      messages.appendChild(div);
+      const d=document.createElement("div");
+      d.className="message"+(m.uid===currentUser.uid?" me":"");
+      d.innerHTML=`<b>${m.name}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+      if(m.uid===currentUser.uid||currentRole==="Administrateur"){
+        const del=document.createElement("button");
+        del.textContent="×";
+        del.className="delete";
+        del.onclick=()=>c.ref.remove();
+        d.appendChild(del);
+      }
+      messages.appendChild(d);
     });
     messages.scrollTop=messages.scrollHeight;
   });
 }
 
-/* ===== Profile ===== */
+/* Profile */
 function saveProfile(){
   db.ref("users/"+currentUser.uid+"/name").set(pName.value);
+}
+
+/* Admin */
+function loadUsers(){
+  userSelect.innerHTML="";
+  db.ref("users").once("value").then(s=>{
+    s.forEach(c=>{
+      const o=document.createElement("option");
+      o.value=c.key;
+      o.textContent=c.val().name+" ("+c.val().role+")";
+      userSelect.appendChild(o);
+    });
+  });
+}
+function setRole(){
+  if(currentRole!=="Administrateur") return;
+  db.ref("users/"+userSelect.value+"/role").set(roleSelect.value);
 }
 </script>
 
