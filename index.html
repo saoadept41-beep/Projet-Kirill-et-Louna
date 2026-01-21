@@ -1,332 +1,255 @@
-<!-- ⬇️ ЭТОТ КОД ПРОВЕРЕН: СИНТАКСИС / ЛОГИКА / FIREBASE v9 COMPAT -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <title>LogiSupport</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 :root{
---bg:#1e1f22;
---panel:#2b2d31;
---panel2:#313338;
---border:#3f4147;
---text:#e4e6eb;
---muted:#a0a4ab;
---accent:#b5b8bd;
---danger:#e55353;
+  --bg:#0f1115;
+  --panel:#1a1d23;
+  --border:#2a2f38;
+  --text:#e6e8ec;
+  --muted:#9aa0a8;
+  --accent:#b0b5bc;
 }
+
 *{box-sizing:border-box}
+
 body{
-margin:0;
-font-family:Segoe UI,Arial;
-background:var(--bg);
-color:var(--text);
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:var(--bg);
+  color:var(--text);
 }
+
 header{
-padding:12px;
-text-align:center;
-background:#232428;
-border-bottom:1px solid var(--border);
+  padding:16px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
 }
+
 .logo{
-font-size:1.6rem;
-font-weight:700;
-letter-spacing:.06em;
-color:var(--accent);
+  font-size:2rem;
+  font-weight:700;
+  color:var(--accent);
 }
+
 nav{
-display:flex;
-justify-content:center;
-gap:4px;
-padding:6px;
-background:#232428;
-border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  padding:10px;
+  border-bottom:1px solid var(--border);
 }
+
 nav button{
-background:var(--panel);
-color:var(--text);
-border:1px solid var(--border);
-padding:6px 12px;
-border-radius:4px;
-cursor:pointer;
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
 }
+
 nav button.active{
-background:var(--panel2);
-border-color:#5a5d66;
+  background:#2a2f38;
 }
+
 .box{
-max-width:900px;
-margin:8px auto;
-padding:10px;
-background:var(--panel);
-border:1px solid var(--border);
-border-radius:4px;
+  max-width:900px;
+  margin:16px auto;
+  padding:16px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
 }
+
 .hidden{display:none}
+
 input,textarea,select{
-width:100%;
-padding:8px;
-margin-top:6px;
-background:#1f2024;
-border:1px solid var(--border);
-border-radius:4px;
-color:var(--text);
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#0f1115;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:10px;
 }
-textarea{resize:none;height:70px}
+
 button.main{
-margin-top:6px;
-padding:8px;
-border-radius:4px;
-border:1px solid #5a5d66;
-background:#3a3d44;
-color:var(--text);
-cursor:pointer;
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border-radius:10px;
+  border:none;
+  background:#b0b5bc;
+  color:#000;
+  font-weight:600;
+  cursor:pointer;
 }
+
 .messages{
-height:280px;
-overflow-y:auto;
-border:1px solid var(--border);
-background:#1f2024;
-padding:6px;
+  height:320px;
+  overflow-y:auto;
+  background:#0f1115;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
 }
+
 .message{
-padding:6px 8px;
-margin-bottom:4px;
-background:#2a2c32;
-border:1px solid var(--border);
-border-radius:4px;
+  margin-bottom:10px;
+  padding:10px;
+  background:#1a1d23;
+  border-radius:10px;
 }
-.message.me{background:#32343b}
+
+.message.me{
+  background:#242932;
+}
+
 .message small{
-display:block;
-color:var(--muted);
-font-size:.75rem;
-margin-top:3px;
+  display:block;
+  margin-top:4px;
+  font-size:.75rem;
+  color:var(--muted);
 }
-.file{
-padding:6px;
-border-bottom:1px solid var(--border);
-}
-.file a{color:var(--accent);text-decoration:none}
-.delete{
-margin-left:8px;
-border:none;
-background:var(--danger);
-color:#fff;
-border-radius:3px;
-padding:2px 6px;
-cursor:pointer;
-}
-.admin-row{display:flex;gap:6px;margin-top:6px}
 </style>
 </head>
 
 <body>
 
-<header><div class="logo">LogiSupport</div></header>
+<header>
+  <div class="logo">LogiSupport</div>
+</header>
 
 <nav>
-<button id="tabAuth" class="active" onclick="showTab('auth')">Вход</button>
-<button id="tabChat" onclick="showTab('chat')">Чат</button>
-<button id="tabFiles" onclick="showTab('files')">Файлы</button>
-<button id="tabProfile" onclick="showTab('profile')">Профиль</button>
-<button id="tabAdmin" onclick="showTab('admin')">Админ</button>
+  <button id="tabAuth" class="active" onclick="showTab('auth')">Вход</button>
+  <button id="tabChat" onclick="showTab('chat')">Чат</button>
+  <button id="tabProfile" onclick="showTab('profile')">Профиль</button>
 </nav>
 
 <section id="auth" class="box">
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Пароль">
-<button class="main" onclick="login()">Войти</button>
-<button class="main" onclick="register()">Регистрация</button>
-<button class="main" onclick="guest()">Гость</button>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Пароль">
+  <button class="main" onclick="login()">Войти</button>
+  <button class="main" onclick="register()">Регистрация</button>
+  <button class="main" onclick="guest()">Гость</button>
 </section>
 
 <section id="chat" class="box hidden">
-<select id="chatRoom"></select>
-<div class="messages" id="messages"></div>
-<textarea id="content" placeholder="Сообщение"></textarea>
-<button class="main" onclick="sendMessage()">Отправить</button>
-</section>
-
-<section id="files" class="box hidden">
-<input type="file" id="fileInput">
-<button class="main" onclick="uploadFile()">Загрузить</button>
-<div id="fileList"></div>
+  <div class="messages" id="messages"></div>
+  <textarea id="content" placeholder="Сообщение"></textarea>
+  <button class="main" onclick="sendMessage()">Отправить</button>
 </section>
 
 <section id="profile" class="box hidden">
-<input id="pName" placeholder="Имя">
-<input id="pRole" disabled>
-<button class="main" onclick="saveProfile()">Сохранить</button>
+  <input id="pName" placeholder="Имя">
+  <input id="pRole" disabled>
+  <button class="main" onclick="saveProfile()">Сохранить</button>
 </section>
 
-<section id="admin" class="box hidden">
-<select id="roleUser"></select>
-<div class="admin-row">
-<select id="newRole">
-<option>Chauffeur</option>
-<option>Logisticien</option>
-<option>Mécanicien</option>
-<option>Organisateur</option>
-<option>Administrateur</option>
-</select>
-<button class="main" onclick="setRole()">Сменить роль</button>
-</div>
-</section>
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
 const firebaseConfig = {
-  apiKey: "PASTE",
-  authDomain: "PASTE",
-  databaseURL: "PASTE",
-  projectId: "PASTE",
-  storageBucket: "PASTE",
-  messagingSenderId: "PASTE",
-  appId: "PASTE"
+  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
+  authDomain: "projet-56900.firebaseapp.com",
+  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "projet-56900",
+  messagingSenderId: "753669702381",
+  appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
+
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.database();
-const storage = firebase.storage();
 
-let currentUser=null, currentRole=null, currentRoom=null;
+let currentUser = null;
 
-/* tabs */
+/* ===== Tabs ===== */
 function showTab(id){
-document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
-document.getElementById(id).classList.remove("hidden");
-document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1)).classList.add("active");
+  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1)).classList.add("active");
 }
 
-/* auth */
+/* ===== Auth ===== */
 function login(){
-const e=email.value.trim(), p=password.value.trim();
-if(!e||!p) return alert("Введите email и пароль");
-auth.signInWithEmailAndPassword(e,p).catch(er=>alert(er.message));
+  auth.signInWithEmailAndPassword(email.value, password.value).catch(alert);
 }
+
 function register(){
-const e=email.value.trim(), p=password.value.trim();
-if(!e||!p) return alert("Введите email и пароль");
-if(p.length<6) return alert("Пароль минимум 6 символов");
-auth.createUserWithEmailAndPassword(e,p)
-.then(()=>alert("Регистрация успешна"))
-.catch(er=>alert(er.message));
+  auth.createUserWithEmailAndPassword(email.value, password.value).catch(alert);
 }
-function guest(){auth.signInAnonymously();}
 
-auth.onAuthStateChanged(u=>{
-if(!u) return;
-currentUser=u;
-const ref=db.ref("users/"+u.uid);
-ref.once("value").then(s=>{
-if(!s.exists()){
-ref.set({name:"User",role:"Chauffeur",created:new Date().toLocaleString()});
-}});
-ref.on("value",s=>{
-const d=s.val(); if(!d) return;
-currentRole=d.role;
-pName.value=d.name; pRole.value=d.role;
-loadRooms(); loadUsers(); showTab("chat");
-});
-});
-
-/* rooms + chat */
-function loadRooms(){
-chatRoom.innerHTML="";
-["Общий",currentRole].forEach(r=>{
-const o=document.createElement("option");
-o.value=o.textContent=r; chatRoom.appendChild(o);
-});
-chatRoom.onchange=()=>{currentRoom=chatRoom.value;loadMessages();}
-currentRoom=chatRoom.value; loadMessages();
+function guest(){
+  auth.signInAnonymously().catch(alert);
 }
+
+auth.onAuthStateChanged(user=>{
+  if(!user) return;
+  currentUser = user;
+
+  const ref = db.ref("users/"+user.uid);
+  ref.once("value").then(s=>{
+    if(!s.exists()){
+      ref.set({name:"User", role:"User"});
+    }
+  });
+
+  ref.on("value", s=>{
+    const d = s.val();
+    pName.value = d.name;
+    pRole.value = d.role;
+  });
+
+  showTab("chat");
+  loadMessages();
+});
+
+/* ===== Chat ===== */
 function sendMessage(){
-if(!content.value.trim())return;
-db.ref("messages/"+currentRoom).push({
-uid:currentUser.uid,
-name:pName.value,
-role:currentRole,
-content:content.value,
-time:new Date().toLocaleString()
-});
-content.value="";
+  const text = content.value.trim();
+  if(!text) return;
+
+  db.ref("messages").push({
+    uid: currentUser.uid,
+    name: pName.value,
+    text,
+    time: new Date().toLocaleString()
+  });
+
+  content.value="";
 }
+
 function loadMessages(){
-const ref=db.ref("messages/"+currentRoom);
-ref.off();
-ref.on("value",s=>{
-messages.innerHTML="";
-s.forEach(c=>{
-const m=c.val();
-const d=document.createElement("div");
-d.className="message"+(m.uid===currentUser.uid?" me":"");
-d.innerHTML=`<b>${m.name}</b> (${m.role})<br>${m.content}<small>${m.time}</small>`;
-messages.appendChild(d);
-});
-});
+  db.ref("messages").on("value", snap=>{
+    messages.innerHTML="";
+    snap.forEach(c=>{
+      const m=c.val();
+      const div=document.createElement("div");
+      div.className="message"+(m.uid===currentUser.uid?" me":"");
+      div.innerHTML=`<b>${m.name}</b><br>${m.text}<small>${m.time}</small>`;
+      messages.appendChild(div);
+    });
+    messages.scrollTop=messages.scrollHeight;
+  });
 }
 
-/* files */
-function uploadFile(){
-const f=fileInput.files[0];
-if(!f) return;
-const r=storage.ref("files/"+Date.now()+"_"+f.name);
-r.put(f).then(()=>r.getDownloadURL().then(url=>{
-db.ref("files").push({
-name:f.name,url,
-author:pName.value,
-role:currentRole,
-time:new Date().toLocaleString()
-});
-fileInput.value="";
-}));
-}
-db.ref("files").on("value",s=>{
-fileList.innerHTML="";
-s.forEach(c=>{
-const f=c.val();
-const d=document.createElement("div");
-d.className="file";
-d.innerHTML=`<b>${f.name}</b> — <a href="${f.url}" target="_blank">открыть</a>
-<small><br>${f.author} | ${f.role} | ${f.time}</small>`;
-if(currentRole==="Administrateur"){
-const b=document.createElement("button");
-b.textContent="Удалить"; b.className="delete";
-b.onclick=()=>{storage.refFromURL(f.url).delete(); c.ref.remove();}
-d.appendChild(b);
-}
-fileList.appendChild(d);
-});
-});
-
-/* profile + admin */
+/* ===== Profile ===== */
 function saveProfile(){
-db.ref("users/"+currentUser.uid+"/name").set(pName.value);
-}
-function loadUsers(){
-roleUser.innerHTML="";
-db.ref("users").once("value").then(s=>{
-s.forEach(c=>{
-const o=document.createElement("option");
-o.value=c.key;
-o.textContent=c.val().name+" ("+c.val().role+")";
-roleUser.appendChild(o);
-});
-});
-}
-function setRole(){
-if(currentRole!=="Administrateur") return alert("Нет прав");
-db.ref("users/"+roleUser.value+"/role").set(newRole.value);
+  db.ref("users/"+currentUser.uid+"/name").set(pName.value);
 }
 </script>
+
 </body>
 </html>
-
