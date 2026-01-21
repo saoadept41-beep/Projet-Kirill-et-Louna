@@ -3,10 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LogiSupport – Plateforme logistique sécurisée</title>
+  <title>LogiSupport — Plateforme professionnelle logistique</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='black'/><text x='50%' y='60%' font-size='60' text-anchor='middle' fill='%23ff2e63'>😈</text></svg>">
 
   <!-- Firebase compat -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">  function addFile(){
+    const input=document.getElementById('fileInput');
+    if(!input.files.length) return alert('Veuillez sélectionner un fichier');
+    const file=input.files[0];
+    const list=document.getElementById('fileList');
+    const div=document.createElement('div');
+    div.className='message';
+    div.innerHTML=`📄 <strong>${file.name}</strong><br><small>Taille : ${(file.size/1024).toFixed(1)} KB</small>`;
+    list.appendChild(div);
+    input.value='';
+  }
+</script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
@@ -20,214 +32,103 @@
       --danger:#ff6b6b;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:'Segoe UI',Roboto,Arial;
-      background:radial-gradient(circle at top,#111,#000);
-      color:var(--text);
-    }
-
-    /* LOGO */
-    .logo{
-      font-size:3rem;
-      text-align:center;
-      margin-bottom:10px;
-      color:var(--accent);
-      text-shadow:0 0 15px rgba(255,46,99,.6);
-    }
+    body{margin:0;font-family:Segoe UI,Roboto,Arial;background:radial-gradient(circle at top,#111,#000);color:var(--text)}
+    .logo{text-align:center;font-size:3rem;color:var(--accent);text-shadow:0 0 15px rgba(255,46,99,.6)}
     .logo span{color:var(--accent2)}
-
-    /* CHOICE */
     #choice{min-height:100vh;display:flex;align-items:center;justify-content:center}
-    .choice-box{
-      background:var(--panel);
-      padding:34px;
-      border-radius:22px;
-      max-width:520px;
-      width:100%;
-      box-shadow:0 25px 60px rgba(0,0,0,.6);
-      animation:fadeIn .8s ease;
-    }
-    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-    .choice-box h2{text-align:center;margin-top:0}
-    .choice-box p{text-align:center;color:var(--muted)}
-    .choice-box button{
-      width:100%;
-      margin-top:14px;
-      padding:14px;
-      border-radius:16px;
-      border:none;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      font-weight:700;
-      cursor:pointer;
-      transition:transform .1s,box-shadow .1s;
-    }
-    .choice-box button:hover{transform:translateY(-1px);box-shadow:0 10px 25px rgba(255,46,99,.35)}
-
-    .admin-btn{
-      background:transparent!important;
-      color:var(--accent2);
-      border:1px solid var(--accent2)!important;
-    }
-
-    /* APP */
+    .choice-box{background:var(--panel);padding:32px;border-radius:22px;max-width:520px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,.6)}
+    .choice-box button{width:100%;margin-top:14px;padding:14px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700;cursor:pointer}
+    .admin-btn{background:transparent!important;color:var(--accent2);border:1px solid var(--accent2)!important}
     #app{display:none}
     header{text-align:center;padding:26px;background:#000}
-    header h1{margin:0;color:var(--accent)}
-    header p{color:var(--muted)}
     nav{display:flex;justify-content:center;gap:10px;margin-top:14px}
-    nav button{
-      padding:10px 18px;
-      border-radius:20px;
-      border:none;
-      background:#161b22;
-      color:#fff;
-      cursor:pointer;
-    }
+    nav button{padding:10px 18px;border-radius:20px;border:none;background:#161b22;color:#fff;cursor:pointer}
     nav button.active{background:var(--accent);color:#000}
-
     section{display:none;padding:28px}
     section.active{display:block}
-
-    .container{
-      max-width:1200px;
-      margin:auto;
-      display:grid;
-      grid-template-columns:360px 1fr;
-      gap:22px;
-    }
-
-    .box{
-      background:var(--panel);
-      border-radius:20px;
-      padding:20px;
-      box-shadow:0 15px 35px rgba(0,0,0,.5);
-    }
-
+    .container{max-width:1200px;margin:auto;display:grid;grid-template-columns:360px 1fr;gap:22px}
+    .box{background:var(--panel);border-radius:20px;padding:20px;box-shadow:0 15px 35px rgba(0,0,0,.5)}
     h3{margin-top:0;color:var(--accent2)}
-    input,textarea,button{
-      width:100%;
-      margin-top:10px;
-      padding:14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.08);
-      background:#010409;
-      color:#fff;
-    }
-
-    button.primary{
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#000;
-      font-weight:700;
-      cursor:pointer;
-    }
-
+    input,textarea,button{width:100%;margin-top:10px;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#010409;color:#fff}
+    button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;cursor:pointer}
     .messages{height:420px;overflow-y:auto}
-    .message{
-      background:rgba(255,255,255,.04);
-      border-radius:16px;
-      padding:14px;
-      margin-bottom:12px;
-      position:relative;
-    }
+    .message{background:rgba(255,255,255,.04);border-radius:16px;padding:14px;margin-bottom:12px;position:relative}
     .message small{color:var(--muted)}
-    .delete{
-      position:absolute;
-      top:10px;right:10px;
-      background:var(--danger);
-      border:none;
-      border-radius:10px;
-      padding:4px 8px;
-      cursor:pointer;
-    }
-
-    .badge{
-      display:inline-block;
-      padding:4px 10px;
-      border-radius:20px;
-      background:#161b22;
-      font-size:.75rem;
-      margin-left:6px;
-    }
-
+    .delete{position:absolute;top:10px;right:10px;background:var(--danger);border:none;border-radius:10px;padding:4px 8px;cursor:pointer}
     @media(max-width:900px){.container{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 
-<!-- LOGIN / CHOICE -->
 <div id="choice">
   <div class="choice-box">
     <div class="logo">😈 <span>Logi</span>Support</div>
-    <p>Plateforme sécurisée d’échange logistique</p>
-
+    <p style="text-align:center;color:var(--muted)">Plateforme sécurisée d’échange logistique</p>
     <button onclick="enterUser('Logisticien')">Espace Logisticien</button>
     <button onclick="enterUser('Chauffeur')">Espace Chauffeur</button>
     <button onclick="enterUser('Mécanicien')">Espace Mécanicien</button>
     <button onclick="enterUser('Organisateur')">Espace Organisateur</button>
-
     <button class="admin-btn" onclick="enterAdmin()">Accès Administrateur</button>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
 <header>
   <h1>LogiSupport</h1>
   <p id="roleLabel"></p>
   <nav>
-    <button class="active" onclick="openTab('chat')">Chat</button>
-    <button onclick="openTab('files')">Fichiers</button>
-    <button onclick="openTab('support')">Support</button>
-    <button onclick="openTab('info')">Infos</button>
+    <button class="active" onclick="openTab('chat', this)">Chat</button>
+    <button onclick="openTab('files', this)">Fichiers</button>
+    <button onclick="openTab('support', this)">Support</button>
+    <button onclick="openTab('info', this)">Infos</button>
+    <button id="adminTab" style="display:none" onclick="openTab('admin', this)">Dashboard Admin</button>
   </nav>
 </header>
+
+<div style="text-align:center;color:var(--muted);padding:10px">🔒 Espace sécurisé • Synchronisation temps réel • Prototype académique avancé</div>
 
 <section id="chat" class="active">
   <div class="container">
     <div class="box">
-      <h3>Nouveau message <span class="badge">Question</span></h3>
+      <h3>Nouveau message</h3>
       <input id="name" placeholder="Nom" />
-      <textarea id="content" placeholder="Expliquez votre problème ou question..." ></textarea>
+      <textarea id="content" placeholder="Votre message..."></textarea>
       <button class="primary" onclick="sendMessage()">Envoyer</button>
     </div>
     <div class="box">
       <h3>Messages</h3>
       <div class="messages" id="messages"></div>
+<div style="margin-top:10px;font-size:0.85rem;color:var(--muted)">✔ Messages synchronisés en temps réel</div>
     </div>
   </div>
 </section>
 
-<section id="files">
-  <div class="box" style="max-width:600px;margin:auto">
-    <h3>Partage de fichiers <span class="badge">Bientôt</span></h3>
-    <input type="file" />
-    <button class="primary">Envoyer</button>
-  </div>
-</section>
-
-<section id="support">
-  <div class="box" style="max-width:600px;margin:auto">
-    <h3>Support & signalement</h3>
-    <textarea placeholder="Bug ou suggestion..."></textarea>
-    <button class="primary" onclick="alert('Message envoyé à l’administrateur')">Envoyer</button>
-  </div>
-</section>
-
-<section id="info">
+<section id="files" class="active">
   <div class="box" style="max-width:700px;margin:auto">
-    <h3>À propos</h3>
-    <p>LogiSupport est une plateforme professionnelle sécurisée dédiée aux métiers de la logistique.</p>
-    <ul>
-      <li>Espaces métiers cloisonnés</li>
-      <li>Modération administrative</li>
-      <li>Support intégré</li>
-      <li>Architecture évolutive cloud</li>
-    </ul>
+    <h3>📁 Partage de fichiers</h3>
+    <p style="color:var(--muted)">Espace de démonstration pour le partage de documents professionnels.</p>
+    <input type="file" id="fileInput" />
+    <button class="primary" onclick="addFile()">Ajouter le fichier</button>
+    <div id="fileList" style="margin-top:20px"></div>
+  </div>
+</section>
+<section id="support"><div class="box" style="max-width:600px;margin:auto"><h3>Support</h3><textarea></textarea><button class="primary">Envoyer</button></div></section>
+<section id="info"><div class="box" style="max-width:700px;margin:auto"><h3>Informations</h3><p>Plateforme professionnelle logistique.</p></div></section>
+
+<section id="admin">
+  <div class="container">
+    <div class="box">
+      <h3>📊 Statistiques</h3>
+      <p id="statMessages">Messages : 0</p>
+      <p id="statResolved">Résolus : 0</p>
+    </div>
+    <div class="box">
+      <h3>📝 Journal des actions</h3>
+      <div id="auditLog" class="messages"></div>
+    </div>
   </div>
 </section>
 </div>
-
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
@@ -246,63 +147,29 @@
   let currentRole=null;
   let isAdmin=false;
 
-  function enterUser(role){
-    currentRole=role;isAdmin=false;startApp();
-  }
+  function enterUser(role){currentRole=role;isAdmin=false;startApp();}
+  function enterAdmin(){const pass=prompt('Mot de passe administrateur');if(pass==='kirill22898'){currentRole='Administrateur';isAdmin=true;startApp();}else alert('Accès refusé');}
 
-  function enterAdmin(){
-    const pass = prompt('Mot de passe administrateur');
-    if(pass==='admin123'){
-      currentRole='Administrateur';isAdmin=true;startApp();
-    } else alert('Accès refusé');
-  }
+  function startApp(){document.getElementById('choice').style.display='none';document.getElementById('app').style.display='block';document.getElementById('roleLabel').textContent=isAdmin?'Mode Administrateur':`Espace : ${currentRole}`;loadMessages();}
 
-  function startApp(){
-    document.getElementById('choice').style.display='none';
-    document.getElementById('app').style.display='block';
-    document.getElementById('roleLabel').textContent = isAdmin ? 'Mode Administrateur' : `Espace : ${currentRole}`;
-    loadMessages();
-  }
-
-  function openTab(id){
-    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
-    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    event.target.classList.add('active');
-  }
+  function openTab(id,btn){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
 
   function sendMessage(){
-    const name=document.getElementById('name').value;
-    const content=document.getElementById('content').value;
-    if(!name||!content) return alert('Champs requis');
-    ref.push({name,content,role:currentRole,time:Date.now()});
-    document.getElementById('content').value='';
-  }
+  const name=document.getElementById('name').value.trim();
+  const content=document.getElementById('content').value.trim();
+  if(!name||!content) return alert('Veuillez remplir tous les champs');
+  ref.push({
+    name,
+    content,
+    role:currentRole,
+    time:new Date().toLocaleString()
+  });
+  document.getElementById('content').value='';
+});document.getElementById('content').value='';}
 
-  function loadMessages(){
-    ref.on('value',snap=>{
-      const box=document.getElementById('messages');
-      box.innerHTML='';
-      snap.forEach(c=>{
-        const m=c.val();
-        if(!isAdmin && m.role!==currentRole) return;
-        const div=document.createElement('div');
-        div.className='message';
-        div.innerHTML=`<strong>${m.name}</strong> <small>(${m.role})</small><p>${m.content}</p>`;
-        if(isAdmin){
-          const del=document.createElement('button');
-          del.textContent='Supprimer';
-          del.className='delete';
-          del.onclick=()=>ref.child(c.key).remove();
-          div.appendChild(del);
-        }
-        box.appendChild(div);
-      })
-    })
-  }
+  function loadMessages(){ref.off();ref.on('value',snap=>{const box=document.getElementById('messages');box.innerHTML='';snap.forEach(c=>{const m=c.val();if(!isAdmin && m.role!==currentRole)return;const div=document.createElement('div');div.className='message';div.innerHTML=`<strong>${m.name}</strong> <small>(${m.role}) • ${m.time}</small><p>${m.content}</p>`;>${m.name}</strong> <small>(${m.role})</small><p>${m.content}</p>`;if(isAdmin){const del=document.createElement('button');del.textContent='Supprimer';del.className='delete';del.onclick=()=>ref.child(c.key).remove();div.appendChild(del);}box.appendChild(div);});});}
 </script>
 
 </body>
 </html>
-
 
