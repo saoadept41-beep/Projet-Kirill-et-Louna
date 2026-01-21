@@ -3,66 +3,174 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LogiSupport – Plateforme professionnelle logistique</title>
+  <title>LogiSupport – Plateforme logistique sécurisée</title>
 
   <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
-    :root{--bg:#0b1220;--panel:#111a2e;--accent:#4facfe;--text:#fff;--muted:#9aa4bf;--danger:#ff6b6b}
+    :root{
+      --bg:#000000;
+      --panel:#0d1117;
+      --accent:#ff2e63;
+      --accent2:#08fdd8;
+      --text:#ffffff;
+      --muted:#8b949e;
+      --danger:#ff6b6b;
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Segoe UI,Roboto,Arial;background:linear-gradient(120deg,#0b1220,#020409);color:var(--text)}
-    header{padding:26px;text-align:center;background:#0f2027}
-    header h1{margin:0}
-    header p{color:var(--muted)}
+    body{
+      margin:0;
+      font-family:'Segoe UI',Roboto,Arial;
+      background:radial-gradient(circle at top,#111,#000);
+      color:var(--text);
+    }
 
-    /* Initial choice screen */
+    /* LOGO */
+    .logo{
+      font-size:3rem;
+      text-align:center;
+      margin-bottom:10px;
+      color:var(--accent);
+      text-shadow:0 0 15px rgba(255,46,99,.6);
+    }
+    .logo span{color:var(--accent2)}
+
+    /* CHOICE */
     #choice{min-height:100vh;display:flex;align-items:center;justify-content:center}
-    .choice-box{background:var(--panel);padding:30px;border-radius:20px;max-width:500px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,.45)}
-    .choice-box h2{text-align:center;color:var(--accent)}
-    .choice-box button{width:100%;margin-top:12px;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#4facfe,#00f2fe);font-weight:600;cursor:pointer}
+    .choice-box{
+      background:var(--panel);
+      padding:34px;
+      border-radius:22px;
+      max-width:520px;
+      width:100%;
+      box-shadow:0 25px 60px rgba(0,0,0,.6);
+      animation:fadeIn .8s ease;
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+    .choice-box h2{text-align:center;margin-top:0}
+    .choice-box p{text-align:center;color:var(--muted)}
+    .choice-box button{
+      width:100%;
+      margin-top:14px;
+      padding:14px;
+      border-radius:16px;
+      border:none;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .1s,box-shadow .1s;
+    }
+    .choice-box button:hover{transform:translateY(-1px);box-shadow:0 10px 25px rgba(255,46,99,.35)}
 
-    /* App layout */
+    .admin-btn{
+      background:transparent!important;
+      color:var(--accent2);
+      border:1px solid var(--accent2)!important;
+    }
+
+    /* APP */
     #app{display:none}
-    nav{display:flex;justify-content:center;gap:10px;margin-top:12px}
-    nav button{padding:10px 16px;border-radius:20px;border:none;background:#1a2742;color:#fff;cursor:pointer}
+    header{text-align:center;padding:26px;background:#000}
+    header h1{margin:0;color:var(--accent)}
+    header p{color:var(--muted)}
+    nav{display:flex;justify-content:center;gap:10px;margin-top:14px}
+    nav button{
+      padding:10px 18px;
+      border-radius:20px;
+      border:none;
+      background:#161b22;
+      color:#fff;
+      cursor:pointer;
+    }
     nav button.active{background:var(--accent);color:#000}
 
-    section{display:none;padding:24px}
+    section{display:none;padding:28px}
     section.active{display:block}
-    .container{max-width:1100px;margin:auto;display:grid;grid-template-columns:360px 1fr;gap:20px}
-    .box{background:var(--panel);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    h3{margin-top:0;color:var(--accent)}
-    input,textarea,select,button{width:100%;margin-top:8px;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:#0c1426;color:#fff}
-    button.primary{background:linear-gradient(135deg,#4facfe,#00f2fe);color:#000;font-weight:600;cursor:pointer}
-    .messages{height:420px;overflow-y:auto}
-    .message{background:rgba(255,255,255,.05);border-radius:14px;padding:12px;margin-bottom:10px;position:relative}
-    .message small{color:var(--muted)}
-    .delete{position:absolute;top:10px;right:10px;background:var(--danger);border:none;border-radius:8px;padding:4px 8px;color:#000;cursor:pointer}
 
-    /* Ideas */
-    .badge{display:inline-block;background:#1f2d4d;color:#fff;padding:4px 10px;border-radius:20px;font-size:.75rem;margin-left:6px}
-    .tip{background:#0c1426;border-left:4px solid var(--accent);padding:12px;border-radius:8px;margin-top:10px;color:var(--muted)}
+    .container{
+      max-width:1200px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:360px 1fr;
+      gap:22px;
+    }
+
+    .box{
+      background:var(--panel);
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 15px 35px rgba(0,0,0,.5);
+    }
+
+    h3{margin-top:0;color:var(--accent2)}
+    input,textarea,button{
+      width:100%;
+      margin-top:10px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#010409;
+      color:#fff;
+    }
+
+    button.primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#000;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .messages{height:420px;overflow-y:auto}
+    .message{
+      background:rgba(255,255,255,.04);
+      border-radius:16px;
+      padding:14px;
+      margin-bottom:12px;
+      position:relative;
+    }
+    .message small{color:var(--muted)}
+    .delete{
+      position:absolute;
+      top:10px;right:10px;
+      background:var(--danger);
+      border:none;
+      border-radius:10px;
+      padding:4px 8px;
+      cursor:pointer;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:20px;
+      background:#161b22;
+      font-size:.75rem;
+      margin-left:6px;
+    }
 
     @media(max-width:900px){.container{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 
-<!-- CHOICE SCREEN -->
+<!-- LOGIN / CHOICE -->
 <div id="choice">
   <div class="choice-box">
-    <h2>Choisissez votre espace</h2>
-    <p style="text-align:center;color:var(--muted)">Une fois entré, vous restez dans cet espace professionnel.</p>
-    <button onclick="enterApp('Logisticien')">Espace Logisticiens</button>
-    <button onclick="enterApp('Chauffeur')">Espace Chauffeurs</button>
-    <button onclick="enterApp('Mécanicien')">Espace Mécaniciens</button>
-    <button onclick="enterApp('Organisateur')">Espace Organisateurs</button>
+    <div class="logo">😈 <span>Logi</span>Support</div>
+    <p>Plateforme sécurisée d’échange logistique</p>
+
+    <button onclick="enterUser('Logisticien')">Espace Logisticien</button>
+    <button onclick="enterUser('Chauffeur')">Espace Chauffeur</button>
+    <button onclick="enterUser('Mécanicien')">Espace Mécanicien</button>
+    <button onclick="enterUser('Organisateur')">Espace Organisateur</button>
+
+    <button class="admin-btn" onclick="enterAdmin()">Accès Administrateur</button>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app">
 <header>
   <h1>LogiSupport</h1>
@@ -80,12 +188,11 @@
     <div class="box">
       <h3>Nouveau message <span class="badge">Question</span></h3>
       <input id="name" placeholder="Nom" />
-      <textarea id="content" placeholder="Expliquez votre situation professionnelle..."></textarea>
+      <textarea id="content" placeholder="Expliquez votre problème ou question..." ></textarea>
       <button class="primary" onclick="sendMessage()">Envoyer</button>
-      <div class="tip">💡 Astuce : soyez précis (lieu, matériel, contexte) pour obtenir une meilleure réponse.</div>
     </div>
     <div class="box">
-      <h3>Messages de l’espace</h3>
+      <h3>Messages</h3>
       <div class="messages" id="messages"></div>
     </div>
   </div>
@@ -93,8 +200,7 @@
 
 <section id="files">
   <div class="box" style="max-width:600px;margin:auto">
-    <h3>Partage de fichiers <span class="badge">À venir</span></h3>
-    <p>Documents, photos de problèmes techniques, rapports PDF.</p>
+    <h3>Partage de fichiers <span class="badge">Bientôt</span></h3>
     <input type="file" />
     <button class="primary">Envoyer</button>
   </div>
@@ -103,20 +209,20 @@
 <section id="support">
   <div class="box" style="max-width:600px;margin:auto">
     <h3>Support & signalement</h3>
-    <textarea placeholder="Bug, problème ou suggestion..."></textarea>
-    <button class="primary" onclick="alert('Signalement envoyé à l’administrateur')">Envoyer</button>
+    <textarea placeholder="Bug ou suggestion..."></textarea>
+    <button class="primary" onclick="alert('Message envoyé à l’administrateur')">Envoyer</button>
   </div>
 </section>
 
 <section id="info">
   <div class="box" style="max-width:700px;margin:auto">
     <h3>À propos</h3>
-    <p>Plateforme professionnelle d’échange dédiée aux métiers de la logistique.</p>
+    <p>LogiSupport est une plateforme professionnelle sécurisée dédiée aux métiers de la logistique.</p>
     <ul>
-      <li>Espaces séparés par métier</li>
+      <li>Espaces métiers cloisonnés</li>
       <li>Modération administrative</li>
-      <li>Support technique intégré</li>
-      <li>Évolution prévue : stockage fichiers, comptes utilisateurs</li>
+      <li>Support intégré</li>
+      <li>Architecture évolutive cloud</li>
     </ul>
   </div>
 </section>
@@ -137,13 +243,24 @@
   const db = firebase.database();
   const ref = db.ref('messages');
 
-  let currentRole = null;
+  let currentRole=null;
+  let isAdmin=false;
 
-  function enterApp(role){
-    currentRole = role;
+  function enterUser(role){
+    currentRole=role;isAdmin=false;startApp();
+  }
+
+  function enterAdmin(){
+    const pass = prompt('Mot de passe administrateur');
+    if(pass==='admin123'){
+      currentRole='Administrateur';isAdmin=true;startApp();
+    } else alert('Accès refusé');
+  }
+
+  function startApp(){
     document.getElementById('choice').style.display='none';
     document.getElementById('app').style.display='block';
-    document.getElementById('roleLabel').textContent = `Espace : ${role}`;
+    document.getElementById('roleLabel').textContent = isAdmin ? 'Mode Administrateur' : `Espace : ${currentRole}`;
     loadMessages();
   }
 
@@ -155,8 +272,8 @@
   }
 
   function sendMessage(){
-    const name = document.getElementById('name').value;
-    const content = document.getElementById('content').value;
+    const name=document.getElementById('name').value;
+    const content=document.getElementById('content').value;
     if(!name||!content) return alert('Champs requis');
     ref.push({name,content,role:currentRole,time:Date.now()});
     document.getElementById('content').value='';
@@ -168,15 +285,17 @@
       box.innerHTML='';
       snap.forEach(c=>{
         const m=c.val();
-        if(m.role!==currentRole) return;
+        if(!isAdmin && m.role!==currentRole) return;
         const div=document.createElement('div');
         div.className='message';
         div.innerHTML=`<strong>${m.name}</strong> <small>(${m.role})</small><p>${m.content}</p>`;
-        const del=document.createElement('button');
-        del.textContent='Supprimer';
-        del.className='delete';
-        del.onclick=()=>ref.child(c.key).remove();
-        div.appendChild(del);
+        if(isAdmin){
+          const del=document.createElement('button');
+          del.textContent='Supprimer';
+          del.className='delete';
+          del.onclick=()=>ref.child(c.key).remove();
+          div.appendChild(del);
+        }
         box.appendChild(div);
       })
     })
@@ -185,3 +304,5 @@
 
 </body>
 </html>
+
+
