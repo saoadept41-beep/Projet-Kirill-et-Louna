@@ -1,5 +1,4 @@
 <!-- ⬇️ ЭТОТ КОД ПРОВЕРЕН: СИНТАКСИС / ЛОГИКА / FIREBASE v9 COMPAT -->
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -17,30 +16,25 @@
 --accent:#b5b8bd;
 --danger:#e55353;
 }
-
 *{box-sizing:border-box}
-
 body{
 margin:0;
 font-family:Segoe UI,Arial;
 background:var(--bg);
 color:var(--text);
 }
-
 header{
 padding:12px;
 text-align:center;
 background:#232428;
 border-bottom:1px solid var(--border);
 }
-
 .logo{
 font-size:1.6rem;
 font-weight:700;
 letter-spacing:.06em;
 color:var(--accent);
 }
-
 nav{
 display:flex;
 justify-content:center;
@@ -49,7 +43,6 @@ padding:6px;
 background:#232428;
 border-bottom:1px solid var(--border);
 }
-
 nav button{
 background:var(--panel);
 color:var(--text);
@@ -57,14 +50,11 @@ border:1px solid var(--border);
 padding:6px 12px;
 border-radius:4px;
 cursor:pointer;
-font-size:.9rem;
 }
-
 nav button.active{
 background:var(--panel2);
 border-color:#5a5d66;
 }
-
 .box{
 max-width:900px;
 margin:8px auto;
@@ -73,9 +63,7 @@ background:var(--panel);
 border:1px solid var(--border);
 border-radius:4px;
 }
-
 .hidden{display:none}
-
 input,textarea,select{
 width:100%;
 padding:8px;
@@ -84,11 +72,8 @@ background:#1f2024;
 border:1px solid var(--border);
 border-radius:4px;
 color:var(--text);
-font-size:.9rem;
 }
-
 textarea{resize:none;height:70px}
-
 button.main{
 margin-top:6px;
 padding:8px;
@@ -97,11 +82,7 @@ border:1px solid #5a5d66;
 background:#3a3d44;
 color:var(--text);
 cursor:pointer;
-font-size:.9rem;
 }
-
-button.main:hover{background:#464a53}
-
 .messages{
 height:280px;
 overflow-y:auto;
@@ -109,61 +90,41 @@ border:1px solid var(--border);
 background:#1f2024;
 padding:6px;
 }
-
 .message{
 padding:6px 8px;
 margin-bottom:4px;
 background:#2a2c32;
 border:1px solid var(--border);
 border-radius:4px;
-font-size:.9rem;
 }
-
-.message.me{
-background:#32343b;
-}
-
+.message.me{background:#32343b}
 .message small{
 display:block;
 color:var(--muted);
 font-size:.75rem;
 margin-top:3px;
 }
-
+.file{
+padding:6px;
+border-bottom:1px solid var(--border);
+}
+.file a{color:var(--accent);text-decoration:none}
 .delete{
-float:right;
+margin-left:8px;
 border:none;
 background:var(--danger);
 color:#fff;
 border-radius:3px;
-padding:1px 6px;
+padding:2px 6px;
 cursor:pointer;
 }
-
-.file{
-padding:6px;
-border-bottom:1px solid var(--border);
-font-size:.9rem;
-}
-
-.file a{
-color:var(--accent);
-text-decoration:none;
-}
-
-.admin-row{
-display:flex;
-gap:6px;
-margin-top:6px;
-}
+.admin-row{display:flex;gap:6px;margin-top:6px}
 </style>
 </head>
 
 <body>
 
-<header>
-<div class="logo">LogiSupport</div>
-</header>
+<header><div class="logo">LogiSupport</div></header>
 
 <nav>
 <button id="tabAuth" class="active" onclick="showTab('auth')">Вход</button>
@@ -214,5 +175,158 @@ margin-top:6px;
 </div>
 </section>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "PASTE",
+  authDomain: "PASTE",
+  databaseURL: "PASTE",
+  projectId: "PASTE",
+  storageBucket: "PASTE",
+  messagingSenderId: "PASTE",
+  appId: "PASTE"
+};
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.database();
+const storage = firebase.storage();
+
+let currentUser=null, currentRole=null, currentRoom=null;
+
+/* tabs */
+function showTab(id){
+document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1)).classList.add("active");
+}
+
+/* auth */
+function login(){
+const e=email.value.trim(), p=password.value.trim();
+if(!e||!p) return alert("Введите email и пароль");
+auth.signInWithEmailAndPassword(e,p).catch(er=>alert(er.message));
+}
+function register(){
+const e=email.value.trim(), p=password.value.trim();
+if(!e||!p) return alert("Введите email и пароль");
+if(p.length<6) return alert("Пароль минимум 6 символов");
+auth.createUserWithEmailAndPassword(e,p)
+.then(()=>alert("Регистрация успешна"))
+.catch(er=>alert(er.message));
+}
+function guest(){auth.signInAnonymously();}
+
+auth.onAuthStateChanged(u=>{
+if(!u) return;
+currentUser=u;
+const ref=db.ref("users/"+u.uid);
+ref.once("value").then(s=>{
+if(!s.exists()){
+ref.set({name:"User",role:"Chauffeur",created:new Date().toLocaleString()});
+}});
+ref.on("value",s=>{
+const d=s.val(); if(!d) return;
+currentRole=d.role;
+pName.value=d.name; pRole.value=d.role;
+loadRooms(); loadUsers(); showTab("chat");
+});
+});
+
+/* rooms + chat */
+function loadRooms(){
+chatRoom.innerHTML="";
+["Общий",currentRole].forEach(r=>{
+const o=document.createElement("option");
+o.value=o.textContent=r; chatRoom.appendChild(o);
+});
+chatRoom.onchange=()=>{currentRoom=chatRoom.value;loadMessages();}
+currentRoom=chatRoom.value; loadMessages();
+}
+function sendMessage(){
+if(!content.value.trim())return;
+db.ref("messages/"+currentRoom).push({
+uid:currentUser.uid,
+name:pName.value,
+role:currentRole,
+content:content.value,
+time:new Date().toLocaleString()
+});
+content.value="";
+}
+function loadMessages(){
+const ref=db.ref("messages/"+currentRoom);
+ref.off();
+ref.on("value",s=>{
+messages.innerHTML="";
+s.forEach(c=>{
+const m=c.val();
+const d=document.createElement("div");
+d.className="message"+(m.uid===currentUser.uid?" me":"");
+d.innerHTML=`<b>${m.name}</b> (${m.role})<br>${m.content}<small>${m.time}</small>`;
+messages.appendChild(d);
+});
+});
+}
+
+/* files */
+function uploadFile(){
+const f=fileInput.files[0];
+if(!f) return;
+const r=storage.ref("files/"+Date.now()+"_"+f.name);
+r.put(f).then(()=>r.getDownloadURL().then(url=>{
+db.ref("files").push({
+name:f.name,url,
+author:pName.value,
+role:currentRole,
+time:new Date().toLocaleString()
+});
+fileInput.value="";
+}));
+}
+db.ref("files").on("value",s=>{
+fileList.innerHTML="";
+s.forEach(c=>{
+const f=c.val();
+const d=document.createElement("div");
+d.className="file";
+d.innerHTML=`<b>${f.name}</b> — <a href="${f.url}" target="_blank">открыть</a>
+<small><br>${f.author} | ${f.role} | ${f.time}</small>`;
+if(currentRole==="Administrateur"){
+const b=document.createElement("button");
+b.textContent="Удалить"; b.className="delete";
+b.onclick=()=>{storage.refFromURL(f.url).delete(); c.ref.remove();}
+d.appendChild(b);
+}
+fileList.appendChild(d);
+});
+});
+
+/* profile + admin */
+function saveProfile(){
+db.ref("users/"+currentUser.uid+"/name").set(pName.value);
+}
+function loadUsers(){
+roleUser.innerHTML="";
+db.ref("users").once("value").then(s=>{
+s.forEach(c=>{
+const o=document.createElement("option");
+o.value=c.key;
+o.textContent=c.val().name+" ("+c.val().role+")";
+roleUser.appendChild(o);
+});
+});
+}
+function setRole(){
+if(currentRole!=="Administrateur") return alert("Нет прав");
+db.ref("users/"+roleUser.value+"/role").set(newRole.value);
+}
+</script>
 </body>
 </html>
+
