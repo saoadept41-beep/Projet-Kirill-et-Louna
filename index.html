@@ -1,175 +1,304 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LogiSupport — Plateforme professionnelle logistique</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='black'/><text x='50%' y='60%' font-size='60' text-anchor='middle' fill='%23ff2e63'>😈</text></svg>">
+<meta charset="UTF-8">
+<title>🐉 LogiSupport</title>
 
-  <!-- Firebase compat -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">  function addFile(){
-    const input=document.getElementById('fileInput');
-    if(!input.files.length) return alert('Veuillez sélectionner un fichier');
-    const file=input.files[0];
-    const list=document.getElementById('fileList');
-    const div=document.createElement('div');
-    div.className='message';
-    div.innerHTML=`📄 <strong>${file.name}</strong><br><small>Taille : ${(file.size/1024).toFixed(1)} KB</small>`;
-    list.appendChild(div);
-    input.value='';
-  }
-</script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<link rel="icon" type="image/svg+xml"
+  href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <rect width='100' height='100' fill='black'/>
+  <text x='50%' y='62%' font-size='62' text-anchor='middle' fill='%23b300ff'>🐉</text>
+  </svg>">
 
-  <style>
-    :root{
-      --bg:#000000;
-      --panel:#0d1117;
-      --accent:#ff2e63;
-      --accent2:#08fdd8;
-      --text:#ffffff;
-      --muted:#8b949e;
-      --danger:#ff6b6b;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Segoe UI,Roboto,Arial;background:radial-gradient(circle at top,#111,#000);color:var(--text)}
-    .logo{text-align:center;font-size:3rem;color:var(--accent);text-shadow:0 0 15px rgba(255,46,99,.6)}
-    .logo span{color:var(--accent2)}
-    #choice{min-height:100vh;display:flex;align-items:center;justify-content:center}
-    .choice-box{background:var(--panel);padding:32px;border-radius:22px;max-width:520px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,.6)}
-    .choice-box button{width:100%;margin-top:14px;padding:14px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700;cursor:pointer}
-    .admin-btn{background:transparent!important;color:var(--accent2);border:1px solid var(--accent2)!important}
-    #app{display:none}
-    header{text-align:center;padding:26px;background:#000}
-    nav{display:flex;justify-content:center;gap:10px;margin-top:14px}
-    nav button{padding:10px 18px;border-radius:20px;border:none;background:#161b22;color:#fff;cursor:pointer}
-    nav button.active{background:var(--accent);color:#000}
-    section{display:none;padding:28px}
-    section.active{display:block}
-    .container{max-width:1200px;margin:auto;display:grid;grid-template-columns:360px 1fr;gap:22px}
-    .box{background:var(--panel);border-radius:20px;padding:20px;box-shadow:0 15px 35px rgba(0,0,0,.5)}
-    h3{margin-top:0;color:var(--accent2)}
-    input,textarea,button{width:100%;margin-top:10px;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#010409;color:#fff}
-    button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;cursor:pointer}
-    .messages{height:420px;overflow-y:auto}
-    .message{background:rgba(255,255,255,.04);border-radius:16px;padding:14px;margin-bottom:12px;position:relative}
-    .message small{color:var(--muted)}
-    .delete{position:absolute;top:10px;right:10px;background:var(--danger);border:none;border-radius:10px;padding:4px 8px;cursor:pointer}
-    @media(max-width:900px){.container{grid-template-columns:1fr}}
-  </style>
+<style>
+/* ==== DARK FANTASY UI ==== */
+:root{
+  --bg:#050008; --panel:#0b0014;
+  --accent:#b300ff; --accent2:#00ffd5;
+  --blood:#ff003c; --text:#f5f5ff; --muted:#9a8fb3;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Segoe UI,Arial;
+  background:radial-gradient(circle at top,#16001f,#050008 60%);
+  color:var(--text);
+}
+header{padding:20px;text-align:center}
+.logo{font-size:2.6rem;font-weight:900;color:var(--accent);
+  text-shadow:0 0 12px rgba(179,0,255,.8)}
+.logo span{color:var(--accent2)}
+
+.box{
+  background:linear-gradient(145deg,#0e001a,#05000d);
+  border-radius:18px;padding:18px;margin:12px;
+  box-shadow:0 0 18px rgba(179,0,255,.3)
+}
+input,textarea,select{
+  width:100%;padding:12px;margin-top:8px;
+  border-radius:12px;border:1px solid rgba(179,0,255,.3);
+  background:#07000e;color:#fff;
+}
+button{
+  width:100%;margin-top:10px;padding:12px;
+  border-radius:14px;border:none;font-weight:700;
+  background:linear-gradient(135deg,#b300ff,#00ffd5);
+  color:#020005;cursor:pointer;
+}
+button:hover{opacity:.9}
+.messages{height:300px;overflow-y:auto}
+.message{
+  background:#0c0016;border-radius:12px;padding:10px;margin-bottom:8px;
+}
+small{color:var(--muted)}
+.delete{
+  float:right;background:#ff003c;border:none;border-radius:8px;
+  color:#fff;padding:2px 8px;cursor:pointer
+}
+.hidden{display:none}
+nav{display:flex;gap:8px;justify-content:center}
+nav button{background:#12001f;color:#fff}
+nav button.active{background:#ff003c}
+.status{font-size:.9rem;color:#00ffd5}
+</style>
 </head>
+
 <body>
-
-<div id="choice">
-  <div class="choice-box">
-    <div class="logo">😈 <span>Logi</span>Support</div>
-    <p style="text-align:center;color:var(--muted)">Plateforme sécurisée d’échange logistique</p>
-    <button onclick="enterUser('Logisticien')">Espace Logisticien</button>
-    <button onclick="enterUser('Chauffeur')">Espace Chauffeur</button>
-    <button onclick="enterUser('Mécanicien')">Espace Mécanicien</button>
-    <button onclick="enterUser('Organisateur')">Espace Organisateur</button>
-    <button class="admin-btn" onclick="enterAdmin()">Accès Administrateur</button>
-  </div>
-</div>
-
-<div id="app">
 <header>
-  <h1>LogiSupport</h1>
-  <p id="roleLabel"></p>
-  <nav>
-    <button class="active" onclick="openTab('chat', this)">Chat</button>
-    <button onclick="openTab('files', this)">Fichiers</button>
-    <button onclick="openTab('support', this)">Support</button>
-    <button onclick="openTab('info', this)">Infos</button>
-    <button id="adminTab" style="display:none" onclick="openTab('admin', this)">Dashboard Admin</button>
-  </nav>
+  <div class="logo">🐉 <span>Logi</span>Support</div>
 </header>
 
-<div style="text-align:center;color:var(--muted);padding:10px">🔒 Espace sécurisé • Synchronisation temps réel • Prototype académique avancé</div>
+<nav>
+  <button onclick="showTab('chat')" class="active">Чат</button>
+  <button onclick="showTab('files')">Файлы</button>
+  <button onclick="showTab('profile')">Профиль</button>
+  <button onclick="showTab('admin')">Админ</button>
+</nav>
 
-<section id="chat" class="active">
-  <div class="container">
-    <div class="box">
-      <h3>Nouveau message</h3>
-      <input id="name" placeholder="Nom" />
-      <textarea id="content" placeholder="Votre message..."></textarea>
-      <button class="primary" onclick="sendMessage()">Envoyer</button>
-    </div>
-    <div class="box">
-      <h3>Messages</h3>
-      <div class="messages" id="messages"></div>
-<div style="margin-top:10px;font-size:0.85rem;color:var(--muted)">✔ Messages synchronisés en temps réel</div>
-    </div>
-  </div>
+<section id="chat" class="box">
+  <select id="chatRoom"></select>
+  <div class="messages" id="messages"></div>
+  <textarea id="content" placeholder="Сообщение"></textarea>
+  <button onclick="sendMessage()">Отправить</button>
 </section>
 
-<section id="files" class="active">
-  <div class="box" style="max-width:700px;margin:auto">
-    <h3>📁 Partage de fichiers</h3>
-    <p style="color:var(--muted)">Espace de démonstration pour le partage de documents professionnels.</p>
-    <input type="file" id="fileInput" />
-    <button class="primary" onclick="addFile()">Ajouter le fichier</button>
-    <div id="fileList" style="margin-top:20px"></div>
-  </div>
+<section id="files" class="box hidden">
+  <input type="file" id="fileInput">
+  <button onclick="uploadFile()">Загрузить</button>
+  <div id="fileList"></div>
 </section>
-<section id="support"><div class="box" style="max-width:600px;margin:auto"><h3>Support</h3><textarea></textarea><button class="primary">Envoyer</button></div></section>
-<section id="info"><div class="box" style="max-width:700px;margin:auto"><h3>Informations</h3><p>Plateforme professionnelle logistique.</p></div></section>
 
-<section id="admin">
-  <div class="container">
-    <div class="box">
-      <h3>📊 Statistiques</h3>
-      <p id="statMessages">Messages : 0</p>
-      <p id="statResolved">Résolus : 0</p>
-    </div>
-    <div class="box">
-      <h3>📝 Journal des actions</h3>
-      <div id="auditLog" class="messages"></div>
-    </div>
-  </div>
+<section id="profile" class="box hidden">
+  <input id="pName" placeholder="Имя">
+  <input id="pRole" placeholder="Роль" disabled>
+  <button onclick="saveProfile()">Сохранить</button>
 </section>
-</div>
+
+<section id="admin" class="box hidden">
+  <select id="roleUser"></select>
+  <select id="newRole">
+    <option>Chauffeur</option>
+    <option>Logisticien</option>
+    <option>Mécanicien</option>
+    <option>Organisateur</option>
+    <option>Administrateur</option>
+  </select>
+  <button onclick="setRole()">Сменить роль</button>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
-    authDomain: "projet-56900.firebaseapp.com",
-    databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "projet-56900",
-    storageBucket: "projet-56900.appspot.com",
-    messagingSenderId: "753669702381",
-    appId: "1:753669702381:web:0ac180682fba00c68542e4"
-  };
+const firebaseConfig = {
+  apiKey: "PASTE",
+  authDomain: "PASTE",
+  databaseURL: "PASTE",
+  projectId: "PASTE",
+  storageBucket: "PASTE",
+  messagingSenderId: "PASTE",
+  appId: "PASTE"
+};
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const ref = db.ref('messages');
+firebase.initializeApp(firebaseConfig);
 
-  let currentRole=null;
-  let isAdmin=false;
+const db = firebase.database();
+const storage = firebase.storage();
+const auth = firebase.auth();
 
-  function enterUser(role){currentRole=role;isAdmin=false;startApp();}
-  function enterAdmin(){const pass=prompt('Mot de passe administrateur');if(pass==='kirill22898'){currentRole='Administrateur';isAdmin=true;startApp();}else alert('Accès refusé');}
+let currentUser = null;
+let currentRole = null;
+let currentRoom = null;
 
-  function startApp(){document.getElementById('choice').style.display='none';document.getElementById('app').style.display='block';document.getElementById('roleLabel').textContent=isAdmin?'Mode Administrateur':`Espace : ${currentRole}`;loadMessages();}
+/* ===== AUTH ===== */
+auth.signInAnonymously();
 
-  function openTab(id,btn){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
+auth.onAuthStateChanged(user=>{
+  if(!user) return;
+  currentUser = user;
+  const ref = db.ref("users/"+user.uid);
+  ref.once("value",snap=>{
+    if(!snap.exists()){
+      ref.set({name:"User",role:"Chauffeur",online:true});
+    }
+  });
+  ref.on("value",snap=>{
+    const d = snap.val();
+    currentRole = d.role;
+    document.getElementById("pName").value = d.name;
+    document.getElementById("pRole").value = d.role;
+    loadRooms();
+    loadUsers();
+  });
+});
 
-  function sendMessage(){
-  const name=document.getElementById('name').value.trim();
-  const content=document.getElementById('content').value.trim();
-  if(!name||!content) return alert('Veuillez remplir tous les champs');
-  ref.push({
-    name,
-    content,
+/* ===== TABS ===== */
+function showTab(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+/* ===== ROOMS ===== */
+function loadRooms(){
+  const sel = document.getElementById("chatRoom");
+  sel.innerHTML = "";
+  const rooms = ["Общий",currentRole];
+  rooms.forEach(r=>{
+    const o=document.createElement("option");
+    o.value=r;o.textContent=r;sel.appendChild(o);
+  });
+  sel.onchange=()=>{currentRoom=sel.value;loadMessages()};
+  currentRoom=rooms[0];
+  loadMessages();
+}
+
+/* ===== MESSAGES ===== */
+function sendMessage(){
+  const content=document.getElementById("content").value.trim();
+  if(!content) return;
+
+  db.ref("messages/"+currentRoom).push({
+    uid:currentUser.uid,
+    name:document.getElementById("pName").value,
     role:currentRole,
+    content,
     time:new Date().toLocaleString()
   });
-  document.getElementById('content').value='';
-});document.getElementById('content').value='';}
 
-  function loadMessages(){ref.off();ref.on('value',snap=>{const box=document.getElementById('messages');box.innerHTML='';snap.forEach(c=>{const m=c.val();if(!isAdmin && m.role!==currentRole)return;const div=document.createElement('div');div.className='message';div.innerHTML=`<strong>${m.name}</strong> <small>(${m.role}) • ${m.time}</small><p>${m.content}</p>`;>${m.name}</strong> <small>(${m.role})</small><p>${m.content}</p>`;if(isAdmin){const del=document.createElement('button');del.textContent='Supprimer';del.className='delete';del.onclick=()=>ref.child(c.key).remove();div.appendChild(del);}box.appendChild(div);});});}
+  logAction("message",content);
+  notify("Новое сообщение");
+  document.getElementById("content").value="";
+}
+
+function loadMessages(){
+  if(!currentRoom) return;
+  const ref=db.ref("messages/"+currentRoom);
+  ref.off();
+  ref.on("value",snap=>{
+    const box=document.getElementById("messages");
+    box.innerHTML="";
+    snap.forEach(c=>{
+      const m=c.val();
+      const div=document.createElement("div");
+      div.className="message";
+      div.innerHTML=`<strong>${m.name}</strong> (${m.role})<br>${m.content}
+      <br><small>${m.time}</small>`;
+      if(currentRole==="Administrateur"){
+        const b=document.createElement("button");
+        b.textContent="X";b.className="delete";
+        b.onclick=()=>c.ref.remove();
+        div.appendChild(b);
+      }
+      box.appendChild(div);
+    });
+  });
+}
+
+/* ===== FILES ===== */
+function uploadFile(){
+  const f=document.getElementById("fileInput").files[0];
+  if(!f) return alert("Выбери файл");
+  const ref=storage.ref("files/"+Date.now()+"_"+f.name);
+  ref.put(f).then(()=>{
+    ref.getDownloadURL().then(url=>{
+      db.ref("files").push({
+        name:f.name,url,
+        user:currentUser.uid,time:new Date().toLocaleString()
+      });
+      notify("Файл загружен");
+    });
+  });
+}
+
+db.ref("files").on("value",snap=>{
+  const list=document.getElementById("fileList");
+  list.innerHTML="";
+  snap.forEach(c=>{
+    const f=c.val();
+    const d=document.createElement("div");
+    d.className="message";
+    d.innerHTML=`📄 <a href="${f.url}" target="_blank">${f.name}</a>
+    <br><small>${f.time}</small>`;
+    list.appendChild(d);
+  });
+});
+
+/* ===== PROFILE ===== */
+function saveProfile(){
+  const name=document.getElementById("pName").value;
+  db.ref("users/"+currentUser.uid+"/name").set(name);
+  notify("Профиль обновлён");
+}
+
+/* ===== ADMIN ===== */
+function loadUsers(){
+  const sel=document.getElementById("roleUser");
+  sel.innerHTML="";
+  db.ref("users").once("value",snap=>{
+    snap.forEach(c=>{
+      const o=document.createElement("option");
+      o.value=c.key;
+      o.textContent=c.val().name+" ("+c.val().role+")";
+      sel.appendChild(o);
+    });
+  });
+}
+
+function setRole(){
+  if(currentRole!=="Administrateur") return alert("Нет прав");
+  const uid=document.getElementById("roleUser").value;
+  const role=document.getElementById("newRole").value;
+  db.ref("users/"+uid+"/role").set(role);
+  logAction("role_change",role);
+  notify("Роль изменена");
+}
+
+/* ===== LOGS ===== */
+function logAction(type,detail){
+  db.ref("logs").push({
+    uid:currentUser.uid,
+    type,detail,time:new Date().toLocaleString()
+  });
+}
+
+/* ===== NOTIFY ===== */
+function notify(text){
+  if(Notification.permission==="granted"){
+    new Notification(text);
+  }else if(Notification.permission!=="denied"){
+    Notification.requestPermission();
+  }
+}
+
+/* ===== ONLINE ===== */
+window.addEventListener("beforeunload",()=>{
+  if(currentUser) db.ref("users/"+currentUser.uid+"/online").set(false);
+});
 </script>
 
 </body>
 </html>
-
