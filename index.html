@@ -1,1 +1,386 @@
-<!DOCTYPE html> <html lang="ru"> <head> <meta charset="UTF-8"> <title>LogiSupport</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <style> :root{ --bg:#0b0e13; --panel:#151a22; --panel2:#1d2330; --border:#2e3646; --text:#e8ebf0; --muted:#9aa3af; --accent:#9fa6b2; --danger:#ff6b6b; } *{box-sizing:border-box} body{ margin:0; font-family:Segoe UI,Arial; background:radial-gradient(circle at top,#1a2030,#0b0e13 65%); color:var(--text); } header{ display:flex; justify-content:center; align-items:center; gap:12px; padding:18px; border-bottom:1px solid var(--border); } .logo-icon{ width:44px;height:44px; border-radius:14px; background:linear-gradient(135deg,#b4bac6,#7b8394); display:flex; align-items:center; justify-content:center; color:#0b0e13; font-weight:900; } .logo-text{ font-size:1.9rem; letter-spacing:.12em; font-weight:800; color:var(--accent); } nav{ display:flex; justify-content:center; gap:8px; padding:10px; border-bottom:1px solid var(--border); } nav button{ background:var(--panel); color:var(--text); border:1px solid var(--border); padding:8px 16px; border-radius:12px; cursor:pointer; transition:.2s; } nav button:hover{background:var(--panel2)} nav button.active{background:var(--panel2)} .box{ max-width:900px; margin:16px auto; padding:16px; background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--border); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.4); } .hidden{display:none} input,textarea,select{ width:100%; padding:12px; margin-top:10px; background:#0b0e13; color:var(--text); border:1px solid var(--border); border-radius:12px; } button.main{ margin-top:12px; padding:12px; width:100%; background:linear-gradient(135deg,#b8beca,#7e8696); border:none; border-radius:12px; font-weight:800; color:#0b0e13; cursor:pointer; } .messages{ height:340px; overflow-y:auto; padding:10px; background:#0b0e13; border-radius:12px; border:1px solid var(--border); } .message{ padding:10px; margin-bottom:8px; background:var(--panel); border-radius:12px; position:relative; } .message.me{background:#232b3a} .message small{ display:block; font-size:.75rem; color:var(--muted); margin-top:4px; } .delete{ position:absolute; top:6px; right:6px; background:var(--danger); border:none; border-radius:6px; color:#fff; padding:2px 6px; cursor:pointer; } </style> </head> <body> <header> <div class="logo-icon">LS</div> <div class="logo-text">LogiSupport</div> </header> <nav> <button id="tabAuth" class="active" onclick="showTab('auth')">Вход</button> <button id="tabChat" onclick="showTab('chat')">Чаты</button> <button id="tabContact" onclick="showTab('contact')">Связь с админом</button> <button id="tabProfile" onclick="showTab('profile')">Профиль</button> <button id="tabAdmin" class="hidden" onclick="showTab('admin')">Админ</button> </nav> <section id="auth" class="box"> <input id="email" placeholder="Email"> <input id="password" type="password" placeholder="Пароль"> <select id="roleRegister"> <option value="">Выберите роль</option> <option>Chauffeur</option> <option>Logisticien</option> <option>Organisateur</option> <option>Mécanicien</option> </select> <button class="main" onclick="login()">Войти</button> <button class="main" onclick="register()">Регистрация</button> </section> <section id="chat" class="box hidden"> <select id="roomSelect"></select> <div class="messages" id="messages"></div> <textarea id="content" placeholder="Сообщение"></textarea> <button class="main" onclick="sendMessage()">Отправить</button> </section> <section id="contact" class="box hidden"> <textarea id="adminMessage" placeholder="Сообщение администратору"></textarea> <button class="main" onclick="sendToAdmin()">Отправить админу</button> </section> <section id="profile" class="box hidden"> <input id="pName" placeholder="Имя"> <input id="pRole" disabled> <button class="main" onclick="saveProfile()">Сохранить</button> </section> <section id="admin" class="box hidden"> <select id="userSelect"></select> <select id="roleSelect"> <option>Chauffeur</option> <option>Logisticien</option> <option>Organisateur</option> <option>Mécanicien</option> <option>Administrateur</option> </select> <button class="main" onclick="setRole()">Сменить роль</button> </section> <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script> <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script> <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script> <script> const firebaseConfig = { apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw", authDomain: "projet-56900.firebaseapp.com", databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app", projectId: "projet-56900", messagingSenderId: "753669702381", appId: "1:753669702381:web:0ac180682fba00c68542e4" }; firebase.initializeApp(firebaseConfig); const auth=firebase.auth(); const db=firebase.database(); const ROLES=["Chauffeur","Logisticien","Organisateur","Mécanicien"]; let currentUser,currentRole,currentRoom; /* Tabs */ function showTab(id){ document.querySelectorAll("section").forEach(s=>s.classList.add("hidden")); document.getElementById(id).classList.remove("hidden"); document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active")); document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1)).classList.add("active"); } /* Auth */ function login(){auth.signInWithEmailAndPassword(email.value,password.value).catch(alert)} function register(){ if(!roleRegister.value) return alert("Выберите роль"); auth.createUserWithEmailAndPassword(email.value,password.value) .then(c=>{ db.ref("users/"+c.user.uid).set({ name:"User", role:roleRegister.value }); }).catch(alert); } auth.onAuthStateChanged(user=>{ if(!user) return; currentUser=user; db.ref("users/"+user.uid).on("value",s=>{ const d=s.val(); currentRole=d.role; pName.value=d.name; pRole.value=d.role; tabAdmin.classList.toggle("hidden",d.role!=="Administrateur"); loadRooms(); if(d.role==="Administrateur") loadUsers(); }); showTab("chat"); }); /* Rooms */ function loadRooms(){ roomSelect.innerHTML=""; addRoom("Global"); addRoom(currentRole); if(currentRole==="Administrateur"){ ROLES.forEach(addRoom); addRoom("Administrateur"); } roomSelect.onchange=()=>{currentRoom=roomSelect.value;loadMessages();} currentRoom=roomSelect.value; loadMessages(); } function addRoom(r){ if([...roomSelect.options].some(o=>o.value===r)) return; const o=document.createElement("option"); o.value=r;o.textContent=r; roomSelect.appendChild(o); } /* Messages */ function sendMessage(){ if(!content.value.trim()) return; db.ref("messages/"+currentRoom).push({ uid:currentUser.uid, name:pName.value, role:currentRole, text:content.value, time:new Date().toLocaleString() }); content.value=""; } function sendToAdmin(){ if(!adminMessage.value.trim()) return; db.ref("messages/Administrateur").push({ uid:currentUser.uid, name:pName.value, role:currentRole, text:"[К админу] "+adminMessage.value, time:new Date().toLocaleString() }); adminMessage.value=""; } function loadMessages(){ const ref=db.ref("messages/"+currentRoom); ref.off(); ref.on("value",snap=>{ messages.innerHTML=""; snap.forEach(c=>{ const m=c.val(); const d=document.createElement("div"); d.className="message"+(m.uid===currentUser.uid?" me":""); d.innerHTML=<b>${m.name}</b> (${m.role})<br>${m.text}<small>${m.time}</small>; if(m.uid===currentUser.uid||currentRole==="Administrateur"){ const del=document.createElement("button"); del.textContent="×"; del.className="delete"; del.onclick=()=>c.ref.remove(); d.appendChild(del); } messages.appendChild(d); }); messages.scrollTop=messages.scrollHeight; }); } /* Profile */ function saveProfile(){ db.ref("users/"+currentUser.uid+"/name").set(pName.value); } /* Admin */ function loadUsers(){ userSelect.innerHTML=""; db.ref("users").once("value").then(s=>{ s.forEach(c=>{ const o=document.createElement("option"); o.value=c.key; o.textContent=c.val().name+" ("+c.val().role+")"; userSelect.appendChild(o); }); }); } function setRole(){ if(currentRole!=="Administrateur") return; db.ref("users/"+userSelect.value+"/role").set(roleSelect.value); } </script> </body> </html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>LogiSupport</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+  --bg:#0b0e13;
+  --panel:#151a22;
+  --panel2:#1d2330;
+  --border:#2e3646;
+  --text:#e8ebf0;
+  --muted:#9aa3af;
+  --accent:#9fa6b2;
+  --grad:linear-gradient(135deg,#9fa6b2,#6f7788);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:radial-gradient(circle at top,#1a2030,#0b0e13 70%);
+  color:var(--text);
+}
+
+header{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:18px;
+  border-bottom:1px solid var(--border);
+}
+
+.logo{
+  font-size:2rem;
+  letter-spacing:.15em;
+  font-weight:900;
+  color:var(--accent);
+}
+
+nav{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  padding:10px;
+  border-bottom:1px solid var(--border);
+}
+
+nav button{
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:8px 16px;
+  border-radius:14px;
+  cursor:pointer;
+  transition:.25s;
+}
+
+nav button:hover{background:var(--panel2)}
+nav button.active{
+  background:var(--panel2);
+  box-shadow:0 0 12px rgba(255,255,255,.08);
+}
+
+.box{
+  max-width:900px;
+  margin:16px auto;
+  padding:18px;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+  animation:fade .4s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.hidden{display:none}
+
+input,textarea,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#0b0e13;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:14px;
+}
+
+button.main{
+  margin-top:12px;
+  padding:12px;
+  width:100%;
+  background:var(--grad);
+  border:none;
+  border-radius:14px;
+  font-weight:800;
+  color:#0b0e13;
+  cursor:pointer;
+  transition:.25s;
+}
+
+button.main:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(0,0,0,.35);
+}
+
+.messages{
+  height:320px;
+  overflow-y:auto;
+  padding:12px;
+  background:#0b0e13;
+  border-radius:14px;
+  border:1px solid var(--border);
+}
+
+.message{
+  padding:10px 14px;
+  margin-bottom:10px;
+  background:var(--panel);
+  border-radius:14px;
+  position:relative;
+  animation:fade .3s ease;
+}
+
+.message.me{background:#232b3a}
+
+.message b{color:#cdd3de}
+
+.message small{
+  display:block;
+  font-size:.75rem;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.delete{
+  position:absolute;
+  top:6px;
+  right:6px;
+  background:#ff6b6b;
+  border:none;
+  border-radius:8px;
+  color:#fff;
+  padding:2px 6px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">LogiSupport</div>
+</header>
+
+<nav>
+  <button id="tabAuth" class="active" onclick="showTab('auth')">Вход</button>
+  <button id="tabChat" onclick="showTab('chat')">Чаты</button>
+  <button id="tabAdminChat" onclick="showTab('adminchat')">Сообщения админу</button>
+  <button id="tabProfile" onclick="showTab('profile')">Профиль</button>
+  <button id="tabAbout" onclick="showTab('about')">О нас</button>
+  <button id="tabContact" onclick="showTab('contact')">Связаться</button>
+  <button id="tabAdmin" class="hidden" onclick="showTab('admin')">Админ</button>
+</nav>
+
+<section id="auth" class="box">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Пароль">
+  <select id="roleRegister">
+    <option value="">Выберите роль</option>
+    <option>Chauffeur</option>
+    <option>Logisticien</option>
+    <option>Organisateur</option>
+    <option>Mécanicien</option>
+  </select>
+  <button class="main" onclick="login()">Войти</button>
+  <button class="main" onclick="register()">Регистрация</button>
+</section>
+
+<section id="chat" class="box hidden">
+  <select id="roomSelect"></select>
+  <div class="messages" id="messages"></div>
+  <textarea id="content" placeholder="Сообщение"></textarea>
+  <button class="main" onclick="sendMessage()">Отправить</button>
+</section>
+
+<section id="adminchat" class="box hidden">
+  <div class="messages" id="adminMessages"></div>
+</section>
+
+<section id="profile" class="box hidden">
+  <input id="pName" placeholder="Имя">
+  <input id="pRole" disabled>
+  <button class="main" onclick="saveProfile()">Сохранить</button>
+</section>
+
+<section id="about" class="box hidden">
+  <h2>О нас</h2>
+  <p>LogiSupport — внутренняя платформа для логистических команд, созданная для быстрого общения и управления ролями.</p>
+</section>
+
+<section id="contact" class="box hidden">
+  <textarea id="adminMessage" placeholder="Сообщение администратору"></textarea>
+  <button class="main" onclick="sendToAdmin()">Отправить админу</button>
+</section>
+
+<section id="admin" class="box hidden">
+  <select id="userSelect"></select>
+  <select id="roleSelect">
+    <option>Chauffeur</option>
+    <option>Logisticien</option>
+    <option>Organisateur</option>
+    <option>Mécanicien</option>
+    <option>Administrateur</option>
+  </select>
+  <button class="main" onclick="setRole()">Сменить роль</button>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
+  authDomain: "projet-56900.firebaseapp.com",
+  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "projet-56900",
+  messagingSenderId: "753669702381",
+  appId: "1:753669702381:web:0ac180682fba00c68542e4"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+
+let currentUser=null;
+let currentRole=null;
+let currentRoom=null;
+
+function showTab(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  const btn=document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1));
+  if(btn) btn.classList.add("active");
+}
+
+function login(){
+  auth.signInWithEmailAndPassword(email.value,password.value).catch(alert);
+}
+
+function register(){
+  if(!roleRegister.value) return alert("Выберите роль");
+  auth.createUserWithEmailAndPassword(email.value,password.value)
+  .then(c=>{
+    db.ref("users/"+c.user.uid).set({name:"User",role:roleRegister.value});
+  }).catch(alert);
+}
+
+auth.onAuthStateChanged(user=>{
+  if(!user) return;
+  currentUser=user;
+  db.ref("users/"+user.uid).on("value",s=>{
+    const d=s.val();
+    currentRole=d.role;
+    pName.value=d.name;
+    pRole.value=d.role;
+    tabAdmin.classList.toggle("hidden",d.role!=="Administrateur");
+    loadRooms();
+    loadAdminInbox();
+    if(d.role==="Administrateur") loadUsers();
+  });
+  showTab("chat");
+});
+
+function loadRooms(){
+  roomSelect.innerHTML="";
+  ["Global",currentRole].forEach(addRoom);
+  if(currentRole==="Administrateur") ["Chauffeur","Logisticien","Organisateur","Mécanicien"].forEach(addRoom);
+  currentRoom=roomSelect.value;
+  roomSelect.onchange=()=>{currentRoom=roomSelect.value;loadMessages();}
+  loadMessages();
+}
+
+function addRoom(r){
+  const o=document.createElement("option");
+  o.value=r;o.textContent=r;
+  roomSelect.appendChild(o);
+}
+
+function sendMessage(){
+  if(!content.value.trim()) return;
+  db.ref("messages/"+currentRoom).push({
+    uid:currentUser.uid,
+    name:pName.value,
+    role:currentRole,
+    text:content.value,
+    time:new Date().toLocaleString()
+  });
+  content.value="";
+}
+
+function sendToAdmin(){
+  if(!adminMessage.value.trim()) return;
+  db.ref("adminInbox").push({
+    uid:currentUser.uid,
+    name:pName.value,
+    role:currentRole,
+    text:adminMessage.value,
+    time:new Date().toLocaleString()
+  });
+  adminMessage.value="";
+}
+
+function loadMessages(){
+  const ref=db.ref("messages/"+currentRoom);
+  ref.off();
+  ref.on("value",snap=>{
+    messages.innerHTML="";
+    snap.forEach(c=>{
+      const m=c.val();
+      const d=document.createElement("div");
+      d.className="message"+(m.uid===currentUser.uid?" me":"");
+      d.innerHTML=`<b>${m.name}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+      if(m.uid===currentUser.uid||currentRole==="Administrateur"){
+        const del=document.createElement("button");
+        del.textContent="×";
+        del.className="delete";
+        del.onclick=()=>c.ref.remove();
+        d.appendChild(del);
+      }
+      messages.appendChild(d);
+    });
+    messages.scrollTop=messages.scrollHeight;
+  });
+}
+
+function loadAdminInbox(){
+  const ref=db.ref("adminInbox");
+  ref.off();
+  ref.on("value",snap=>{
+    adminMessages.innerHTML="";
+    snap.forEach(c=>{
+      const m=c.val();
+      const d=document.createElement("div");
+      d.className="message";
+      d.innerHTML=`<b>${m.name}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+      adminMessages.appendChild(d);
+    });
+    adminMessages.scrollTop=adminMessages.scrollHeight;
+  });
+}
+
+function saveProfile(){
+  db.ref("users/"+currentUser.uid+"/name").set(pName.value);
+}
+
+function loadUsers(){
+  userSelect.innerHTML="";
+  db.ref("users").once("value").then(s=>{
+    s.forEach(c=>{
+      const o=document.createElement("option");
+      o.value=c.key;
+      o.textContent=c.val().name+" ("+c.val().role+")";
+      userSelect.appendChild(o);
+    });
+  });
+}
+
+function setRole(){
+  if(currentRole!=="Administrateur") return;
+  db.ref("users/"+userSelect.value+"/role").set(roleSelect.value);
+}
+</script>
+
+</body>
+</html>
