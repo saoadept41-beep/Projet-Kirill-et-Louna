@@ -5,36 +5,59 @@
 <title>K-NET • Neon Network</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- FAVICON -->
+<link rel="icon" type="image/svg+xml"
+href='data:image/svg+xml,
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<rect width="100" height="100" rx="20" fill="black"/>
+<text x="50%" y="65%" text-anchor="middle"
+font-size="70" fill="cyan" font-family="Arial" font-weight="900">K</text>
+</svg>'>
+
 <style>
-body{font-family:Segoe UI,Arial;background:#05060a;color:#fff;display:flex;margin:0;min-height:100vh;}
-.sidebar{width:260px;background:#0b1020;padding:24px;display:flex;flex-direction:column;}
-.logo-circle{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.8rem;color:#00f6ff;border:1px solid #00f6ff;margin-bottom:20px;}
-.menu button{margin-bottom:10px;padding:14px;border-radius:16px;border:none;background:#0b1020;color:#fff;text-align:left;cursor:pointer;}
-.menu button.active{background:#00f6ff;color:#05060a;font-weight:900;}
-.content{flex:1;padding:32px;}
-section{max-width:900px;background:#0f1733;border-radius:24px;padding:24px;margin-bottom:20px;display:none;}
-section.active{display:block;}
-input,select,textarea{width:100%;padding:12px;margin-top:12px;background:#05060a;border:1px solid #1e2a55;border-radius:16px;color:#fff;}
-button.main{margin-top:12px;padding:12px;width:100%;border:none;border-radius:18px;background:#00f6ff;color:#05060a;font-weight:900;cursor:pointer;}
-.messages{height:300px;overflow-y:auto;background:#05060a;border-radius:18px;padding:14px;margin-top:12px;}
-.message{background:#0b1020;padding:12px;border-radius:16px;margin-bottom:12px;}
+:root{
+  --bg:#05060a; --panel:#0b1020; --panel2:#0f1733; --border:#1e2a55;
+  --text:#eaf0ff; --muted:#9aa4c7; --neon:#00f6ff; --neon2:#7c7cff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial;background:radial-gradient(circle at top,#101b44,#05060a 70%);color:var(--text);display:flex;min-height:100vh;}
+.sidebar{width:260px;background:linear-gradient(180deg,#05060a,#080c1a);border-right:1px solid var(--border);padding:24px;}
+.logo{display:flex;align-items:center;gap:14px;margin-bottom:40px;}
+.logo-circle{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.8rem;color:var(--neon);box-shadow:0 0 10px var(--neon),0 0 25px rgba(0,246,255,.7);border:1px solid var(--neon);animation:pulse 3s infinite;}
+.logo span{font-size:1.3rem;letter-spacing:.25em;font-weight:900;color:var(--neon);}
+@keyframes pulse{0%,100%{box-shadow:0 0 10px var(--neon)}50%{box-shadow:0 0 25px var(--neon)}}
+.menu button{width:100%;padding:14px;margin-bottom:10px;border-radius:16px;border:1px solid transparent;background:transparent;color:var(--text);text-align:left;cursor:pointer;transition:.3s;}
+.menu button:hover{border-color:var(--neon);box-shadow:0 0 10px rgba(0,246,255,.4);}
+.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05060a;font-weight:900;}
+.content{flex:1;padding:32px}
+section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:24px;padding:24px;animation:fade .4s ease;}
+.hidden{display:none}
+@keyframes fade{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+input,textarea,select{width:100%;padding:14px;margin-top:14px;background:#05060a;border:1px solid var(--border);border-radius:16px;color:var(--text);}
+button.main{margin-top:18px;padding:14px;width:100%;border:none;border-radius:18px;background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05060a;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,246,255,.6);}
+.messages{height:320px;overflow-y:auto;background:#05060a;border-radius:18px;padding:14px;}
+.message{background:var(--panel);padding:12px 16px;border-radius:16px;margin-bottom:12px;}
 .message.me{background:#14205a;box-shadow:0 0 10px rgba(124,124,255,.5);}
+.message small{display:block;color:var(--muted);font-size:.75rem;}
 </style>
 </head>
 
 <body>
 <div class="sidebar">
-  <div class="logo-circle">K</div>
+  <div class="logo">
+    <div class="logo-circle">K</div>
+    <span>K-NET</span>
+  </div>
   <div class="menu">
-    <button onclick="showTab('auth')" class="active" id="authBtn">🔐 Connexion</button>
-    <button onclick="showTab('chat')" id="chatBtn">💬 Discussions</button>
-    <button onclick="showTab('profile')" id="profileBtn">👤 Profil</button>
+    <button onclick="showTab('auth')" class="active">🔐 Connexion</button>
+    <button onclick="showTab('chat')">💬 Discussions</button>
+    <button onclick="showTab('profile')">👤 Profil</button>
     <button onclick="logout()">🚪 Déconnexion</button>
   </div>
 </div>
 
 <div class="content">
-  <section id="auth" class="active">
+  <section id="auth">
     <input id="email" placeholder="Adresse e-mail">
     <input id="password" type="password" placeholder="Mot de passe">
     <select id="role">
@@ -45,31 +68,29 @@ button.main{margin-top:12px;padding:12px;width:100%;border:none;border-radius:18
       <option>Mécanicien</option>
       <option>Administrateur</option>
     </select>
-    <button class="main" onclick="register()">Créer un compte</button>
     <button class="main" onclick="login()">Se connecter</button>
+    <button class="main" onclick="register()">Créer un compte</button>
   </section>
 
-  <section id="chat">
+  <section id="chat" class="hidden">
     <select id="roomSelect"></select>
     <div class="messages" id="messages"></div>
     <textarea id="text" placeholder="Votre message…"></textarea>
     <button class="main" onclick="sendMessage()">Envoyer</button>
   </section>
 
-  <section id="profile">
+  <section id="profile" class="hidden">
     <input id="name" placeholder="Nom affiché">
     <input id="userRole" disabled>
-    <button class="main" onclick="updateProfile()">Mettre à jour le profil</button>
   </section>
 </div>
 
-<!-- Firebase SDK v9+ Modular -->
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, off, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
   authDomain: "projet-56900.firebaseapp.com",
@@ -81,149 +102,144 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getDatabase(app);
-
-// ----- UI helpers -----
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const roleSelect = document.getElementById("role");
-const nameInput = document.getElementById("name");
-const userRoleInput = document.getElementById("userRole");
-const roomSelect = document.getElementById("roomSelect");
-const messagesDiv = document.getElementById("messages");
-const textInput = document.getElementById("text");
+const auth = getAuth(app);
 
 let currentUser = null;
 let currentRole = null;
-let currentRoom = "Global";
+let currentRoom = null;
 
-// ----- Tabs -----
+/* ===== UI ===== */
 function showTab(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
 }
 
-// ----- Auth -----
+/* ===== AUTH ===== */
 function register(){
-  if(!emailInput.value || !passwordInput.value || !roleSelect.value){
-    alert("Remplissez tous les champs !");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const role = document.getElementById("role");
+
+  if(!email.value || !password.value || !role.value){
+    alert("Veuillez remplir email, mot de passe et rôle");
     return;
   }
-  createUserWithEmailAndPassword(auth,emailInput.value,passwordInput.value)
-  .then(userCred=>{
-    const user = userCred.user;
-    set(ref(db,'users/'+user.uid),{
-      email: emailInput.value,
-      role: roleSelect.value,
-      name: "User"
+
+  createUserWithEmailAndPassword(auth, email.value, password.value)
+  .then(userCredential=>{
+    currentUser = userCredential.user;
+    currentRole = role.value;
+    set(ref(db, 'users/' + currentUser.uid), {
+      name: "User",
+      role: currentRole
     });
-    alert("Inscription réussie !");
+    alert("Inscription réussie: " + email.value);
+    showTab('chat');
+    loadRooms();
   })
-  .catch(err=>{
-    alert(err.code+"\n"+err.message);
+  .catch(error=>{
+    alert(error.code + "\n" + error.message);
+    console.error(error);
   });
 }
 
 function login(){
-  if(!emailInput.value || !passwordInput.value){
-    alert("Remplissez tous les champs !");
-    return;
-  }
-  signInWithEmailAndPassword(auth,emailInput.value,passwordInput.value)
-  .then(userCred=>{
-    currentUser = userCred.user;
-    loadUserData();
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+
+  signInWithEmailAndPassword(auth, email.value, password.value)
+  .then(userCredential=>{
+    currentUser = userCredential.user;
+    get(ref(db, 'users/' + currentUser.uid)).then(snapshot=>{
+      if(snapshot.exists()){
+        currentRole = snapshot.val().role;
+        document.getElementById("userRole").value = currentRole;
+        document.getElementById("name").value = snapshot.val().name;
+        loadRooms();
+        showTab('chat');
+      }
+    });
   })
-  .catch(err=>{
-    alert(err.code+"\n"+err.message);
+  .catch(error=>{
+    alert(error.code + "\n" + error.message);
   });
 }
 
 function logout(){
-  signOut(auth);
-  currentUser = null;
-  location.reload();
-}
-
-// ----- Load user & chat -----
-onAuthStateChanged(auth,user=>{
-  if(user){
-    currentUser=user;
-    loadUserData();
-  }
-});
-
-function loadUserData(){
-  const userRef = ref(db,'users/'+currentUser.uid);
-  onValue(userRef,snap=>{
-    const data = snap.val();
-    currentRole = data.role;
-    nameInput.value = data.name;
-    userRoleInput.value = currentRole;
-    setupRooms();
-    showTab('chat');
-    document.getElementById('authBtn').style.display="none";
+  signOut(auth).then(()=>{
+    currentUser = null;
+    currentRole = null;
+    currentRoom = null;
+    showTab('auth');
   });
 }
 
-// ----- Chat -----
-function setupRooms(){
-  roomSelect.innerHTML="";
-  const rooms = ["Global"];
-  if(currentRole==="Administrateur"){
-    rooms.push("Admin");
-    rooms.push("Avec Admin");
-    ["Chauffeur","Logisticien","Organisateur","Mécanicien"].forEach(r=>rooms.push(r));
-  }else{
-    rooms.push(currentRole);
-    rooms.push("Avec Admin");
+/* ===== ROOMS ===== */
+function loadRooms(){
+  const roomSelect = document.getElementById("roomSelect");
+  roomSelect.innerHTML = "";
+  addRoom("Global");
+  if(currentRole === "Administrateur"){
+    ["Chauffeur","Logisticien","Organisateur","Mécanicien"].forEach(addRoom);
+  } else if(currentRole === "Utilisateur") {
+    addRoom("Global");
+  } else {
+    addRoom(currentRole);
   }
-  rooms.forEach(r=>{
-    const opt = document.createElement("option");
-    opt.value = opt.textContent = r;
-    roomSelect.appendChild(opt);
-  });
+
   currentRoom = roomSelect.value;
-  roomSelect.onchange=()=>{currentRoom=roomSelect.value;loadMessages();}
+  roomSelect.onchange = ()=>{ currentRoom = roomSelect.value; loadMessages(); }
   loadMessages();
 }
 
+function addRoom(room){
+  const roomSelect = document.getElementById("roomSelect");
+  const option = document.createElement("option");
+  option.value = option.textContent = room;
+  roomSelect.appendChild(option);
+}
+
+/* ===== CHAT ===== */
 function sendMessage(){
-  if(!textInput.value.trim()) return;
-  push(ref(db,'messages/'+currentRoom),{
+  const text = document.getElementById("text");
+  if(!text.value.trim()) return;
+  push(ref(db, 'messages/' + currentRoom), {
     uid: currentUser.uid,
-    name: nameInput.value,
+    name: document.getElementById("name").value,
     role: currentRole,
-    text: textInput.value,
+    text: text.value,
     time: new Date().toLocaleTimeString()
   });
-  textInput.value="";
+  text.value = "";
 }
 
 function loadMessages(){
-  const refMsg = ref(db,'messages/'+currentRoom);
-  messagesDiv.innerHTML="";
-  onValue(refMsg,snap=>{
-    messagesDiv.innerHTML="";
-    snap.forEach(c=>{
-      const m = c.val();
+  const messagesEl = document.getElementById("messages");
+  const messagesRef = ref(db, 'messages/' + currentRoom);
+  off(messagesRef);
+  onValue(messagesRef, snapshot=>{
+    messagesEl.innerHTML = "";
+    snapshot.forEach(child=>{
+      const m = child.val();
       const div = document.createElement("div");
-      div.className="message"+(m.uid===currentUser.uid?" me":"");
-      div.innerHTML=`<b>${m.name}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
-      messagesDiv.appendChild(div);
+      div.className = "message" + (m.uid === currentUser.uid ? " me" : "");
+      div.innerHTML = `<b>${m.name}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+      messagesEl.appendChild(div);
     });
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   });
 }
 
-// ----- Profile -----
-function updateProfile(){
-  const newName = nameInput.value;
-  set(ref(db,'users/'+currentUser.uid+'/name'), newName);
-  alert("Profil mis à jour !");
-}
-
+/* ===== Make functions global for HTML onclick ===== */
+window.register = register;
+window.login = login;
+window.logout = logout;
+window.sendMessage = sendMessage;
+window.showTab = showTab;
 </script>
+
 </body>
 </html>
