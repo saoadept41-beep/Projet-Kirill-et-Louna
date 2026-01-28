@@ -2,244 +2,306 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>LogiSupport</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Network Chat</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-:root{
-  --bg:#0a0d14;
-  --panel:#141926;
-  --panel2:#1c2233;
-  --border:#2b3246;
-  --text:#e9ecf1;
-  --muted:#9aa3af;
-  --accent:#7dd3fc;
-  --accent2:#60a5fa;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Segoe UI,Arial;
-  background:radial-gradient(circle at top,#1b2340,#0a0d14 70%);
-  color:var(--text);
-  display:flex;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial}
+body{background:#0b0f1a;color:#fff;display:flex;height:100vh;overflow:hidden}
 
 /* ===== SIDEBAR ===== */
 .sidebar{
-  width:250px;
-  background:linear-gradient(180deg,#0f1422,#0a0d14);
-  border-right:1px solid var(--border);
-  padding:20px;
+  width:80px;
+  background:#0f172a;
   display:flex;
   flex-direction:column;
-  animation:slideIn .6s ease;
-}
-
-@keyframes slideIn{
-  from{transform:translateX(-100%);opacity:0}
-  to{transform:translateX(0);opacity:1}
-}
-
-/* ===== LOGO ===== */
-.logo{
-  display:flex;
   align-items:center;
-  gap:12px;
-  margin-bottom:30px;
+  padding:20px 0;
+  gap:25px;
+  transition:.4s;
 }
-
-.logo svg{
-  width:42px;
-  height:42px;
+.sidebar:hover{width:220px}
+.logo{
+  width:45px;height:45px;
+  border-radius:50%;
+  background:radial-gradient(circle,#38bdf8,#1e3a8a);
+  position:relative;
 }
-
-.logo span{
-  font-size:1.4rem;
-  font-weight:900;
-  letter-spacing:.15em;
-  color:var(--accent);
+.logo:before,.logo:after{
+  content:"";
+  position:absolute;
+  width:8px;height:8px;
+  background:#fff;border-radius:50%;
 }
+.logo:before{top:5px;left:18px}
+.logo:after{bottom:5px;right:18px}
 
-/* ===== MENU ===== */
-.menu button{
-  width:100%;
-  background:transparent;
-  border:1px solid transparent;
-  color:var(--text);
-  padding:12px;
-  border-radius:14px;
-  margin-bottom:8px;
-  cursor:pointer;
-  text-align:left;
-  transition:.3s;
-}
-
-.menu button:hover{
-  background:var(--panel);
-  border-color:var(--border);
-  transform:translateX(6px);
-}
-
-.menu button.active{
-  background:linear-gradient(135deg,var(--accent2),var(--accent));
-  color:#0a0d14;
-  font-weight:800;
-}
-
-/* ===== CONTENT ===== */
-.content{
-  flex:1;
-  padding:30px;
-  overflow:hidden;
-}
-
-section{
-  max-width:900px;
-  background:linear-gradient(180deg,var(--panel2),var(--panel));
-  border:1px solid var(--border);
-  border-radius:22px;
-  padding:22px;
-  box-shadow:0 20px 40px rgba(0,0,0,.45);
-  animation:fadeUp .4s ease;
-}
-
-.hidden{display:none}
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(30px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* ===== FORMS ===== */
-input,textarea,select{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  background:#0a0d14;
-  border:1px solid var(--border);
-  border-radius:14px;
-  color:var(--text);
-}
-
-button.main{
-  margin-top:14px;
-  width:100%;
-  padding:12px;
+.sidebar button{
+  width:180px;
+  background:none;
   border:none;
-  border-radius:16px;
-  background:linear-gradient(135deg,var(--accent2),var(--accent));
-  color:#0a0d14;
-  font-weight:900;
+  color:#cbd5f5;
+  padding:10px;
+  text-align:left;
+  border-radius:10px;
   cursor:pointer;
   transition:.3s;
 }
+.sidebar button:hover,
+.sidebar button.active{
+  background:#1e293b;
+  color:#38bdf8;
+}
 
-button.main:hover{
-  transform:translateY(-3px);
-  box-shadow:0 10px 20px rgba(0,0,0,.4);
+/* ===== MAIN ===== */
+main{flex:1;padding:30px;animation:fade .4s}
+section{display:none;height:100%}
+section.active{display:block}
+
+@keyframes fade{from{opacity:0;transform:translateX(20px)}to{opacity:1}}
+
+/* ===== AUTH ===== */
+.auth-box{
+  max-width:400px;
+  margin:80px auto;
+  background:#020617;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 0 30px #020617;
+}
+.auth-box h2{text-align:center;margin-bottom:20px}
+.auth-box input,.auth-box select{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:none;
+}
+.auth-box button{
+  width:100%;
+  padding:10px;
+  background:#38bdf8;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
 
 /* ===== CHAT ===== */
-.messages{
-  height:320px;
-  background:#0a0d14;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:12px;
-  overflow-y:auto;
+.chat-box{
+  height:100%;
+  display:flex;
+  flex-direction:column;
 }
-
-.message{
-  background:var(--panel);
-  padding:10px 14px;
-  border-radius:14px;
+.chat-header{
+  display:flex;
+  justify-content:space-between;
   margin-bottom:10px;
-  animation:fadeUp .25s ease;
+}
+#messages{
+  flex:1;
+  overflow-y:auto;
+  background:#020617;
+  padding:15px;
+  border-radius:12px;
+}
+.message{
+  margin-bottom:10px;
+  padding:8px 12px;
+  border-radius:10px;
+  background:#1e293b;
+  animation:fade .2s;
+}
+.message.me{background:#1d4ed8}
+.chat-input{
+  display:flex;
+  margin-top:10px;
+}
+.chat-input input{
+  flex:1;
+  padding:10px;
+  border-radius:8px 0 0 8px;
+  border:none;
+}
+.chat-input button{
+  padding:10px 20px;
+  border:none;
+  background:#38bdf8;
+  border-radius:0 8px 8px 0;
 }
 
-.message.me{
-  background:#26304a;
-}
-
-.message small{
-  display:block;
-  color:var(--muted);
-  font-size:.75rem;
-  margin-top:4px;
+/* ===== PROFILE ===== */
+.profile input{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:none;
 }
 </style>
 </head>
 
 <body>
 
+<!-- ===== SIDEBAR ===== -->
 <div class="sidebar">
-  <div class="logo">
-    <!-- ЛОГОТИП СЕТЬ -->
-    <svg viewBox="0 0 100 100">
-      <circle cx="20" cy="50" r="6" fill="#7dd3fc"/>
-      <circle cx="50" cy="20" r="6" fill="#7dd3fc"/>
-      <circle cx="80" cy="50" r="6" fill="#7dd3fc"/>
-      <circle cx="50" cy="80" r="6" fill="#7dd3fc"/>
-      <line x1="20" y1="50" x2="50" y2="20" stroke="#7dd3fc"/>
-      <line x1="50" y1="20" x2="80" y2="50" stroke="#7dd3fc"/>
-      <line x1="80" y1="50" x2="50" y2="80" stroke="#7dd3fc"/>
-      <line x1="50" y1="80" x2="20" y2="50" stroke="#7dd3fc"/>
-    </svg>
-    <span>LogiSupport</span>
-  </div>
-
-  <div class="menu">
-    <button onclick="showTab('auth')" class="active">🔐 Вход</button>
-    <button onclick="showTab('chat')">💬 Чаты</button>
-    <button onclick="showTab('adminchat')">📨 Админу</button>
-    <button onclick="showTab('profile')">👤 Профиль</button>
-    <button onclick="showTab('about')">ℹ️ О нас</button>
-  </div>
+  <div class="logo"></div>
+  <button onclick="showTab('auth')" id="authBtn" class="active">Вход</button>
+  <button onclick="showTab('chat')">Чат</button>
+  <button onclick="showTab('profile')">Профиль</button>
+  <button onclick="logout()">Выход</button>
 </div>
 
-<div class="content">
-  <section id="auth">
-    <input placeholder="Email">
-    <input type="password" placeholder="Пароль">
-    <button class="main">Войти</button>
+<!-- ===== MAIN ===== -->
+<main>
+  <!-- AUTH -->
+  <section id="auth" class="active">
+    <div class="auth-box">
+      <h2>Вход / Регистрация</h2>
+      <input id="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Пароль">
+      <select id="role">
+        <option value="">Выберите роль</option>
+        <option>Chauffeur</option>
+        <option>Logisticien</option>
+        <option>Organisateur</option>
+        <option>Mécanicien</option>
+      </select>
+      <button onclick="register()">Регистрация</button>
+      <button onclick="login()">Вход</button>
+    </div>
   </section>
 
-  <section id="chat" class="hidden">
-    <div class="messages"></div>
-    <textarea placeholder="Сообщение"></textarea>
-    <button class="main">Отправить</button>
+  <!-- CHAT -->
+  <section id="chat">
+    <div class="chat-box">
+      <div class="chat-header">
+        <select id="roomSelect"></select>
+        <span id="userRole"></span>
+      </div>
+      <div id="messages"></div>
+      <div class="chat-input">
+        <input id="text" placeholder="Сообщение...">
+        <button onclick="sendMessage()">➤</button>
+      </div>
+    </div>
   </section>
 
-  <section id="adminchat" class="hidden">
-    <div class="messages"></div>
-    <textarea placeholder="Сообщение администратору"></textarea>
-    <button class="main">Отправить админу</button>
+  <!-- PROFILE -->
+  <section id="profile" class="profile">
+    <h2>Профиль</h2>
+    <input id="name" placeholder="Имя">
+    <input id="userRole" disabled>
   </section>
-
-  <section id="profile" class="hidden">
-    <input placeholder="Имя">
-    <input disabled placeholder="Роль">
-    <button class="main">Сохранить</button>
-  </section>
-
-  <section id="about" class="hidden">
-    <h2>О платформе</h2>
-    <p>LogiSupport — современная логистическая платформа с защищёнными чатами и управлением ролями.</p>
-  </section>
-</div>
+</main>
 
 <script>
-function showTab(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
+/* ===== FIREBASE ===== */
+firebase.initializeApp({
+  apiKey: "API_KEY",
+  authDomain: "PROJECT.firebaseapp.com",
+  databaseURL: "https://PROJECT.firebaseio.com",
+  projectId: "PROJECT"
+});
 
-  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+const auth = firebase.auth();
+const db = firebase.database();
+
+let currentUser,currentRole,currentRoom;
+
+/* ===== UI ===== */
+function showTab(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".sidebar button").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
 }
-</script>
 
+/* ===== AUTH ===== */
+function register(){
+  if(!role.value) return alert("Выберите роль");
+  auth.createUserWithEmailAndPassword(email.value,password.value)
+  .then(c=>{
+    db.ref("users/"+c.user.uid).set({
+      name:"User",
+      role:role.value
+    });
+  }).catch(alert);
+}
+
+function login(){
+  auth.signInWithEmailAndPassword(email.value,password.value).catch(alert);
+}
+
+function logout(){
+  auth.signOut();
+  location.reload();
+}
+
+auth.onAuthStateChanged(u=>{
+  if(!u) return;
+  currentUser=u;
+
+  db.ref("users/"+u.uid).once("value").then(s=>{
+    currentRole=s.val().role;
+    userRole.value=currentRole;
+    name.value=s.val().name;
+    loadRooms();
+    showTab("chat");
+    authBtn.style.display="none";
+  });
+});
+
+/* ===== ROOMS ===== */
+function loadRooms(){
+  roomSelect.innerHTML="";
+  addRoom("Global");
+  if(currentRole==="Administrateur"){
+    ["Chauffeur","Logisticien","Organisateur","Mécanicien"].forEach(addRoom);
+  }else addRoom(currentRole);
+
+  currentRoom=roomSelect.value;
+  roomSelect.onchange=()=>{currentRoom=roomSelect.value;loadMessages();}
+  loadMessages();
+}
+
+function addRoom(r){
+  const o=document.createElement("option");
+  o.value=o.textContent=r;
+  roomSelect.appendChild(o);
+}
+
+/* ===== CHAT ===== */
+function sendMessage(){
+  if(!text.value.trim())return;
+  db.ref("messages/"+currentRoom).push({
+    uid:currentUser.uid,
+    name:name.value,
+    role:currentRole,
+    text:text.value,
+    time:new Date().toLocaleTimeString()
+  });
+  text.value="";
+}
+
+function loadMessages(){
+  const ref=db.ref("messages/"+currentRoom);
+  ref.off();
+  ref.on("value",s=>{
+    messages.innerHTML="";
+    s.forEach(c=>{
+      const m=c.val();
+      const d=document.createElement("div");
+      d.className="message"+(m.uid===currentUser.uid?" me":"");
+      d.innerHTML=`<b>${m.name}</b> (${m.role})<br>${m.text}`;
+      messages.appendChild(d);
+    });
+    messages.scrollTop=messages.scrollHeight;
+  });
+}
+</script>
 </body>
 </html>
