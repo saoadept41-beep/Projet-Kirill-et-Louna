@@ -1,159 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>K-NET • Neon Network</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="icon" type="image/svg+xml"
+href='data:image/svg+xml,
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<rect width="100" height="100" rx="20" fill="black"/>
+<text x="50%" y="65%" text-anchor="middle"
+font-size="70" fill="cyan" font-family="Arial" font-weight="900">K</text>
+</svg>'>
+
+<style>
+/* ⚡ ТВОЙ СТИЛЬ — БЕЗ ИЗМЕНЕНИЙ */
+:root{
+--bg:#05060a;--panel:#0b1020;--panel2:#0f1733;
+--border:#1e2a55;--text:#eaf0ff;--muted:#9aa4c7;
+--neon:#00f6ff;--neon2:#7c7cff;}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial;
+background:radial-gradient(circle at top,#101b44,#05060a 70%);
+color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:260px;background:linear-gradient(180deg,#05060a,#080c1a);
+border-right:1px solid var(--border);padding:24px}
+.logo{display:flex;align-items:center;gap:14px;margin-bottom:40px}
+.logo-circle{width:48px;height:48px;border-radius:14px;
+display:flex;align-items:center;justify-content:center;
+font-weight:900;font-size:1.8rem;color:var(--neon);
+box-shadow:0 0 10px var(--neon),0 0 25px rgba(0,246,255,.7);
+border:1px solid var(--neon)}
+.menu button{width:100%;padding:14px;margin-bottom:10px;
+border-radius:16px;border:1px solid transparent;background:transparent;
+color:var(--text);text-align:left;cursor:pointer}
+.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));
+color:#05060a;font-weight:900}
+.content{flex:1;padding:32px}
+section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));
+border:1px solid var(--border);border-radius:24px;padding:24px}
+.hidden{display:none}
+input,textarea,select{width:100%;padding:14px;margin-top:14px;
+background:#05060a;border:1px solid var(--border);
+border-radius:16px;color:var(--text)}
+button.main{margin-top:18px;padding:14px;width:100%;
+border:none;border-radius:18px;
+background:linear-gradient(135deg,var(--neon2),var(--neon));
+color:#05060a;font-weight:900;cursor:pointer}
+.messages{height:320px;overflow-y:auto;background:#05060a;
+border-radius:18px;padding:14px}
+.message{background:var(--panel);padding:12px 16px;
+border-radius:16px;margin-bottom:12px}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-circle">K</div>
+    <span>K-NET</span>
+  </div>
+  <div class="menu">
+    <button class="active" onclick="showTab('auth')">🔐 Connexion</button>
+    <button onclick="showTab('chat')">💬 Discussions</button>
+    <button onclick="showTab('profile')">👤 Profil</button>
+  </div>
+</div>
+
+<div class="content">
+
+<section id="auth">
+  <input id="email" placeholder="Adresse e-mail">
+  <input id="password" type="password" placeholder="Mot de passe">
+  <select id="role">
+    <option value="">Choisissez un rôle</option>
+    <option>Chauffeur</option>
+    <option>Logisticien</option>
+    <option>Organisateur</option>
+    <option>Mécanicien</option>
+  </select>
+  <button class="main" onclick="login()">Se connecter</button>
+  <button class="main" onclick="register()">Créer un compte</button>
+</section>
+
+<section id="chat" class="hidden">
+  <select id="roomSelect"></select>
+  <div class="messages" id="messages"></div>
+  <textarea id="text" placeholder="Votre message…"></textarea>
+  <button class="main" onclick="sendMessage()">Envoyer</button>
+</section>
+
+<section id="profile" class="hidden">
+  <input id="name" placeholder="Nom affiché">
+  <input id="userRole" disabled>
+</section>
+
+</div>
+
+<!-- 🔥 FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
-/* ===== FIREBASE INIT ===== */
+/* 🔥 CONFIG */
 firebase.initializeApp({
   apiKey: "API_KEY",
   authDomain: "PROJECT.firebaseapp.com",
-  databaseURL: "https://PROJECT.firebaseio.com",
+  databaseURL: "https://PROJECT-default-rtdb.firebaseio.com",
   projectId: "PROJECT"
 });
+const auth=firebase.auth();
+const db=firebase.database();
 
-const auth = firebase.auth();
-const db = firebase.database();
-
-let currentUser = null;
-let currentRole = null;
-let currentRoom = null;
-
-/* ===== UI ===== */
+/* 🧭 TABS */
 function showTab(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
 }
 
-/* ===== REGISTRATION ===== */
+/* 🔐 REGISTER */
 function register(){
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-  const role = document.getElementById("role");
-
-  if (!email.value || !password.value) {
-    alert("Введите email и пароль");
-    return;
-  }
-
-  if (password.value.length < 6) {
-    alert("Пароль должен быть минимум 6 символов");
-    return;
-  }
-
-  auth.createUserWithEmailAndPassword(email.value, password.value)
-    .then(cred => {
-      return db.ref("users/" + cred.user.uid).set({
-        email: email.value,
-        role: role.value || "User",
-        name: "User"
-      });
-    })
-    .then(() => {
-      alert("Регистрация прошла успешно ✅");
-      showTab("chat");
-    })
-    .catch(error => {
-      alert(error.code + "\n" + error.message);
-      console.error(error);
-    });
+  const email=emailInput.value;
+  const password=passwordInput.value;
+  const role=roleSelect.value;
+  if(!email||!password||!role) return alert("Tout remplir");
+  auth.createUserWithEmailAndPassword(email,password)
+  .then(u=>db.ref("users/"+u.user.uid).set({email,role}))
+  .then(()=>alert("Compte créé"));
 }
 
-/* ===== LOGIN ===== */
+/* 🔑 LOGIN */
 function login(){
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-
-  if (!email.value || !password.value) {
-    alert("Введите email и пароль");
-    return;
-  }
-
-  auth.signInWithEmailAndPassword(email.value, password.value)
-    .catch(error => {
-      alert(error.code + "\n" + error.message);
-    });
+  auth.signInWithEmailAndPassword(
+    emailInput.value,passwordInput.value
+  );
 }
 
-/* ===== LOGOUT ===== */
-function logout(){
-  auth.signOut();
-  location.reload();
-}
-
-/* ===== AUTH STATE ===== */
-auth.onAuthStateChanged(user=>{
-  if(!user) return;
-
-  currentUser = user;
-
-  db.ref("users/" + user.uid).once("value").then(snap=>{
-    const data = snap.val();
-    currentRole = data.role;
-
-    document.getElementById("userRole").value = data.role;
-    document.getElementById("name").value = data.name;
-
-    loadRooms();
-    showTab("chat");
+/* 💬 CHAT */
+function sendMessage(){
+  const msg=text.value;
+  if(!msg) return;
+  const user=auth.currentUser;
+  db.ref("messages/"+roomSelect.value).push({
+    text:msg,
+    user:user.email,
+    time:Date.now()
   });
+  text.value="";
+}
+
+/* 👤 STATE */
+auth.onAuthStateChanged(user=>{
+  if(user){
+    showTab("chat");
+    db.ref("users/"+user.uid).once("value",s=>{
+      userRole.value=s.val().role;
+      roomSelect.innerHTML=`<option>${s.val().role}</option>`;
+    });
+  }
 });
 
-/* ===== ROOMS ===== */
-function loadRooms(){
-  const roomSelect = document.getElementById("roomSelect");
-  roomSelect.innerHTML = "";
-
-  addRoom("Global");
-
-  if (currentRole === "Administrateur") {
-    ["Chauffeur","Logisticien","Organisateur","Mécanicien"].forEach(addRoom);
-  } else {
-    addRoom(currentRole);
-  }
-
-  currentRoom = roomSelect.value;
-  roomSelect.onchange = ()=>{
-    currentRoom = roomSelect.value;
-    loadMessages();
-  };
-
-  loadMessages();
-}
-
-function addRoom(room){
-  const o = document.createElement("option");
-  o.value = room;
-  o.textContent = room;
-  roomSelect.appendChild(o);
-}
-
-/* ===== CHAT ===== */
-function sendMessage(){
-  const text = document.getElementById("text");
-  if(!text.value.trim()) return;
-
-  db.ref("messages/" + currentRoom).push({
-    uid: currentUser.uid,
-    name: document.getElementById("name").value,
-    role: currentRole,
-    text: text.value,
-    time: new Date().toLocaleTimeString()
-  });
-
-  text.value = "";
-}
-
-function loadMessages(){
-  const messages = document.getElementById("messages");
-  const ref = db.ref("messages/" + currentRoom);
-  ref.off();
-
-  ref.on("value",snap=>{
-    messages.innerHTML = "";
-    snap.forEach(c=>{
-      const m = c.val();
-      const d = document.createElement("div");
-      d.className = "message" + (m.uid === currentUser.uid ? " me" : "");
-      d.innerHTML = `<b>${m.name}</b> (${m.role})<br>${m.text}`;
-      messages.appendChild(d);
-    });
-    messages.scrollTop = messages.scrollHeight;
-  });
-}
+/* SHORTCUTS */
+const emailInput=email;
+const passwordInput=password;
+const roleSelect=role;
 </script>
+
+</body>
+</html>
