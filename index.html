@@ -101,6 +101,28 @@ button{
   background:linear-gradient(135deg,#7aa2ff,#9b7aff);
   border:none;
 }
+
+.tabs{
+  display:flex;
+  justify-content:space-around;
+  margin-bottom:14px;
+}
+
+.tab{
+  cursor:pointer;
+  font-weight:700;
+  padding:10px;
+  border-radius:12px;
+  transition:0.3s;
+}
+
+.tab.active{
+  background:rgba(122,162,255,0.2);
+}
+#errorMsg{
+  color:#ff6b6b;
+  text-align:center;
+}
 </style>
 </head>
 <body>
@@ -113,25 +135,38 @@ button{
 
 <div id="auth">
   <div class="authBox">
-    <h2 style="text-align:center;color:#7aa2ff">Neural Access</h2>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <input id="nick" placeholder="Nickname">
-    <select id="role">
-      <option value="">Выберите роль</option>
-      <option value="Chauffeur">🚗 Chauffeur</option>
-      <option value="Logisticien">📦 Logisticien</option>
-      <option value="Mécanicien">🛠 Mécanicien</option>
-      <option value="Organisateur">📋 Organisateur</option>
-    </select>
-    <button id="regBtn">ENTER SYSTEM</button>
-    <div id="errorMsg" style="color:#ff6b6b;margin-top:10px;text-align:center;"></div>
+    <div class="tabs">
+      <div class="tab active" id="tabLogin">Login</div>
+      <div class="tab" id="tabRegister">Register</div>
+    </div>
+
+    <div id="loginForm">
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <button id="loginBtn">Login</button>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+      <input id="regEmail" placeholder="Email">
+      <input id="regPassword" type="password" placeholder="Password">
+      <input id="regNick" placeholder="Nickname">
+      <select id="regRole">
+        <option value="">Выберите роль</option>
+        <option value="Chauffeur">🚗 Chauffeur</option>
+        <option value="Logisticien">📦 Logisticien</option>
+        <option value="Mécanicien">🛠 Mécanicien</option>
+        <option value="Organisateur">📋 Organisateur</option>
+      </select>
+      <button id="registerBtn">Register</button>
+    </div>
+
+    <div id="errorMsg"></div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 /* ================= FIREBASE ================= */
@@ -153,20 +188,12 @@ const db=getDatabase(app);
 /* ================= NEBULA PARTICLES ================= */
 const canvas=document.getElementById('nebulaCanvas');
 const ctx=canvas.getContext('2d');
-
 function resize(){canvas.width=innerWidth; canvas.height=innerHeight;}
 resize(); window.onresize=resize;
 
 let particles=[];
 for(let i=0;i<150;i++){
-  particles.push({
-    x:canvas.width/2 + (Math.random()-0.5)*120,
-    y:canvas.height/2 + (Math.random()-0.5)*120,
-    r:Math.random()*4+2,
-    dx:(Math.random()-0.5)*0.2,
-    dy:(Math.random()-0.5)*0.2,
-    alpha:Math.random()*0.5+0.2
-  });
+  particles.push({x:canvas.width/2 + (Math.random()-0.5)*120, y:canvas.height/2 + (Math.random()-0.5)*120, r:Math.random()*4+2, dx:(Math.random()-0.5)*0.2, dy:(Math.random()-0.5)*0.2, alpha:Math.random()*0.5+0.2});
 }
 
 function draw(){
@@ -193,7 +220,6 @@ draw();
 /* ================= CLICK TRANSITION ================= */
 const sphere=document.getElementById('sphere');
 const authDiv=document.getElementById('auth');
-
 sphere.onclick=()=>{
   sphere.style.transition='transform 0.8s, opacity 0.8s';
   sphere.style.transform='scale(5)';
@@ -201,16 +227,37 @@ sphere.onclick=()=>{
   setTimeout(()=>authDiv.classList.add('show'),800);
 };
 
+/* ================= TAB SWITCH ================= */
+const tabLogin=document.getElementById('tabLogin');
+const tabRegister=document.getElementById('tabRegister');
+const loginForm=document.getElementById('loginForm');
+const registerForm=document.getElementById('registerForm');
+tabLogin.onclick=()=>{
+  tabLogin.classList.add('active');
+  tabRegister.classList.remove('active');
+  loginForm.style.display='block';
+  registerForm.style.display='none';
+  errorMsg.textContent='';
+};
+tabRegister.onclick=()=>{
+  tabRegister.classList.add('active');
+  tabLogin.classList.remove('active');
+  loginForm.style.display='none';
+  registerForm.style.display='block';
+  errorMsg.textContent='';
+};
+
 /* ================= REGISTRATION ================= */
-const regBtn=document.getElementById('regBtn');
+const registerBtn=document.getElementById('registerBtn');
+const loginBtn=document.getElementById('loginBtn');
 const errorMsg=document.getElementById('errorMsg');
 
-regBtn.onclick=async ()=>{
+registerBtn.onclick=async ()=>{
   errorMsg.textContent='';
-  const email=document.getElementById('email').value;
-  const password=document.getElementById('password').value;
-  const nick=document.getElementById('nick').value;
-  const role=document.getElementById('role').value;
+  const email=document.getElementById('regEmail').value;
+  const password=document.getElementById('regPassword').value;
+  const nick=document.getElementById('regNick').value;
+  const role=document.getElementById('regRole').value;
 
   if(!email || !password || !nick || !role){
     errorMsg.textContent='Заполните все поля!';
@@ -219,27 +266,41 @@ regBtn.onclick=async ()=>{
 
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,password);
-
-    // Определяем роль
     const usersSnap=await get(ref(db,'users'));
     let finalRole = !usersSnap.exists() ? 'Administrateur' : role;
-
-    await set(ref(db,'users/'+cred.user.uid),{
-      nick,
-      role:finalRole,
-      createdAt:Date.now()
-    });
-
-    // Переход
+    await set(ref(db,'users/'+cred.user.uid),{nick, role:finalRole, createdAt:Date.now()});
     location.href='system.html';
   }catch(err){
-    console.error(err);
-    errorMsg.textContent=err.message || 'Ошибка регистрации';
+    if(err.code==='auth/email-already-in-use'){
+      errorMsg.textContent='Этот email уже зарегистрирован! Войдите.';
+    } else {
+      errorMsg.textContent=err.message;
+    }
+  }
+};
+
+/* ================= LOGIN ================= */
+loginBtn.onclick=async ()=>{
+  errorMsg.textContent='';
+  const email=document.getElementById('loginEmail').value;
+  const password=document.getElementById('loginPassword').value;
+
+  if(!email || !password){
+    errorMsg.textContent='Заполните все поля!';
+    return;
+  }
+
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    location.href='system.html';
+  }catch(err){
+    errorMsg.textContent='Ошибка входа: '+err.message;
   }
 };
 </script>
 
 </body>
 </html>
+
 
 
