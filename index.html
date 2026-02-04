@@ -1,23 +1,29 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • Secure Neural Network</title>
+<title>K-NET • Neural Secure Network</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-/* ================= CORE ================= */
+/* ================= RESET ================= */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:Inter,Segoe UI,Arial}
+
+/* ================= VARIABLES ================= */
 :root{
   --bg:#05070f;
+  --deep:#02040c;
   --panel:#0a1025;
   --neon:#2a6bff;
   --neon2:#6fb0ff;
+  --purple:#7b5cff;
   --text:#e6ecff;
   --line:rgba(120,160,255,.15);
 }
-*{margin:0;box-sizing:border-box;font-family:Segoe UI,Inter,Arial}
+
+/* ================= BODY ================= */
 body{
-  height:100vh;
   background:
     repeating-linear-gradient(
       to bottom,
@@ -26,222 +32,176 @@ body{
       transparent 1px,
       transparent 4px
     ),
-    radial-gradient(circle at center,#0a1025,#05070f);
+    radial-gradient(circle at center,#0a1025,#05070f 70%);
   color:var(--text);
-  overflow:hidden;
 }
 
-/* ================= LANDING ================= */
-#landing{
+/* ================= NOISE ================= */
+body::after{
+  content:"";
   position:fixed;inset:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+
+/* ================= CENTER ================= */
+.center{
+  position:absolute;
+  inset:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  flex-direction:column;
 }
 
-.energy-ring{
+/* ================= ENERGY RINGS ================= */
+.ring{
   position:absolute;
   width:900px;height:900px;
   border-radius:50%;
-  background:conic-gradient(from 0deg,var(--neon),transparent 65%);
-  filter:blur(90px);
+  background:conic-gradient(from 0deg,var(--neon),transparent 70%);
+  filter:blur(120px);
   animation:spin 18s linear infinite;
-  opacity:.9;
+  opacity:.8;
 }
+.ring.slow{animation-duration:40s;opacity:.4}
+.ring.fast{animation-duration:10s;opacity:.9}
 
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.core-sphere{
-  width:300px;height:300px;
+/* ================= CORE ================= */
+.core{
+  position:relative;
+  width:320px;height:320px;
   border-radius:50%;
   background:
-    radial-gradient(circle at 30% 30%,#1a3cff,#020617);
+    radial-gradient(circle at 30% 30%,#2a6bff,#020617 70%);
   box-shadow:
-    0 0 120px var(--neon),
-    inset 0 0 40px rgba(255,255,255,.15);
+    0 0 200px rgba(90,140,255,.9),
+    inset 0 0 60px rgba(255,255,255,.2);
   display:flex;
   align-items:center;
   justify-content:center;
   animation:pulse 4s ease-in-out infinite;
-  position:relative;
 }
 
 @keyframes pulse{
-  50%{box-shadow:0 0 200px var(--neon2), inset 0 0 60px rgba(255,255,255,.2)}
+  50%{
+    box-shadow:
+      0 0 260px rgba(120,180,255,1),
+      inset 0 0 90px rgba(255,255,255,.25);
+  }
 }
 
-/* HUD lines */
-.core-sphere::before,
-.core-sphere::after{
+/* ================= HUD ================= */
+.core::before,
+.core::after{
   content:"";
   position:absolute;
-  inset:-30px;
+  inset:-40px;
   border-radius:50%;
   border:1px dashed var(--line);
-  animation:spin 40s linear infinite reverse;
+  animation:spin 60s linear infinite reverse;
 }
-.core-sphere::after{
-  inset:-55px;
-  animation-duration:65s;
+.core::after{
+  inset:-70px;
+  animation-duration:120s;
 }
 
 /* ================= LOGO ================= */
 .logo{
-  width:160px;
+  width:200px;
 }
 .logo path{
   fill:none;
-  stroke:var(--neon2);
-  stroke-width:3;
-  filter:drop-shadow(0 0 12px var(--neon));
-  animation:draw 3s ease forwards;
+  stroke:url(#grad);
+  stroke-width:4;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter:drop-shadow(0 0 18px var(--neon));
+  stroke-dasharray:1000;
+  stroke-dashoffset:1000;
+  animation:draw 3.5s ease forwards;
 }
 
 @keyframes draw{
-  from{stroke-dasharray:1000;stroke-dashoffset:1000}
   to{stroke-dashoffset:0}
 }
 
-.landing-text{
-  margin-top:34px;
+/* ================= TEXT ================= */
+.title{
+  position:absolute;
+  bottom:120px;
+  text-align:center;
+  letter-spacing:.5em;
+  font-size:.8rem;
   opacity:.75;
-  letter-spacing:.35em;
-  font-size:.85rem;
+  animation:fadeUp 1.5s ease forwards;
 }
 
-/* ================= AUTH ================= */
-#windows{
-  position:fixed;inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  backdrop-filter:blur(18px);
-}
-
-.window{
-  width:380px;
-  padding:36px;
-  border-radius:28px;
-  background:linear-gradient(180deg,#0a1025,#05070f);
-  border:1px solid var(--line);
-  box-shadow:0 40px 140px rgba(0,0,0,.85);
-  animation:fadeIn .6s ease;
-}
-
-@keyframes fadeIn{
+@keyframes fadeUp{
   from{opacity:0;transform:translateY(20px)}
-  to{opacity:1}
+  to{opacity:.75}
 }
 
-input,select,textarea{
-  width:100%;
-  margin-top:14px;
-  padding:14px;
-  border-radius:14px;
-  background:#05070f;
+/* ================= CTA ================= */
+.cta{
+  position:absolute;
+  bottom:60px;
+  padding:14px 36px;
+  border-radius:40px;
   border:1px solid var(--line);
-  color:var(--text);
-}
-
-button{
-  width:100%;
-  margin-top:18px;
-  padding:14px;
-  border:none;
-  border-radius:16px;
-  background:linear-gradient(135deg,var(--neon2),var(--neon));
-  font-weight:900;
-  letter-spacing:.15em;
+  background:linear-gradient(135deg,rgba(60,120,255,.3),rgba(120,80,255,.3));
+  backdrop-filter:blur(14px);
+  letter-spacing:.3em;
+  font-size:.75rem;
   cursor:pointer;
-  transition:.3s;
+  transition:.4s;
 }
-button:hover{
-  box-shadow:0 0 30px var(--neon2);
-  transform:translateY(-2px);
-}
-
-/* ================= APP ================= */
-#appUI{
-  display:none;
-  height:100vh;
-}
-
-.sidebar{
-  width:260px;
-  padding:26px;
-  background:#05070f;
-  border-right:1px solid var(--line);
-}
-
-.content{
-  flex:1;
-  padding:28px;
-  display:flex;
-}
-
-.chat{
-  display:flex;
-  flex-direction:column;
-  width:100%;
-}
-
-.messages{
-  flex:1;
-  overflow-y:auto;
-  margin:18px 0;
-}
-
-.message{
-  max-width:75%;
-  padding:14px 18px;
-  border-radius:18px;
-  background:#0a1025;
-  margin-bottom:14px;
-  animation:msgIn .3s ease;
-}
-@keyframes msgIn{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1}
-}
-.message.me{
-  background:var(--neon);
-  color:#05070f;
-  margin-left:auto;
+.cta:hover{
+  box-shadow:0 0 40px rgba(120,180,255,.8);
+  transform:translateY(-4px);
 }
 </style>
 </head>
 
 <body>
 
-<!-- LANDING -->
-<div id="landing" onclick="landing.style.display='none';windows.style.display='flex'">
-  <div class="energy-ring"></div>
+<div class="center">
+  <div class="ring slow"></div>
+  <div class="ring"></div>
+  <div class="ring fast"></div>
 
-  <div class="core-sphere">
-    <!-- SVG LOGO -->
-    <svg class="logo" viewBox="0 0 200 80">
-      <path d="M10 70 V10 L40 40 L10 70 Z"/>
-      <path d="M60 10 V70"/>
-      <path d="M60 40 H100"/>
-      <path d="M120 10 V70"/>
-      <path d="M120 40 H170"/>
+  <div class="core">
+    <!-- LOGO -->
+    <svg class="logo" viewBox="0 0 240 80">
+      <defs>
+        <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#6fb0ff"/>
+          <stop offset="100%" stop-color="#7b5cff"/>
+        </linearGradient>
+      </defs>
+
+      <!-- K -->
+      <path d="M10 70 V10 M10 40 L40 10 M10 40 L40 70"/>
+      <!-- - -->
+      <path d="M55 40 H75"/>
+      <!-- N -->
+      <path d="M90 70 V10 L130 70 V10"/>
+      <!-- E -->
+      <path d="M155 10 V70 M155 10 H190 M155 40 H185 M155 70 H190"/>
+      <!-- T -->
+      <path d="M205 10 H235 M220 10 V70"/>
     </svg>
   </div>
 
-  <div class="landing-text">CLICK TO CONNECT</div>
-</div>
+  <div class="title">
+    SECURE · NEURAL · NETWORK
+  </div>
 
-<!-- AUTH -->
-<div id="windows">
-  <div class="window">
-    <h3>ACCESS NODE</h3>
-    <input placeholder="Email">
-    <input type="password" placeholder="Password">
-    <button>ENTER</button>
+  <div class="cta">
+    ENTER K-NET
   </div>
 </div>
 
 </body>
 </html>
-
