@@ -124,16 +124,17 @@ button{
       <option value="Mécanicien">🛠 Mécanicien</option>
       <option value="Organisateur">📋 Organisateur</option>
     </select>
-    <button onclick="register()">ENTER SYSTEM</button>
+    <button id="regBtn">ENTER SYSTEM</button>
+    <div id="errorMsg" style="color:#ff6b6b;margin-top:10px;text-align:center;"></div>
   </div>
 </div>
 
 <script type="module">
-/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/* ================= FIREBASE ================= */
 const firebaseConfig={
   apiKey:"AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
   authDomain:"projet-56900.firebaseapp.com",
@@ -141,35 +142,20 @@ const firebaseConfig={
   projectId:"projet-56900",
   storageBucket:"projet-56900.firebasestorage.app",
   messagingSenderId:"753669702381",
-  appId:"1:753669702381:web:0ac180682fba00c68542e4"
+  appId:"1:753669702381:web:0ac180682fba00c68542e4",
+  measurementId:"G-M9X20GDLQN"
 };
 
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
 
-/* ===== ROLE ===== */
-async function assignRole(uid,nick,selectedRole){
-  const snap = await get(ref(db,'users'));
-  let role = !snap.exists() ? 'Administrateur' : selectedRole;
-  if(role!=='Administrateur' && !selectedRole){ alert('Выберите роль'); throw 'NO_ROLE'; }
-  await set(ref(db,'users/'+uid),{nick,role,createdAt:Date.now()});
-}
-
-window.register = async ()=>{
-  const e=email.value,p=password.value,n=nick.value,r=role.value;
-  const cred = await createUserWithEmailAndPassword(auth,e,p);
-  await assignRole(cred.user.uid,n,r);
-  location.href='system.html';
-};
-
-/* ================= NEBULA SPHERE ================= */
+/* ================= NEBULA PARTICLES ================= */
 const canvas=document.getElementById('nebulaCanvas');
 const ctx=canvas.getContext('2d');
 
 function resize(){canvas.width=innerWidth; canvas.height=innerHeight;}
-resize();
-window.onresize=resize;
+resize(); window.onresize=resize;
 
 let particles=[];
 for(let i=0;i<150;i++){
@@ -204,17 +190,56 @@ function draw(){
 }
 draw();
 
-/* CLICK TRANSITION */
+/* ================= CLICK TRANSITION ================= */
+const sphere=document.getElementById('sphere');
+const authDiv=document.getElementById('auth');
+
 sphere.onclick=()=>{
   sphere.style.transition='transform 0.8s, opacity 0.8s';
   sphere.style.transform='scale(5)';
   sphere.style.opacity='0';
-  setTimeout(()=>document.getElementById('auth').classList.add('show'),800);
+  setTimeout(()=>authDiv.classList.add('show'),800);
+};
+
+/* ================= REGISTRATION ================= */
+const regBtn=document.getElementById('regBtn');
+const errorMsg=document.getElementById('errorMsg');
+
+regBtn.onclick=async ()=>{
+  errorMsg.textContent='';
+  const email=document.getElementById('email').value;
+  const password=document.getElementById('password').value;
+  const nick=document.getElementById('nick').value;
+  const role=document.getElementById('role').value;
+
+  if(!email || !password || !nick || !role){
+    errorMsg.textContent='Заполните все поля!';
+    return;
+  }
+
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,password);
+
+    // Определяем роль
+    const usersSnap=await get(ref(db,'users'));
+    let finalRole = !usersSnap.exists() ? 'Administrateur' : role;
+
+    await set(ref(db,'users/'+cred.user.uid),{
+      nick,
+      role:finalRole,
+      createdAt:Date.now()
+    });
+
+    // Переход
+    location.href='system.html';
+  }catch(err){
+    console.error(err);
+    errorMsg.textContent=err.message || 'Ошибка регистрации';
+  }
 };
 </script>
 
 </body>
 </html>
-
 
 
