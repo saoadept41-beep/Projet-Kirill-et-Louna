@@ -1,28 +1,23 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>K-NET</title>
+<title>K-NET • Neon Network</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, get, off } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { 
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-/* ===== Firebase ===== */
+const ADMIN_EMAIL = "kirillmirisnik@gamil.com";
+
 const firebaseConfig = {
   apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
   authDomain: "projet-56900.firebaseapp.com",
   databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "projet-56900",
+  storageBucket: "projet-56900.appspot.com",
   messagingSenderId: "753669702381",
   appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
@@ -30,200 +25,161 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
-/* ===== State ===== */
-let currentUser = null;
-let currentNick = "";
-let currentRole = "";
-let currentRoom = "Global";
-let messagesRef = null;
+let user, role, nick, room = "Global";
 
 /* ===== AUTH ===== */
 window.register = async () => {
   const email = regEmail.value;
   const pass = regPass.value;
-  const nick = regNick.value;
-  const role = regRole.value;
+  const n = regNick.value;
+  const r = regRole.value;
 
-  if(!email || !pass || !nick || !role){
-    alert("Tous les champs sont obligatoires");
-    return;
-  }
+  if (!email || !pass || !n || !r) return alert("Заполни всё");
 
-  const cred = await createUserWithEmailAndPassword(auth,email,pass);
-  currentUser = cred.user;
+  if (r === "Администратор") return alert("Админ назначается вручную");
 
-  await set(ref(db,"users/"+currentUser.uid),{
-    nick,
-    role
-  });
-
-  currentNick = nick;
-  currentRole = role;
-  showApp();
+  const cred = await createUserWithEmailAndPassword(auth, email, pass);
+  await set(ref(db, "users/" + cred.user.uid), { nick: n, role: r });
+  loginAuto(cred.user);
 };
 
 window.login = async () => {
-  const email = loginEmail.value;
-  const pass = loginPass.value;
+  const cred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPass.value);
+  loginAuto(cred.user);
+};
 
-  const cred = await signInWithEmailAndPassword(auth,email,pass);
-  currentUser = cred.user;
-
-  const snap = await get(ref(db,"users/"+currentUser.uid));
-  currentNick = snap.val().nick;
-  currentRole = snap.val().role;
-
+async function loginAuto(u) {
+  user = u;
+  const snap = await get(ref(db, "users/" + u.uid));
+  nick = snap.val()?.nick || "Admin";
+  role = (u.email === ADMIN_EMAIL) ? "Администратор" : snap.val()?.role;
   showApp();
-};
+}
 
-window.googleLogin = async () => {
-  const result = await signInWithPopup(auth,provider);
-  currentUser = result.user;
-
-  const uref = ref(db,"users/"+currentUser.uid);
-  const snap = await get(uref);
-
-  if(!snap.exists()){
-    await set(uref,{
-      nick: currentUser.displayName || "GoogleUser",
-      role: "Chauffeur"
-    });
-    currentNick = currentUser.displayName || "GoogleUser";
-    currentRole = "Chauffeur";
-  } else {
-    currentNick = snap.val().nick;
-    currentRole = snap.val().role;
-  }
-  showApp();
-};
-
-window.logout = async () => {
-  await signOut(auth);
-  location.reload();
-};
+window.logout = () => signOut(auth).then(() => location.reload());
 
 /* ===== UI ===== */
-function showApp(){
-  landing.style.display="none";
-  windows.style.display="none";
-  appDiv.style.display="flex";
+function showApp() {
+  landing.style.display = windows.style.display = "none";
+  app.style.display = "flex";
   loadRooms();
 }
 
 /* ===== ROOMS ===== */
-function loadRooms(){
-  roomSelect.innerHTML="";
-  addRoom("Global");
+function loadRooms() {
+  roomSelect.innerHTML = "";
+  const rooms = role === "Администратор"
+    ? ["Global", "Водитель", "Логистик", "Механик", "Организатор", "Admins"]
+    : ["Global", role];
 
-  if(currentRole === "Administrateur"){
-    ["Chauffeur","Logisticien","Organisateur","Mécanicien","Admins"].forEach(addRoom);
-  } else {
-    addRoom(currentRole);
-  }
+  rooms.forEach(r => {
+    const o = document.createElement("option");
+    o.value = o.textContent = r;
+    roomSelect.appendChild(o);
+  });
 
-  roomSelect.onchange = ()=>{
-    currentRoom = roomSelect.value;
-    loadMessages();
-  };
-
-  currentRoom = roomSelect.value;
+  room = roomSelect.value;
   loadMessages();
 }
 
-function addRoom(r){
-  const o = document.createElement("option");
-  o.value=o.textContent=r;
-  roomSelect.appendChild(o);
-}
+roomSelect.onchange = () => {
+  room = roomSelect.value;
+  loadMessages();
+};
 
-/* ===== MESSAGES ===== */
-window.sendMessage = ()=>{
-  if(!chatText.value.trim()) return;
-
-  push(ref(db,"messages/"+currentRoom),{
-    uid: currentUser.uid,
-    nick: currentNick,
-    role: currentRole,
+/* ===== CHAT ===== */
+window.sendMessage = () => {
+  if (!chatText.value.trim()) return;
+  push(ref(db, "messages/" + room), {
+    uid: user.uid,
+    nick,
+    role,
     text: chatText.value,
     time: new Date().toLocaleTimeString()
   });
-  chatText.value="";
+  chatText.value = "";
 };
 
-function loadMessages(){
-  if(messagesRef) off(messagesRef);
-  messages.innerHTML="";
-
-  messagesRef = ref(db,"messages/"+currentRoom);
-  onValue(messagesRef,snap=>{
-    messages.innerHTML="";
-    snap.forEach(c=>{
-      const m=c.val();
-      const d=document.createElement("div");
-      d.className="message"+(m.uid===currentUser.uid?" me":"");
-      d.innerHTML=`<b>${m.nick}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+function loadMessages() {
+  messages.innerHTML = "";
+  onValue(ref(db, "messages/" + room), snap => {
+    messages.innerHTML = "";
+    snap.forEach(c => {
+      const m = c.val();
+      const d = document.createElement("div");
+      d.className = "message";
+      d.innerHTML = `
+        <b>${m.nick}</b> <small>${m.role}</small><br>
+        ${m.text}
+        <div class="time">${m.time}</div>
+        ${role === "Администратор" ? `<span class="del" onclick="deleteMsg('${c.key}')">🗑</span>` : ""}
+      `;
       messages.appendChild(d);
     });
-    messages.scrollTop=messages.scrollHeight;
   });
 }
+
+window.deleteMsg = (id) => {
+  if (role !== "Администратор") return;
+  remove(ref(db, "messages/" + room + "/" + id));
+};
 </script>
 
 <style>
-body{margin:0;background:#05070f;color:#e6ecff;font-family:Segoe UI}
-.hidden{display:none}
-#app{display:none;height:100vh}
-.sidebar{width:220px;background:#060a1d;padding:20px}
-button{padding:12px;border-radius:12px;border:none;background:#7f8cff;color:#000;font-weight:700;cursor:pointer}
+body{margin:0;font-family:Segoe UI;background:#05070f;color:#e6ecff}
+#landing,#windows,#app{height:100vh;display:flex;align-items:center;justify-content:center}
+#windows,#app{display:none}
+.window{background:#0b1024;padding:25px;border-radius:20px;width:300px}
+input,select,textarea,button{width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none}
+button{background:linear-gradient(135deg,#ff6aff,#2aa8ff);font-weight:900;cursor:pointer}
+.sidebar{width:220px;background:#02040c;padding:20px}
 .content{flex:1;padding:20px}
-.messages{height:320px;background:#02040c;border-radius:12px;padding:10px;overflow-y:auto}
-.message{background:#0b1a3a;margin-bottom:8px;padding:8px;border-radius:10px}
-.message.me{background:#1e2a66}
+.messages{height:300px;overflow:auto;background:#02040c;padding:10px;border-radius:12px}
+.message{background:#0f1740;padding:10px;border-radius:10px;margin-bottom:8px;position:relative}
+.del{position:absolute;top:5px;right:8px;cursor:pointer}
+.time{font-size:10px;opacity:.6}
 </style>
 </head>
 
 <body>
 
-<div id="landing" onclick="this.style.display='none';windows.style.display='flex';" style="height:100vh;display:flex;align-items:center;justify-content:center;">
-<h1>K-NET</h1>
+<div id="landing" onclick="this.style.display='none';windows.style.display='flex'">
+  <h1>K-NET</h1>
 </div>
 
-<div id="windows" style="display:none;gap:20px;justify-content:center;">
-  <div>
+<div id="windows">
+  <div class="window">
+    <h3>Вход</h3>
     <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <button onclick="googleLogin()">Google</button>
-  </div>
-
-  <div>
+    <input id="loginPass" type="password" placeholder="Пароль">
+    <button onclick="login()">Войти</button>
+    <hr>
     <input id="regEmail" placeholder="Email">
-    <input id="regPass" type="password">
-    <input id="regNick" placeholder="Nick">
+    <input id="regPass" placeholder="Пароль">
+    <input id="regNick" placeholder="Ник">
     <select id="regRole">
-      <option value="">Rôle</option>
-      <option>Chauffeur</option>
-      <option>Logisticien</option>
-      <option>Organisateur</option>
-      <option>Mécanicien</option>
+      <option>Водитель</option>
+      <option>Логистик</option>
+      <option>Механик</option>
+      <option>Организатор</option>
     </select>
-    <button onclick="register()">Register</button>
+    <button onclick="register()">Регистрация</button>
   </div>
 </div>
 
-<div id="app" style="display:flex" id="appDiv">
+<div id="app">
   <div class="sidebar">
-    <button onclick="logout()">Logout</button>
+    <select id="roomSelect"></select>
+    <button onclick="logout()">Выход</button>
   </div>
   <div class="content">
-    <select id="roomSelect"></select>
     <div class="messages" id="messages"></div>
-    <textarea id="chatText"></textarea>
-    <button onclick="sendMessage()">Envoyer</button>
+    <textarea id="chatText" placeholder="Сообщение..."></textarea>
+    <button onclick="sendMessage()">Отправить</button>
   </div>
 </div>
 
 </body>
 </html>
+
