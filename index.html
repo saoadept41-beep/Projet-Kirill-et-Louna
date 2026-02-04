@@ -2,17 +2,15 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • Cosmic Ultimate v7</title>
+<title>K-NET • Neural Entry</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#02030f;
-  --panel:rgba(8,12,35,.92);
   --accent:#7aa2ff;
   --accent2:#9b7aff;
-  --text:#dbe6ff;
+  --bg:#02030f;
 }
 
 *{box-sizing:border-box}
@@ -20,103 +18,139 @@ html,body{
   margin:0;
   width:100%;
   height:100%;
-  font-family:'Orbitron',sans-serif;
   background:var(--bg);
-  color:var(--text);
+  font-family:'Orbitron',sans-serif;
   overflow:hidden;
+  color:#fff;
 }
 
-/* ===== COSMOS ===== */
-#bgCanvas{
+/* ===== SPACE ===== */
+#space{
+  position:fixed;
+  inset:-20%;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(122,162,255,.14), transparent 40%),
+    radial-gradient(circle at 70% 60%, rgba(155,122,255,.12), transparent 45%);
+  filter:blur(80px);
+  animation:spaceMove 22s linear infinite;
+  z-index:-3;
+}
+@keyframes spaceMove{
+  to{transform:rotate(360deg) scale(1.2)}
+}
+
+canvas{
   position:fixed;
   inset:0;
   z-index:-4;
 }
 
-#nebulaGlow{
-  position:fixed;
-  inset:-20%;
-  background:
-    radial-gradient(circle at 30% 40%, rgba(122,162,255,.15), transparent 40%),
-    radial-gradient(circle at 70% 60%, rgba(155,122,255,.12), transparent 45%);
-  filter:blur(80px);
-  animation:nebula 20s linear infinite;
-  z-index:-3;
-}
-
-@keyframes nebula{
-  0%{transform:scale(1) rotate(0deg)}
-  100%{transform:scale(1.2) rotate(360deg)}
-}
-
-/* ===== SPHERE ===== */
-#centerSphere{
-  position:fixed;
-  top:50%;
-  left:50%;
-  width:260px;
-  height:260px;
-  margin:-130px;
-  border-radius:50%;
-  background:
-    radial-gradient(circle at 30% 30%, #bcd0ff, #4b6bff 40%, transparent 70%);
-  box-shadow:
-    0 0 80px rgba(122,162,255,.6),
-    0 0 160px rgba(122,162,255,.35);
-  animation:pulse 3s ease-in-out infinite;
-  z-index:-2;
-  pointer-events:none;
-}
-
-@keyframes pulse{
-  0%{transform:scale(.96)}
-  50%{transform:scale(1.04)}
-  100%{transform:scale(.96)}
-}
-
-/* ===== SCREENS ===== */
-.screen{
+/* ===== ENTRY ===== */
+#entry{
   position:absolute;
   inset:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:opacity .6s, transform .6s;
 }
 
-.hidden{
-  opacity:0;
-  pointer-events:none;
-  transform:scale(1.05);
+/* ===== SPHERE ===== */
+#sphere{
+  width:300px;
+  height:300px;
+  border-radius:50%;
+  position:relative;
+  cursor:pointer;
+  background:
+    radial-gradient(circle at 30% 30%, #e0eaff, #4b6bff 45%, transparent 72%);
+  box-shadow:
+    0 0 100px rgba(122,162,255,.7),
+    0 0 220px rgba(122,162,255,.4);
+  animation:breath 3s ease-in-out infinite;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:1.2s cubic-bezier(.2,.9,.2,1);
+}
+
+@keyframes breath{
+  0%{transform:scale(.94)}
+  50%{transform:scale(1.06)}
+  100%{transform:scale(.94)}
+}
+
+#sphere:hover{
+  box-shadow:
+    0 0 140px rgba(122,162,255,.95),
+    0 0 300px rgba(122,162,255,.6);
+}
+
+/* ===== LOGO ===== */
+#logo{
+  font-size:3.4rem;
+  font-weight:900;
+  letter-spacing:5px;
+  text-shadow:
+    0 0 25px var(--accent),
+    0 0 50px var(--accent);
+  user-select:none;
+}
+
+/* ===== ORBITS ===== */
+.orbit{
+  position:absolute;
+  inset:-50px;
+  border-radius:50%;
+  border:1px dashed rgba(122,162,255,.25);
+  animation:rotate linear infinite;
+}
+.orbit.two{inset:-85px; animation-duration:18s}
+.orbit.one{animation-duration:12s}
+
+@keyframes rotate{
+  to{transform:rotate(360deg)}
 }
 
 /* ===== AUTH ===== */
+#auth{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:1s;
+}
+
+#auth.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
 .authBox{
-  width:340px;
+  width:360px;
   padding:36px;
-  background:var(--panel);
-  border-radius:20px;
-  border:1px solid rgba(122,162,255,.25);
-  box-shadow:0 0 40px rgba(0,0,0,.6);
-  text-align:center;
+  background:rgba(5,8,25,.94);
+  border-radius:22px;
+  border:1px solid rgba(122,162,255,.35);
+  box-shadow:0 0 50px rgba(0,0,0,.7);
+  animation:authIn 1s ease;
 }
 
-.logo{
-  font-size:2.2rem;
-  font-weight:800;
-  color:var(--accent);
-  text-shadow:0 0 20px var(--accent);
-  margin-bottom:20px;
+@keyframes authIn{
+  from{opacity:0; transform:scale(.8)}
+  to{opacity:1}
 }
 
-input,textarea,button{
+input,button{
   width:100%;
   padding:14px;
-  margin-top:12px;
+  margin-top:14px;
   border-radius:14px;
-  background:rgba(10,15,40,.85);
-  border:1px solid rgba(122,162,255,.25);
-  color:var(--text);
+  background:rgba(10,15,40,.95);
+  border:1px solid rgba(122,162,255,.3);
+  color:#fff;
   font-family:inherit;
 }
 
@@ -125,139 +159,121 @@ button{
   font-weight:700;
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   border:none;
-  transition:.3s;
-}
-
-button:hover{
-  transform:translateY(-2px) scale(1.03);
-  box-shadow:0 0 25px var(--accent);
-}
-
-/* ===== SYSTEM ===== */
-#systemScreen{
-  flex-direction:row;
-}
-
-.sidebar{
-  width:260px;
-  padding:24px;
-  background:var(--panel);
-  border-right:1px solid rgba(122,162,255,.25);
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.menu button{
-  background:none;
-  border:1px solid rgba(122,162,255,.25);
-}
-
-.menu button.active{
-  box-shadow:0 0 20px var(--accent);
-}
-
-.content{
-  flex:1;
-  padding:28px;
-}
-
-.messages{
-  height:340px;
-  overflow-y:auto;
-  padding:16px;
-  border-radius:18px;
-  background:rgba(5,10,30,.85);
-}
-
-.message{
-  margin-bottom:10px;
-  padding:10px 14px;
-  border-radius:14px;
-  background:rgba(20,30,70,.7);
-  animation:msg .3s ease;
-}
-
-.message.me{
-  background:linear-gradient(135deg,#7aa2ff,#4c6fff);
-  color:#02030a;
-}
-
-@keyframes msg{
-  from{opacity:0; transform:translateY(10px)}
-  to{opacity:1}
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="bgCanvas"></canvas>
-<div id="nebulaGlow"></div>
-<div id="centerSphere"></div>
+<canvas id="stars"></canvas>
+<div id="space"></div>
+
+<!-- ENTRY -->
+<div id="entry">
+  <div id="sphere">
+    <div class="orbit one"></div>
+    <div class="orbit two"></div>
+    <div id="logo">K-NET</div>
+  </div>
+</div>
 
 <!-- AUTH -->
-<div id="authScreen" class="screen">
+<div id="auth">
   <div class="authBox">
-    <div class="logo">K-NET</div>
-    <input placeholder="Email">
-    <input type="password" placeholder="Password">
-    <button>LOGIN</button>
+    <h2 style="text-align:center">Neural Registration</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <input id="nick" placeholder="Nickname">
+    <button onclick="register()">ENTER SYSTEM</button>
   </div>
 </div>
 
-<!-- SYSTEM -->
-<div id="systemScreen" class="screen hidden">
-  <div class="sidebar">
-    <strong>K-NET</strong>
-    <div class="menu">
-      <button class="active">🌐 Global</button>
-      <button>👤 Profile</button>
-      <button>🚪 Logout</button>
-    </div>
-  </div>
+<script type="module">
+/* ===== FIREBASE ===== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-  <div class="content">
-    <div class="messages">
-      <div class="message">Добро пожаловать в сеть</div>
-      <div class="message me">Связь установлена</div>
-    </div>
-    <textarea placeholder="Сообщение…"></textarea>
-    <button>Send</button>
-  </div>
-</div>
+const firebaseConfig = {
+  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
+  authDomain: "projet-56900.firebaseapp.com",
+  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "projet-56900",
+  storageBucket: "projet-56900.firebasestorage.app",
+  messagingSenderId: "753669702381",
+  appId: "1:753669702381:web:0ac180682fba00c68542e4",
+  measurementId: "G-M9X20GDLQN"
+};
 
-<script>
-/* ===== STARFIELD ===== */
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
-function resize(){
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+/* ===== ROLE ASSIGN ===== */
+async function assignRole(uid,nick){
+  const snap = await get(ref(db,'users'));
+  let role = 'Chauffeur';
+  if(!snap.exists()) role = 'Administrateur';
+
+  await set(ref(db,'users/'+uid),{
+    nick,
+    role,
+    createdAt:Date.now()
+  });
 }
-resize(); addEventListener('resize',resize);
 
-const stars = Array.from({length:500},()=>({
-  x:Math.random()*canvas.width,
-  y:Math.random()*canvas.height,
-  r:Math.random()*1.5,
-  s:Math.random()*0.3+0.1
+/* ===== REGISTER ===== */
+window.register = async ()=>{
+  const email = email.value;
+  const password = password.value;
+  const nick = document.getElementById('nick').value;
+
+  if(!email || !password || !nick) return alert('Заполни всё');
+
+  const cred = await createUserWithEmailAndPassword(auth,email,password);
+  await assignRole(cred.user.uid,nick);
+
+  alert('Доступ разрешён');
+  location.reload(); // дальше можешь вести в system.html
+};
+
+/* ===== SPHERE CLICK ===== */
+const sphere=document.getElementById('sphere');
+sphere.onclick=()=>{
+  sphere.style.transform='scale(7)';
+  sphere.style.opacity='0';
+  setTimeout(()=>{
+    entry.style.display='none';
+    auth.classList.add('show');
+  },900);
+};
+
+/* ===== STARS ===== */
+const c=document.getElementById('stars'),x=c.getContext('2d');
+function resize(){c.width=innerWidth;c.height=innerHeight}
+resize();onresize=resize;
+
+const stars=[...Array(450)].map(()=>({
+  x:Math.random()*c.width,
+  y:Math.random()*c.height,
+  r:Math.random()*1.6,
+  s:Math.random()*0.4+0.1
 }));
 
-function animate(){
-  ctx.fillStyle='rgba(2,3,15,.4)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#fff';
+function draw(){
+  x.fillStyle='rgba(2,3,15,.4)';
+  x.fillRect(0,0,c.width,c.height);
+  x.fillStyle='#fff';
   stars.forEach(st=>{
     st.y+=st.s;
-    if(st.y>canvas.height) st.y=0;
-    ctx.beginPath();
-    ctx.arc(st.x,st.y,st.r,0,Math.PI*2);
-    ctx.fill();
+    if(st.y>c.height) st.y=0;
+    x.beginPath();
+    x.arc(st.x,st.y,st.r,0,Math.PI*2);
+    x.fill();
   });
-  requestAnimationFrame(animate);
+  requestAnimationFrame(draw);
 }
-animate();
+draw();
 </script>
 
 </body>
