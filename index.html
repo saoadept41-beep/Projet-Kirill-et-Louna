@@ -12,10 +12,10 @@
   --border:#1b2a66;
   --text:#e6ecff;
   --neon:#2aa8ff;
+  --neon2:#1e6cff;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0;}
 body{
-  margin:0;
   font-family:Segoe UI,Arial;
   background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);
   color:var(--text);
@@ -24,113 +24,45 @@ body{
 
 /* ===== LANDING ===== */
 #landing{
-  position:fixed;
-  inset:0;
+  position:fixed; inset:0;
   background:radial-gradient(circle,#070d25,#02030a 75%);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  cursor:pointer;
-  z-index:10;
-  transition: opacity .5s;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  cursor:pointer; z-index:10; transition: opacity .5s;
 }
 .energy{
-  position:absolute;
-  width:700px;
-  height:700px;
-  border-radius:50%;
+  position:absolute; width:700px; height:700px; border-radius:50%;
   background:conic-gradient(rgba(42,168,255,.3),transparent);
-  filter:blur(40px);
-  animation:spin 14s linear infinite;
+  filter:blur(40px); animation:spin 14s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-
-.sphere{
-  position:relative;
-  width:260px;
-  height:260px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation:float 5s ease-in-out infinite;
-}
+.sphere{position:relative;width:260px;height:260px;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:float 5s ease-in-out infinite;}
 @keyframes float{50%{transform:translateY(-20px)}}
-
-.sphere-core{
-  width:180px;
-  height:180px;
-  border-radius:50%;
-  background:radial-gradient(circle,#0b1a3a,#02040c);
-  box-shadow:0 0 60px var(--neon);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.sphere-core span{
-  font-size:2.2rem;
-  font-weight:900;
-  letter-spacing:.3em;
-  color:#2aa8ff;
-  text-shadow:0 0 20px var(--neon);
-}
-.hint{
-  margin-top:30px;
-  opacity:.7;
-  letter-spacing:.4em;
-  font-size:.8rem;
-}
+.sphere-core{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,#0b1a3a,#02040c);box-shadow:0 0 60px var(--neon);display:flex;align-items:center;justify-content:center;}
+.sphere-core span{font-size:2.2rem;font-weight:900;letter-spacing:.3em;color:#2aa8ff;text-shadow:0 0 20px var(--neon);}
+.hint{margin-top:30px;opacity:.7;letter-spacing:.4em;font-size:.8rem;}
 
 /* ===== WINDOWS ===== */
-#windows{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:40px;
-  pointer-events:none;
-}
-.window{
-  width:280px;
-  background:linear-gradient(180deg,var(--panel2),var(--panel));
-  border:1px solid var(--border);
-  border-radius:22px;
-  padding:24px;
-  opacity:0;
-  transform:translateY(80px) scale(.9);
-  transition:.8s ease, opacity .8s ease;
-}
-.window.show{
-  opacity:1;
-  transform:translateY(0) scale(1);
-  pointer-events:auto;
-}
-input{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  background:#02040c;
-  border:1px solid var(--border);
-  border-radius:14px;
-  color:var(--text);
-}
-button{
-  width:100%;
-  margin-top:16px;
-  padding:14px;
-  border:none;
-  border-radius:16px;
-  background:linear-gradient(135deg,#1e6cff,#2aa8ff);
-  font-weight:900;
-  cursor:pointer;
-}
-.success{
-  color:#6affb1;
-  text-align:center;
-  margin-top:14px;
-}
+#windows{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; gap:40px; pointer-events:none;}
+.window{width:280px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:22px;padding:24px;opacity:0;transform:translateY(80px) scale(.9);transition:.8s ease, opacity .8s ease;}
+.window.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+input{width:100%;padding:14px;margin-top:12px;background:#02040c;border:1px solid var(--border);border-radius:14px;color:var(--text);}
+button{width:100%;margin-top:16px;padding:14px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--neon2),var(--neon));font-weight:900;cursor:pointer;}
+.success{color:#6affb1;text-align:center;margin-top:14px;}
+
+/* ===== APP ===== */
+#app{display:flex; height:100vh; opacity:0; transition:opacity .8s ease;}
+.sidebar{width:260px;background:linear-gradient(180deg,#05070f,#080c1a);border-right:1px solid var(--border);padding:24px;}
+.menu button{width:100%;padding:14px;margin-bottom:10px;background:none;border-radius:16px;border:1px solid transparent;color:var(--text);cursor:pointer;transition:.3s;}
+.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05070f;font-weight:900;}
+.content{flex:1;padding:32px;overflow-y:auto;}
+section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:20px;}
+
+/* CHAT BOX */
+.messages{height:300px;overflow-y:auto;background:#05070f;border-radius:16px;padding:12px;margin-top:12px;}
+.message{padding:8px 12px;border-radius:12px;margin-bottom:10px;background:#0b1a3a;}
+.message.me{background:#1e2a66;}
+.message small{display:block;color:var(--text);font-size:.75rem;}
+textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;border:1px solid var(--border);background:#02040c;color:var(--text);}
 </style>
 </head>
 <body>
@@ -144,9 +76,8 @@ button{
   <div class="hint">CLICK TO CONNECT</div>
 </div>
 
-<!-- WINDOWS -->
+<!-- WINDOWS LOGIN/REGISTER -->
 <div id="windows">
-  <!-- Login -->
   <div class="window" id="loginWin">
     <h3>Connexion</h3>
     <input id="login" placeholder="Email">
@@ -155,8 +86,6 @@ button{
     <div class="success" id="msgLogin"></div>
     <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showRegister()">Créer un compte</p>
   </div>
-
-  <!-- Register -->
   <div class="window" id="registerWin">
     <h3>Inscription</h3>
     <input id="regLogin" placeholder="Email">
@@ -167,46 +96,101 @@ button{
   </div>
 </div>
 
+<!-- MAIN APP -->
+<div id="app">
+  <div class="sidebar">
+    <div class="menu">
+      <button class="active" onclick="showTab('global')">🌐 Général</button>
+      <button onclick="showTab('admins')">🛡 Admins</button>
+      <button onclick="showTab('profile')">👤 Profil</button>
+    </div>
+  </div>
+  <div class="content">
+    <section id="global"><h3>Chat Général</h3>
+      <div class="messages" id="globalMessages"></div>
+      <textarea id="globalText" placeholder="Écrire un message..."></textarea>
+      <button onclick="sendMessage('global')">Envoyer</button>
+    </section>
+
+    <section id="admins" class="hidden"><h3>Chat Admin</h3>
+      <div class="messages" id="adminMessages"></div>
+      <textarea id="adminText" placeholder="Écrire un message..."></textarea>
+      <button onclick="sendMessage('admins')">Envoyer</button>
+    </section>
+
+    <section id="profile" class="hidden"><h3>Profil</h3>
+      <input id="userName" placeholder="Nom affiché">
+      <input id="userRole" placeholder="Rôle" disabled>
+      <button onclick="saveProfile()">Sauvegarder</button>
+    </section>
+  </div>
+</div>
+
 <script>
-// переменные
+// окна landing/login/register
 const landing = document.getElementById("landing");
 const loginWin = document.getElementById("loginWin");
 const registerWin = document.getElementById("registerWin");
 const msgLogin = document.getElementById("msgLogin");
 const msgRegister = document.getElementById("msgRegister");
+const app = document.getElementById("app");
 
-// показываем окна
-function openWindows(){
-  landing.style.opacity = "0";
-  setTimeout(()=>landing.style.display="none",500);
-  loginWin.classList.add("show");
-}
+function openWindows(){ landing.style.opacity="0"; setTimeout(()=>landing.style.display="none",500); loginWin.classList.add("show"); }
+function showRegister(){ loginWin.classList.remove("show"); setTimeout(()=>registerWin.classList.add("show"),200); }
+function showLogin(){ registerWin.classList.remove("show"); setTimeout(()=>loginWin.classList.add("show"),200); }
 
-function showRegister(){
-  loginWin.classList.remove("show");
-  setTimeout(()=>registerWin.classList.add("show"),200);
-}
-function showLogin(){
-  registerWin.classList.remove("show");
-  setTimeout(()=>loginWin.classList.add("show"),200);
-}
-
-// Простая локальная проверка (для демонстрации)
+// простая демонстрация login/register
 function login(){
   const email = document.getElementById("login").value;
   const passw = document.getElementById("pass").value;
   if(email && passw){
-    msgLogin.innerText = "✔ Bienvenue, "+email;
-    setTimeout(()=>alert("Тут будет переход на приложение!"),500);
-  } else msgLogin.innerText="❌ Remplissez les champs";
+    msgLogin.innerText="✔ Bienvenue, "+email;
+    setTimeout(()=>enterApp(email),500);
+  }else msgLogin.innerText="❌ Remplissez les champs";
 }
 function register(){
   const email = document.getElementById("regLogin").value;
   const passw = document.getElementById("regPass").value;
   if(email && passw){
-    msgRegister.innerText = "✔ Compte créé: "+email;
-    setTimeout(()=>alert("Тут будет переход на приложение!"),500);
-  } else msgRegister.innerText="❌ Remplissez les champs";
+    msgRegister.innerText="✔ Compte créé: "+email;
+    setTimeout(()=>enterApp(email),500);
+  }else msgRegister.innerText="❌ Remplissez les champs";
+}
+
+// переход на приложение
+function enterApp(email){
+  loginWin.classList.remove("show");
+  registerWin.classList.remove("show");
+  app.style.opacity=1;
+  document.getElementById("userName").value=email;
+  document.getElementById("userRole").value="Utilisateur";
+}
+
+// вкладки
+function showTab(id){
+  document.querySelectorAll(".content section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+// chat demo
+function sendMessage(room){
+  const text = document.getElementById(room+"Text").value;
+  if(!text) return;
+  const messagesEl = document.getElementById(room+"Messages");
+  const div = document.createElement("div");
+  div.className="message me";
+  div.innerHTML=`<b>Moi</b><br>${text}<small>${new Date().toLocaleTimeString()}</small>`;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop=messagesEl.scrollHeight;
+  document.getElementById(room+"Text").value="";
+}
+
+// profile
+function saveProfile(){
+  const name = document.getElementById("userName").value;
+  alert("Profil sauvegardé: "+name);
 }
 </script>
 
