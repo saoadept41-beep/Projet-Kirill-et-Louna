@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <title>K-NET • Neon Network</title>
@@ -13,17 +13,14 @@
   --border:#1b2a66;
   --text:#e6ecff;
   --muted:#8c96c9;
-  --neon:#1ea0ff;
-  --neon-soft:#0b4cff;
+  --neon:#2aa8ff;
 }
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Segoe UI,Arial;
   background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);
   color:var(--text);
-  min-height:100vh;
   overflow:hidden;
 }
 
@@ -31,215 +28,203 @@ body{
 #landing{
   position:fixed;
   inset:0;
-  background:radial-gradient(circle at center,#070d25,#02030a 75%);
+  background:radial-gradient(circle,#070d25,#02030a 75%);
   display:flex;
   align-items:center;
   justify-content:center;
   flex-direction:column;
   cursor:pointer;
-  z-index:100;
+  z-index:10;
 }
-
-/* light */
-.light-beam{
-  position:absolute;
-  top:-40%;
-  width:140%;
-  height:80%;
-  background:radial-gradient(circle,rgba(30,160,255,.35),transparent 70%);
-  filter:blur(110px);
-  animation:beamPulse 5s ease-in-out infinite;
-}
-@keyframes beamPulse{
-  0%,100%{opacity:.3}
-  50%{opacity:.8}
-}
-
-/* energy */
-.energy-field{
+.energy{
   position:absolute;
   width:700px;
   height:700px;
   border-radius:50%;
-  background:conic-gradient(
-    rgba(30,160,255,.25),
-    transparent,
-    rgba(11,76,255,.25),
-    transparent
-  );
+  background:conic-gradient(rgba(42,168,255,.3),transparent);
+  filter:blur(40px);
   animation:spin 14s linear infinite;
-  filter:blur(35px);
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* sphere */
 .sphere{
   position:relative;
-  width:280px;
-  height:280px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation:float 6s ease-in-out infinite;
-}
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-24px)}
-}
-
-/* glow */
-.sphere-glow{
-  position:absolute;
-  inset:-45px;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(30,160,255,.45),transparent 70%);
-  filter:blur(45px);
-  animation:glowPulse 4s infinite;
-}
-@keyframes glowPulse{
-  0%,100%{opacity:.5}
-  50%{opacity:1}
-}
-
-/* core */
-.sphere-core{
-  width:190px;
-  height:190px;
-  border-radius:50%;
-  background:radial-gradient(circle at top,#0b1a3a,#02040c);
-  box-shadow:
-    inset 0 0 35px rgba(30,160,255,.35),
-    0 0 55px rgba(30,160,255,.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* text */
-.sphere-core span{
-  font-size:2.4rem;
-  font-weight:900;
-  letter-spacing:.32em;
-  color:#2aa8ff;
-  text-shadow:
-    0 0 8px rgba(42,168,255,.9),
-    0 0 22px rgba(30,160,255,.8);
-}
-
-.hint{
-  margin-top:42px;
-  font-size:.75rem;
-  letter-spacing:.45em;
-  color:var(--muted);
-  opacity:.7;
-  animation:blink 2.2s infinite;
-}
-@keyframes blink{
-  0%,100%{opacity:.25}
-  50%{opacity:1}
-}
-
-.fadeOut{
-  animation:fadeOut 1s forwards;
-}
-@keyframes fadeOut{
-  to{opacity:0;transform:scale(1.25)}
-}
-
-/* ===== APP ===== */
-#app{
-  display:flex;
-  height:100vh;
-}
-.hidden{display:none}
-
-.sidebar{
   width:260px;
-  background:linear-gradient(180deg,#05070f,#080c1f);
-  border-right:1px solid var(--border);
-  padding:24px;
+  height:260px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  animation:float 5s ease-in-out infinite;
 }
+@keyframes float{50%{transform:translateY(-20px)}}
 
-.menu button{
-  width:100%;
-  padding:14px;
-  margin-bottom:10px;
-  background:none;
-  border-radius:16px;
-  border:1px solid transparent;
-  color:var(--text);
-  cursor:pointer;
-  transition:.3s;
+.sphere-core{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:radial-gradient(circle,#0b1a3a,#02040c);
+  box-shadow:0 0 60px var(--neon);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.menu button:hover{
-  border-color:var(--neon);
-}
-.menu button.active{
-  background:linear-gradient(135deg,var(--neon-soft),var(--neon));
-  color:#02030a;
+.sphere-core span{
+  font-size:2.2rem;
   font-weight:900;
+  letter-spacing:.3em;
+  color:#2aa8ff;
+  text-shadow:0 0 20px var(--neon);
+}
+.hint{
+  margin-top:30px;
+  opacity:.7;
+  letter-spacing:.4em;
+  font-size:.8rem;
 }
 
-.content{
-  flex:1;
-  padding:36px;
+/* ===== WINDOWS ===== */
+#windows{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:40px;
+  pointer-events:none;
 }
-
-section{
-  max-width:900px;
+.window{
+  width:280px;
   background:linear-gradient(180deg,var(--panel2),var(--panel));
   border:1px solid var(--border);
-  border-radius:26px;
-  padding:28px;
-  box-shadow:0 0 40px rgba(30,160,255,.15);
+  border-radius:22px;
+  padding:24px;
+  opacity:0;
+  transform:translateY(80px) scale(.9);
+  transition:.8s ease;
+}
+.window.show{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  pointer-events:auto;
+}
+
+/* ===== FORM ===== */
+input{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  background:#02040c;
+  border:1px solid var(--border);
+  border-radius:14px;
+  color:var(--text);
+}
+button{
+  width:100%;
+  margin-top:16px;
+  padding:14px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg,#1e6cff,#2aa8ff);
+  font-weight:900;
+  cursor:pointer;
+}
+.success{
+  color:#6affb1;
+  text-align:center;
+  margin-top:14px;
+}
+
+/* ===== DARK LOGIN MODE ===== */
+body.login-mode{
+  background:radial-gradient(circle at top,#040814,#010205 75%);
+}
+#darkOverlay{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle,transparent 40%,rgba(0,0,0,.7));
+  pointer-events:none;
+  opacity:0;
+  transition:.8s ease;
+  z-index:1;
+}
+body.login-mode #darkOverlay{
+  opacity:1;
 }
 </style>
 </head>
 
 <body>
 
-<div id="landing" onclick="enterSite()">
-  <div class="light-beam"></div>
-  <div class="energy-field"></div>
+<!-- Dark overlay -->
+<div id="darkOverlay"></div>
 
+<!-- LANDING -->
+<div id="landing" onclick="openWindows()">
+  <div class="energy"></div>
   <div class="sphere">
-    <div class="sphere-glow"></div>
-    <div class="sphere-core">
-      <span>K-NET</span>
-    </div>
+    <div class="sphere-core"><span>K-NET</span></div>
   </div>
-
-  <div class="hint">CLICK TO ENTER</div>
+  <div class="hint">CLICK TO CONNECT</div>
 </div>
 
-<div id="app" class="hidden">
-  <div class="sidebar">
-    <div class="menu">
-      <button class="active">🔐 Connexion</button>
-      <button>💬 Discussions</button>
-      <button>👤 Profil</button>
-    </div>
+<!-- WINDOWS -->
+<div id="windows">
+  <!-- Login Window -->
+  <div class="window" id="loginWin">
+    <h3>Connexion</h3>
+    <input id="login" placeholder="Login">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">ENTER</button>
+    <div class="success" id="msgLogin"></div>
+    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showRegister()">Créer un compte</p>
   </div>
 
-  <div class="content">
-    <section>
-      <h2>Bienvenue sur K-NET</h2>
-      <p>Neon Network — plateforme de communication nouvelle génération.</p>
-    </section>
+  <!-- Register Window -->
+  <div class="window" id="registerWin">
+    <h3>Inscription</h3>
+    <input id="regLogin" placeholder="Login">
+    <input id="regPass" type="password" placeholder="Password">
+    <button onclick="register()">REGISTER</button>
+    <div class="success" id="msgRegister"></div>
+    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showLogin()">Déjà inscrit ? Connexion</p>
   </div>
 </div>
 
 <script>
-function enterSite(){
-  const landing = document.getElementById("landing");
-  const app = document.getElementById("app");
-
-  landing.classList.add("fadeOut");
+function openWindows(){
+  document.body.classList.add("login-mode");
+  document.getElementById("landing").style.opacity="0";
   setTimeout(()=>{
-    landing.remove();
-    app.classList.remove("hidden");
-  },1000);
+    document.getElementById("landing").remove();
+    document.getElementById("loginWin").classList.add("show");
+  },700);
+}
+
+function showRegister(){
+  document.getElementById("loginWin").classList.remove("show");
+  setTimeout(()=>document.getElementById("registerWin").classList.add("show"),200);
+}
+function showLogin(){
+  document.getElementById("registerWin").classList.remove("show");
+  setTimeout(()=>document.getElementById("loginWin").classList.add("show"),200);
+}
+
+// Simple localStorage for demo
+function login(){
+  const l = login.value;
+  const p = pass.value;
+  if(!l || !p) return;
+  localStorage.setItem("knet_user",JSON.stringify({login:l}));
+  msgLogin.innerText="✔ Bienvenue, "+l;
+}
+
+function register(){
+  const l = regLogin.value;
+  const p = regPass.value;
+  if(!l || !p) return;
+  localStorage.setItem("knet_user",JSON.stringify({login:l}));
+  msgRegister.innerText="✔ Compte créé: "+l;
 }
 </script>
 
