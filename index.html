@@ -15,33 +15,86 @@
   --neon2:#1e6cff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Segoe UI,Arial;background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);color:var(--text);overflow:hidden;}
+body{
+  font-family:Segoe UI,Arial;
+  background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);
+  color:var(--text);
+  overflow:hidden;
+}
 
-/* LANDING */
-#landing{position:fixed; inset:0; display:flex; justify-content:center; align-items:center; flex-direction:column; cursor:pointer; background:#02030a; z-index:10; transition:opacity .5s;}
-.energy{position:absolute;width:700px;height:700px;border-radius:50%;background:conic-gradient(rgba(42,168,255,.3),transparent);filter:blur(40px);animation:spin 14s linear infinite;}
+/* ===== LANDING ===== */
+#landing{
+  position:fixed; inset:0;
+  background:radial-gradient(circle,#070d25,#02030a 75%);
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  cursor:pointer; z-index:10; transition: opacity .5s;
+}
+.energy{
+  position:absolute; width:700px; height:700px; border-radius:50%;
+  background:conic-gradient(rgba(42,168,255,.3),transparent);
+  filter:blur(40px); animation:spin 14s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.sphere{position:relative;width:260px;height:260px;border-radius:50%;display:flex;justify-content:center;align-items:center;animation:float 5s ease-in-out infinite;}
+.sphere{position:relative;width:260px;height:260px;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:float 5s ease-in-out infinite;}
 @keyframes float{50%{transform:translateY(-20px)}}
-.sphere-core{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,#0b1a3a,#02040c);box-shadow:0 0 60px var(--neon);display:flex;justify-content:center;align-items:center;}
+.sphere-core{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,#0b1a3a,#02040c);box-shadow:0 0 60px var(--neon);display:flex;align-items:center;justify-content:center;}
 .sphere-core span{font-size:2.2rem;font-weight:900;letter-spacing:.3em;color:#2aa8ff;text-shadow:0 0 20px var(--neon);}
-.hint{margin-top:30px;opacity:.7;letter-spacing:.4em;font-size:.8rem;color:var(--neon);}
+.hint{margin-top:30px;opacity:.7;letter-spacing:.4em;font-size:.8rem;}
 
-/* WINDOWS */
-#windows{position:fixed; inset:0; display:flex; justify-content:center; align-items:center; gap:40px; pointer-events:none;}
-.window{width:280px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:22px;padding:24px;opacity:0;transform:translateY(80px) scale(.9);transition:.8s ease, opacity .8s ease;}
-.window.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
-input{width:100%;padding:14px;margin-top:12px;background:#02040c;border:1px solid var(--border);border-radius:14px;color:var(--text);}
-button{width:100%;margin-top:16px;padding:14px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--neon2),var(--neon));font-weight:900;cursor:pointer;}
+/* ===== WINDOWS LOGIN/REGISTER ===== */
+#windows{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+.window{
+  width: 280px;
+  background: linear-gradient(180deg,var(--panel2),var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 24px;
+  opacity: 0;
+  transform: translateY(80px) scale(.9);
+  transition: .8s ease, opacity .8s ease;
+  pointer-events: auto;
+}
+.window.show{
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+input{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  background:#02040c;
+  border:1px solid var(--border);
+  border-radius:14px;
+  color:var(--text);
+}
+button{
+  width:100%;
+  margin-top:16px;
+  padding:14px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg,var(--neon2),var(--neon));
+  font-weight:900;
+  cursor:pointer;
+}
 .success{color:#6affb1;text-align:center;margin-top:14px;}
 
-/* APP */
-#app{display:flex;height:100vh;opacity:0;transition:opacity .8s ease;}
+/* ===== APP ===== */
+#app{display:flex; height:100vh; opacity:0; transition:opacity .8s ease;}
 .sidebar{width:260px;background:linear-gradient(180deg,#05070f,#080c1a);border-right:1px solid var(--border);padding:24px;}
 .menu button{width:100%;padding:14px;margin-bottom:10px;background:none;border-radius:16px;border:1px solid transparent;color:var(--text);cursor:pointer;transition:.3s;}
 .menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05070f;font-weight:900;}
 .content{flex:1;padding:32px;overflow-y:auto;}
 section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:20px;}
+
+/* CHAT BOX */
 .messages{height:300px;overflow-y:auto;background:#05070f;border-radius:16px;padding:12px;margin-top:12px;}
 .message{padding:8px 12px;border-radius:12px;margin-bottom:10px;background:#0b1a3a;}
 .message.me{background:#1e2a66;}
@@ -60,44 +113,44 @@ textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;
   <div class="hint">CLICK TO CONNECT</div>
 </div>
 
-<!-- WINDOWS -->
+<!-- WINDOWS LOGIN/REGISTER -->
 <div id="windows">
   <div class="window" id="loginWin">
     <h3>Connexion</h3>
     <input id="loginEmail" placeholder="Email">
     <input id="loginPass" type="password" placeholder="Password">
-    <button id="btnLogin">ENTER</button>
+    <button onclick="login()">ENTER</button>
     <div class="success" id="msgLogin"></div>
-    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" id="toRegister">Créer un compte</p>
+    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showRegister()">Créer un compte</p>
   </div>
   <div class="window" id="registerWin">
     <h3>Inscription</h3>
     <input id="regEmail" placeholder="Email">
     <input id="regPass" type="password" placeholder="Password">
-    <button id="btnRegister">REGISTER</button>
+    <button onclick="register()">REGISTER</button>
     <div class="success" id="msgRegister"></div>
-    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" id="toLogin">Déjà inscrit ? Connexion</p>
+    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showLogin()">Déjà inscrit ? Connexion</p>
   </div>
 </div>
 
-<!-- APP -->
+<!-- MAIN APP -->
 <div id="app">
   <div class="sidebar">
     <div class="menu">
-      <button class="active" data-tab="global">🌐 Général</button>
-      <button data-tab="admins">🛡 Admins</button>
-      <button data-tab="profile">👤 Profil</button>
+      <button class="active" onclick="showTab('global')">🌐 Général</button>
+      <button onclick="showTab('admins')">🛡 Admins</button>
+      <button onclick="showTab('profile')">👤 Profil</button>
     </div>
   </div>
   <div class="content">
     <section id="global"><h3>Chat Général</h3>
       <div class="messages" id="globalMessages"></div>
-      <textarea id="globalText"></textarea>
+      <textarea id="globalText" placeholder="Écrire un message..."></textarea>
       <button onclick="sendMessage('global')">Envoyer</button>
     </section>
     <section id="admins" class="hidden"><h3>Chat Admin</h3>
       <div class="messages" id="adminMessages"></div>
-      <textarea id="adminText"></textarea>
+      <textarea id="adminText" placeholder="Écrire un message..."></textarea>
       <button onclick="sendMessage('admins')">Envoyer</button>
     </section>
     <section id="profile" class="hidden"><h3>Profil</h3>
@@ -108,87 +161,65 @@ textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
-  authDomain: "projet-56900.firebaseapp.com",
-  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "projet-56900",
-  storageBucket: "projet-56900.appspot.com",
-  messagingSenderId: "753669702381",
-  appId: "1:753669702381:web:0ac180682fba00c68542e4",
-  measurementId: "G-M9X20GDLQN"
-};
-const appFirebase = initializeApp(firebaseConfig);
-const auth = getAuth(appFirebase);
-
-// DOM
+<script>
 const landing = document.getElementById("landing");
 const loginWin = document.getElementById("loginWin");
 const registerWin = document.getElementById("registerWin");
 const msgLogin = document.getElementById("msgLogin");
 const msgRegister = document.getElementById("msgRegister");
-const appDiv = document.getElementById("app");
+const app = document.getElementById("app");
 
-// Landing click
-landing.addEventListener("click",()=>{ 
-  landing.style.opacity="0"; 
-  setTimeout(()=>{landing.style.display="none"; loginWin.classList.add("show");},500);
+// клик на шар открывает логин
+landing.addEventListener("click",()=>{
+  landing.style.opacity="0";
+  setTimeout(()=>{
+    landing.style.display="none";
+    loginWin.classList.add("show");
+    document.getElementById("loginEmail").focus();
+  },500);
 });
 
-// Switch windows
-document.getElementById("toRegister").addEventListener("click",()=>{loginWin.classList.remove("show"); setTimeout(()=>registerWin.classList.add("show"),200);});
-document.getElementById("toLogin").addEventListener("click",()=>{registerWin.classList.remove("show"); setTimeout(()=>loginWin.classList.add("show"),200);});
+// переключение login/register
+function showRegister(){ loginWin.classList.remove("show"); setTimeout(()=>registerWin.classList.add("show"),200);}
+function showLogin(){ registerWin.classList.remove("show"); setTimeout(()=>loginWin.classList.add("show"),200);}
 
-// Register
-document.getElementById("btnRegister").addEventListener("click",()=>{
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPass").value;
-  if(!email||!pass){msgRegister.innerText="❌ Remplissez les champs"; return;}
-  createUserWithEmailAndPassword(auth,email,pass)
-    .then((userCredential)=>{
-      msgRegister.innerText="✔ Compte créé: "+email;
-      setTimeout(()=>enterApp(email,"Utilisateur"),500);
-    })
-    .catch((error)=>{msgRegister.innerText="❌ "+error.message;});
-});
-
-// Login
-document.getElementById("btnLogin").addEventListener("click",()=>{
+// DEMO login/register
+function login(){
   const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-  if(!email||!pass){msgLogin.innerText="❌ Remplissez les champs"; return;}
-  signInWithEmailAndPassword(auth,email,pass)
-    .then((userCredential)=>{
-      msgLogin.innerText="✔ Bienvenue, "+email;
-      setTimeout(()=>enterApp(email,"Utilisateur"),500);
-    })
-    .catch((error)=>{msgLogin.innerText="❌ "+error.message;});
-});
-
-// Enter App
-function enterApp(email,role){
-  loginWin.classList.remove("show");
-  registerWin.classList.remove("show");
-  appDiv.style.opacity=1;
-  document.getElementById("userName").value=email;
-  document.getElementById("userRole").value=role;
+  const passw = document.getElementById("loginPass").value;
+  if(email && passw){
+    msgLogin.innerText="✔ Bienvenue, "+email;
+    setTimeout(()=>enterApp(email),500);
+  }else msgLogin.innerText="❌ Remplissez les champs";
 }
 
-// Tabs
-document.querySelectorAll(".menu button").forEach(b=>{
-  b.addEventListener("click",()=>{ 
-    document.querySelectorAll(".content section").forEach(s=>s.classList.add("hidden"));
-    document.getElementById(b.dataset.tab).classList.remove("hidden");
-    document.querySelectorAll(".menu button").forEach(bb=>bb.classList.remove("active"));
-    b.classList.add("active");
-  });
-});
+function register(){
+  const email = document.getElementById("regEmail").value;
+  const passw = document.getElementById("regPass").value;
+  if(email && passw){
+    msgRegister.innerText="✔ Compte créé: "+email;
+    setTimeout(()=>enterApp(email),500);
+  }else msgRegister.innerText="❌ Remplissez les champs";
+}
 
-// Chat demo
+// вход в приложение
+function enterApp(email){
+  loginWin.classList.remove("show");
+  registerWin.classList.remove("show");
+  app.style.opacity=1;
+  document.getElementById("userName").value=email;
+  document.getElementById("userRole").value="Utilisateur";
+}
+
+// вкладки
+function showTab(id){
+  document.querySelectorAll(".content section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+// chat demo
 function sendMessage(room){
   const text = document.getElementById(room+"Text").value;
   if(!text) return;
@@ -201,12 +232,11 @@ function sendMessage(room){
   document.getElementById(room+"Text").value="";
 }
 
-// Profile
+// profile
 function saveProfile(){
   const name = document.getElementById("userName").value;
   alert("Profil sauvegardé: "+name);
 }
 </script>
-
 </body>
 </html>
