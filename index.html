@@ -43,69 +43,55 @@ body{
 
 /* ===== WINDOWS LOGIN/REGISTER ===== */
 #windows{
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 40px;
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center; gap:40px;
+  pointer-events:none;
+  z-index:20;
 }
 .window{
-  width: 280px;
-  background: linear-gradient(180deg,var(--panel2),var(--panel));
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  padding: 24px;
-  opacity: 0;
-  transform: translateY(80px) scale(.9);
-  transition: .8s ease, opacity .8s ease;
-  pointer-events: auto;
-}
-.window.show{
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-input{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  background:#02040c;
+  width:300px;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
   border:1px solid var(--border);
-  border-radius:14px;
-  color:var(--text);
+  border-radius:22px;
+  padding:24px;
+  opacity:0;
+  transform:translateY(80px) scale(.9);
+  transition:.6s ease, opacity .6s ease;
+  pointer-events:auto;
 }
-button{
-  width:100%;
-  margin-top:16px;
-  padding:14px;
-  border:none;
-  border-radius:16px;
-  background:linear-gradient(135deg,var(--neon2),var(--neon));
-  font-weight:900;
-  cursor:pointer;
-}
-.success{color:#6affb1;text-align:center;margin-top:14px;}
+.window.show{opacity:1;transform:translateY(0) scale(1);}
+input,select{width:100%;padding:12px;margin-top:12px;border-radius:12px;border:1px solid var(--border);background:#02040c;color:var(--text);}
+button{width:100%;margin-top:14px;padding:12px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--neon2),var(--neon));font-weight:900;cursor:pointer;}
+p.switch{margin-top:10px;text-align:center;cursor:pointer;color:var(--neon);}
 
 /* ===== APP ===== */
-#app{display:flex; height:100vh; opacity:0; transition:opacity .8s ease;}
-.sidebar{width:260px;background:linear-gradient(180deg,#05070f,#080c1a);border-right:1px solid var(--border);padding:24px;}
-.menu button{width:100%;padding:14px;margin-bottom:10px;background:none;border-radius:16px;border:1px solid transparent;color:var(--text);cursor:pointer;transition:.3s;}
-.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05070f;font-weight:900;}
-.content{flex:1;padding:32px;overflow-y:auto;}
-section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:20px;}
+#app{
+  display:flex; height:100vh; opacity:0; transition:opacity .6s ease; flex-direction:row;
+}
+.sidebar{
+  width:260px; background:linear-gradient(180deg,#05070f,#080c1a);
+  border-right:1px solid var(--border); padding:24px;
+}
+.menu button{
+  width:100%; padding:14px; margin-bottom:10px; background:none; border-radius:16px; border:1px solid transparent; color:var(--text); cursor:pointer; transition:.3s;
+}
+.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon)); color:#05070f; font-weight:900;}
+.content{flex:1; padding:32px; overflow-y:auto;}
+section{max-width:900px; background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--border); border-radius:24px; padding:24px; margin-bottom:20px;}
+.hidden{display:none;}
 
-/* CHAT BOX */
-.messages{height:300px;overflow-y:auto;background:#05070f;border-radius:16px;padding:12px;margin-top:12px;}
-.message{padding:8px 12px;border-radius:12px;margin-bottom:10px;background:#0b1a3a;}
+/* CHAT */
+.messages{height:300px; overflow-y:auto; background:#05070f; border-radius:16px; padding:12px; margin-top:12px;}
+.message{padding:8px 12px; border-radius:12px; margin-bottom:10px; background:#0b1a3a;}
 .message.me{background:#1e2a66;}
-.message small{display:block;color:var(--text);font-size:.75rem;}
+.message small{display:block; color:var(--text); font-size:.75rem;}
 textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;border:1px solid var(--border);background:#02040c;color:var(--text);}
 </style>
 </head>
 <body>
 
 <!-- LANDING -->
-<div id="landing">
+<div id="landing" onclick="showWindows()">
   <div class="energy"></div>
   <div class="sphere">
     <div class="sphere-core"><span>K-NET</span></div>
@@ -113,27 +99,31 @@ textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;
   <div class="hint">CLICK TO CONNECT</div>
 </div>
 
-<!-- WINDOWS LOGIN/REGISTER -->
+<!-- WINDOWS -->
 <div id="windows">
   <div class="window" id="loginWin">
     <h3>Connexion</h3>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" type="password" placeholder="Password">
+    <input id="login" placeholder="Email">
+    <input id="pass" type="password" placeholder="Password">
     <button onclick="login()">ENTER</button>
-    <div class="success" id="msgLogin"></div>
-    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showRegister()">Créer un compte</p>
+    <p class="switch" onclick="showRegister()">Créer un compte</p>
   </div>
+
   <div class="window" id="registerWin">
     <h3>Inscription</h3>
-    <input id="regEmail" placeholder="Email">
+    <input id="regLogin" placeholder="Email">
     <input id="regPass" type="password" placeholder="Password">
+    <input id="userName" placeholder="Nom affiché">
+    <select id="roleSelect">
+      <option value="Utilisateur">Utilisateur</option>
+      <option value="Admin">Admin</option>
+    </select>
     <button onclick="register()">REGISTER</button>
-    <div class="success" id="msgRegister"></div>
-    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showLogin()">Déjà inscrit ? Connexion</p>
+    <p class="switch" onclick="showLogin()">Déjà inscrit ? Connexion</p>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app">
   <div class="sidebar">
     <div class="menu">
@@ -148,67 +138,65 @@ textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;
       <textarea id="globalText" placeholder="Écrire un message..."></textarea>
       <button onclick="sendMessage('global')">Envoyer</button>
     </section>
+
     <section id="admins" class="hidden"><h3>Chat Admin</h3>
       <div class="messages" id="adminMessages"></div>
       <textarea id="adminText" placeholder="Écrire un message..."></textarea>
       <button onclick="sendMessage('admins')">Envoyer</button>
     </section>
+
     <section id="profile" class="hidden"><h3>Profil</h3>
-      <input id="userName" placeholder="Nom affiché">
-      <input id="userRole" placeholder="Rôle" disabled>
+      <input id="profName" placeholder="Nom affiché">
+      <input id="profRole" placeholder="Rôle" disabled>
       <button onclick="saveProfile()">Sauvegarder</button>
     </section>
   </div>
 </div>
 
 <script>
+// окна
 const landing = document.getElementById("landing");
 const loginWin = document.getElementById("loginWin");
 const registerWin = document.getElementById("registerWin");
-const msgLogin = document.getElementById("msgLogin");
-const msgRegister = document.getElementById("msgRegister");
 const app = document.getElementById("app");
 
-// клик на шар открывает логин
-landing.addEventListener("click",()=>{
-  landing.style.opacity="0";
-  setTimeout(()=>{
-    landing.style.display="none";
-    loginWin.classList.add("show");
-    document.getElementById("loginEmail").focus();
-  },500);
-});
-
-// переключение login/register
+function showWindows(){
+  landing.style.display="none";
+  loginWin.classList.add("show");
+}
 function showRegister(){ loginWin.classList.remove("show"); setTimeout(()=>registerWin.classList.add("show"),200);}
 function showLogin(){ registerWin.classList.remove("show"); setTimeout(()=>loginWin.classList.add("show"),200);}
 
-// DEMO login/register
+// login/register demo
+let currentUser = {};
 function login(){
-  const email = document.getElementById("loginEmail").value;
-  const passw = document.getElementById("loginPass").value;
+  const email=document.getElementById("login").value;
+  const passw=document.getElementById("pass").value;
   if(email && passw){
-    msgLogin.innerText="✔ Bienvenue, "+email;
-    setTimeout(()=>enterApp(email),500);
-  }else msgLogin.innerText="❌ Remplissez les champs";
+    currentUser={email, name:email, role:"Utilisateur"};
+    enterApp();
+  } else alert("Remplissez les champs");
 }
-
 function register(){
-  const email = document.getElementById("regEmail").value;
-  const passw = document.getElementById("regPass").value;
-  if(email && passw){
-    msgRegister.innerText="✔ Compte créé: "+email;
-    setTimeout(()=>enterApp(email),500);
-  }else msgRegister.innerText="❌ Remplissez les champs";
+  const email=document.getElementById("regLogin").value;
+  const passw=document.getElementById("regPass").value;
+  const name=document.getElementById("userName").value;
+  const role=document.getElementById("roleSelect").value;
+  if(email && passw && name){
+    currentUser={email, name, role};
+    enterApp();
+  } else alert("Remplissez tous les champs");
 }
 
-// вход в приложение
-function enterApp(email){
+// enter app
+function enterApp(){
   loginWin.classList.remove("show");
   registerWin.classList.remove("show");
   app.style.opacity=1;
-  document.getElementById("userName").value=email;
-  document.getElementById("userRole").value="Utilisateur";
+  document.getElementById("profName").value=currentUser.name;
+  document.getElementById("profRole").value=currentUser.role;
+  // показываем вкладки в зависимости от роли
+  if(currentUser.role!=="Admin") document.getElementById("admins").style.display="none";
 }
 
 // вкладки
@@ -221,12 +209,12 @@ function showTab(id){
 
 // chat demo
 function sendMessage(room){
-  const text = document.getElementById(room+"Text").value;
+  const text=document.getElementById(room+"Text").value;
   if(!text) return;
-  const messagesEl = document.getElementById(room+"Messages");
-  const div = document.createElement("div");
+  const messagesEl=document.getElementById(room+"Messages");
+  const div=document.createElement("div");
   div.className="message me";
-  div.innerHTML=`<b>Moi</b><br>${text}<small>${new Date().toLocaleTimeString()}</small>`;
+  div.innerHTML=`<b>${currentUser.name}</b><br>${text}<small>${new Date().toLocaleTimeString()}</small>`;
   messagesEl.appendChild(div);
   messagesEl.scrollTop=messagesEl.scrollHeight;
   document.getElementById(room+"Text").value="";
@@ -234,9 +222,11 @@ function sendMessage(room){
 
 // profile
 function saveProfile(){
-  const name = document.getElementById("userName").value;
-  alert("Profil sauvegardé: "+name);
+  currentUser.name=document.getElementById("profName").value;
+  alert("Profil sauvegardé: "+currentUser.name);
 }
 </script>
+
 </body>
 </html>
+
