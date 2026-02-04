@@ -53,108 +53,183 @@ function enterSystem(){
 *{box-sizing:border-box;margin:0;padding:0;font-family:Orbitron}
 body{
   background:radial-gradient(circle at center,#0b1235,#02030a);
-  color:#cfe6ff;
+  color:#cfe6ff;<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>K-NET • Core System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+/* 🔴 INSERT YOUR NEW FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "PASTE",
+  authDomain: "PASTE",
+  projectId: "PASTE",
+  appId: "PASTE"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+let cooldown = false;
+let justRegistered = false;
+
+/* ===== LOGIN ===== */
+window.login = async () => {
+  if (cooldown) return alert("Подожди пару секунд…");
+  cooldown = true;
+
+  try {
+    await signInWithEmailAndPassword(auth, email.value, password.value);
+  } catch (e) {
+    alert(e.message);
+  }
+
+  setTimeout(() => cooldown = false, 4000);
+};
+
+/* ===== REGISTER ===== */
+window.register = async () => {
+  try {
+    justRegistered = true;
+    await createUserWithEmailAndPassword(auth, email.value, password.value);
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
+/* ===== AUTH STATE ===== */
+onAuthStateChanged(auth, user => {
+  if (!user) return;
+
+  authScreen.classList.add("fadeOut");
+  setTimeout(() => {
+    authScreen.style.display = "none";
+    bios.style.display = "none";
+
+    if (justRegistered) {
+      welcome.style.display = "flex";
+    } else {
+      system.style.display = "flex";
+    }
+  }, 1200);
+});
+</script>
+
+<style>
+:root{
+  --bg:#02030a;
+  --panel:#050814;
+  --accent:#7aa2ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Orbitron}
+body{
+  background:radial-gradient(circle at center,#0a0f25,#01010a);
+  color:#dbe6ff;
   overflow:hidden;
 }
 
-/* ===== BIOS ===== */
+/* BIOS */
 #bios{
   position:fixed;inset:0;
-  background:black;color:#00ffd0;
+  background:black;color:#6affff;
   padding:40px;font-size:14px;
 }
-#bios span{
-  display:block;opacity:0;
-  animation:show .6s forwards;
-}
-@keyframes show{to{opacity:1}}
+#bios span{display:block;opacity:0;animation:line .6s forwards}
+@keyframes line{to{opacity:1}}
 
 .scan{
   position:absolute;inset:0;
-  background:linear-gradient(transparent 45%,rgba(0,255,255,.2),transparent 55%);
+  background:linear-gradient(transparent 45%,rgba(100,200,255,.15),transparent 55%);
   animation:scan 2s infinite;
 }
 @keyframes scan{to{background-position:0 100%}}
 
 .hidden{display:none}
 
-/* ===== AUTH ===== */
+/* AUTH */
 #authScreen{
   position:fixed;inset:0;
   display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle,#050b25,#01010a);
+  background:radial-gradient(circle,#060a18,#01010a);
 }
 .authBox{
   width:360px;
   padding:36px;
   border-radius:22px;
-  background:rgba(5,10,30,.9);
-  border:1px solid rgba(80,160,255,.35);
-  box-shadow:0 0 80px rgba(80,160,255,.35);
+  background:rgba(5,8,20,.95);
+  border:1px solid rgba(120,160,255,.25);
+  box-shadow:0 0 120px rgba(80,120,255,.25);
   text-align:center;
 }
 .logo{
-  font-size:2.2rem;
+  font-size:2.4rem;
   font-weight:800;
-  color:var(--neon);
-  letter-spacing:.3em;
-  margin-bottom:10px;
-  animation:pulse 3s infinite;
+  letter-spacing:.35em;
+  color:var(--accent);
+  margin-bottom:12px;
+  animation:breath 4s infinite toggle;
 }
-@keyframes pulse{
-  50%{text-shadow:0 0 25px var(--neon)}
+@keyframes breath{
+  50%{text-shadow:0 0 30px var(--accent)}
 }
+
 input,button{
   width:100%;
   margin-top:14px;
   padding:14px;
   border-radius:14px;
   background:#02040c;
-  border:1px solid #1c2a55;
-  color:#cfe6ff;
+  border:1px solid #1c254a;
+  color:#dbe6ff;
 }
 button{
-  background:linear-gradient(135deg,#6fb6ff,#2a6bff);
-  cursor:pointer;
+  background:linear-gradient(135deg,#8fb8ff,#4c6fff);
   font-weight:700;
+  cursor:pointer;
 }
-button:hover{box-shadow:0 0 25px #5fa0ff}
+button:hover{box-shadow:0 0 25px #6f9cff}
 
-/* ===== SYSTEM HUD ===== */
+/* WELCOME */
+#welcome{
+  display:none;
+  position:fixed;inset:0;
+  background:radial-gradient(circle,#050a1c,#01010a);
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+#welcome h1{font-size:2.6rem;margin-bottom:16px}
+#welcome p{opacity:.75;max-width:520px}
+#welcome button{width:240px;margin-top:30px}
+
+/* SYSTEM */
 #system{
   display:none;
   height:100vh;
 }
 .sidebar{
   width:260px;
+  background:rgba(5,8,20,.96);
+  border-right:1px solid rgba(120,160,255,.25);
   padding:24px;
-  background:rgba(5,10,35,.95);
-  border-right:1px solid rgba(80,160,255,.3);
 }
-.content{
-  flex:1;
-  padding:32px;
-}
+.content{flex:1;padding:36px}
 
-/* DATA LINES */
-.lines span{
-  position:absolute;
-  width:2px;height:100%;
-  background:linear-gradient(transparent,var(--neon),transparent);
-  animation:flow 3s linear infinite;
-  opacity:.4;
-}
-@keyframes flow{
-  to{transform:translateY(100%)}
-}
-
-/* TRANSITIONS */
-.fadeOut{
-  animation:fade 1.2s forwards;
-}
-@keyframes fade{
-  to{opacity:0;transform:scale(1.1)}
-}
+/* TRANSITION */
+.fadeOut{animation:fade 1.2s forwards}
+@keyframes fade{to{opacity:0;transform:scale(1.08)}}
 </style>
 </head>
 
@@ -162,10 +237,10 @@ button:hover{box-shadow:0 0 25px #5fa0ff}
 
 <!-- BIOS -->
 <div id="bios">
-  <span style="animation-delay:.3s">K-NET BIOS v4.1</span>
-  <span style="animation-delay:.6s">Initializing secure neural node...</span>
-  <span style="animation-delay:.9s">Loading cryptographic layers...</span>
-  <span style="animation-delay:1.2s">AUTH MODULE READY</span>
+  <span style="animation-delay:.3s">K-NET CORE v5.0</span>
+  <span style="animation-delay:.6s">Neural authority initialized</span>
+  <span style="animation-delay:.9s">System integrity: ABSOLUTE</span>
+  <span style="animation-delay:1.2s">AUTH ONLINE</span>
   <div class="scan"></div>
 </div>
 
@@ -173,7 +248,7 @@ button:hover{box-shadow:0 0 25px #5fa0ff}
 <div id="authScreen" class="hidden">
   <div class="authBox">
     <div class="logo">K-NET</div>
-    <p style="opacity:.7">Secure Neural Network</p>
+    <p style="opacity:.6">Central Neural Authority</p>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">LOGIN</button>
@@ -181,21 +256,35 @@ button:hover{box-shadow:0 0 25px #5fa0ff}
   </div>
 </div>
 
+<!-- WELCOME -->
+<div id="welcome">
+  <div>
+    <h1>WELCOME TO K-NET</h1>
+    <p>
+      You are now part of a closed neural network designed for
+      coordination, control and secure communication.
+    </p>
+    <button onclick="welcome.style.display='none';system.style.display='flex'">
+      ENTER SYSTEM
+    </button>
+  </div>
+</div>
+
 <!-- SYSTEM -->
 <div id="system">
   <div class="sidebar">
     <h3>K-NET</h3>
-    <p style="opacity:.6">Connected</p>
+    <p style="opacity:.6">GOD MODE</p>
   </div>
   <div class="content">
     <h1>ACCESS GRANTED</h1>
-    <p>Neural link established. Welcome to K-NET.</p>
+    <p>System fully operational.</p>
   </div>
 </div>
 
 <script>
 setTimeout(()=>{
-  bios.classList.add("hidden");
+  bios.style.display="none";
   authScreen.classList.remove("hidden");
 },3000);
 </script>
