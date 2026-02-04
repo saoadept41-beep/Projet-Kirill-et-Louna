@@ -26,133 +26,175 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-let user, role, nick, room = "Global";
+let user, role, nick, room="Global";
 
 /* ===== AUTH ===== */
-window.register = async () => {
-  const email = regEmail.value;
-  const pass = regPass.value;
-  const n = regNick.value;
-  const r = regRole.value;
-
-  if (!email || !pass || !n || !r) return alert("Заполни всё");
-
-  if (r === "Администратор") return alert("Админ назначается вручную");
-
-  const cred = await createUserWithEmailAndPassword(auth, email, pass);
-  await set(ref(db, "users/" + cred.user.uid), { nick: n, role: r });
-  loginAuto(cred.user);
+window.register = async ()=>{
+  if(regRole.value==="Администратор") return alert("Админ назначается вручную");
+  const c = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
+  await set(ref(db,"users/"+c.user.uid),{nick:regNick.value, role:regRole.value});
+  autoLogin(c.user);
 };
 
-window.login = async () => {
-  const cred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPass.value);
-  loginAuto(cred.user);
+window.login = async ()=>{
+  const c = await signInWithEmailAndPassword(auth, loginEmail.value, loginPass.value);
+  autoLogin(c.user);
 };
 
-async function loginAuto(u) {
-  user = u;
-  const snap = await get(ref(db, "users/" + u.uid));
-  nick = snap.val()?.nick || "Admin";
-  role = (u.email === ADMIN_EMAIL) ? "Администратор" : snap.val()?.role;
-  showApp();
+async function autoLogin(u){
+  user=u;
+  const s = await get(ref(db,"users/"+u.uid));
+  nick = s.val()?.nick || "Admin";
+  role = (u.email===ADMIN_EMAIL)?"Администратор":s.val()?.role;
+  enterApp();
 }
 
-window.logout = () => signOut(auth).then(() => location.reload());
+window.logout=()=>signOut(auth).then(()=>location.reload());
 
-/* ===== UI ===== */
-function showApp() {
-  landing.style.display = windows.style.display = "none";
-  app.style.display = "flex";
-  loadRooms();
+/* ===== ENTER EFFECT ===== */
+function enterApp(){
+  document.getElementById("sphere").classList.add("explode");
+  setTimeout(()=>{
+    landing.style.display="none";
+    windows.style.display="flex";
+  },800);
 }
-
-/* ===== ROOMS ===== */
-function loadRooms() {
-  roomSelect.innerHTML = "";
-  const rooms = role === "Администратор"
-    ? ["Global", "Водитель", "Логистик", "Механик", "Организатор", "Admins"]
-    : ["Global", role];
-
-  rooms.forEach(r => {
-    const o = document.createElement("option");
-    o.value = o.textContent = r;
-    roomSelect.appendChild(o);
-  });
-
-  room = roomSelect.value;
-  loadMessages();
-}
-
-roomSelect.onchange = () => {
-  room = roomSelect.value;
-  loadMessages();
-};
-
-/* ===== CHAT ===== */
-window.sendMessage = () => {
-  if (!chatText.value.trim()) return;
-  push(ref(db, "messages/" + room), {
-    uid: user.uid,
-    nick,
-    role,
-    text: chatText.value,
-    time: new Date().toLocaleTimeString()
-  });
-  chatText.value = "";
-};
-
-function loadMessages() {
-  messages.innerHTML = "";
-  onValue(ref(db, "messages/" + room), snap => {
-    messages.innerHTML = "";
-    snap.forEach(c => {
-      const m = c.val();
-      const d = document.createElement("div");
-      d.className = "message";
-      d.innerHTML = `
-        <b>${m.nick}</b> <small>${m.role}</small><br>
-        ${m.text}
-        <div class="time">${m.time}</div>
-        ${role === "Администратор" ? `<span class="del" onclick="deleteMsg('${c.key}')">🗑</span>` : ""}
-      `;
-      messages.appendChild(d);
-    });
-  });
-}
-
-window.deleteMsg = (id) => {
-  if (role !== "Администратор") return;
-  remove(ref(db, "messages/" + room + "/" + id));
-};
 </script>
 
 <style>
-body{margin:0;font-family:Segoe UI;background:#05070f;color:#e6ecff}
-#landing,#windows,#app{height:100vh;display:flex;align-items:center;justify-content:center}
-#windows,#app{display:none}
-.window{background:#0b1024;padding:25px;border-radius:20px;width:300px}
-input,select,textarea,button{width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none}
-button{background:linear-gradient(135deg,#ff6aff,#2aa8ff);font-weight:900;cursor:pointer}
-.sidebar{width:220px;background:#02040c;padding:20px}
-.content{flex:1;padding:20px}
-.messages{height:300px;overflow:auto;background:#02040c;padding:10px;border-radius:12px}
-.message{background:#0f1740;padding:10px;border-radius:10px;margin-bottom:8px;position:relative}
-.del{position:absolute;top:5px;right:8px;cursor:pointer}
-.time{font-size:10px;opacity:.6}
+:root{
+  --bg:#05070f;
+  --panel:#0b1024;
+  --neon:#2aa8ff;
+  --pink:#ff6aff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Segoe UI;
+  background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);
+  color:#e6ecff;
+  overflow:hidden;
+}
+
+/* ===== LANDING SPHERE ===== */
+#landing{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  cursor:pointer;
+  z-index:10;
+}
+.energy{
+  position:absolute;
+  width:700px;
+  height:700px;
+  border-radius:50%;
+  background:conic-gradient(rgba(42,168,255,.4),transparent);
+  filter:blur(50px);
+  animation:spin 14s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#sphere{
+  position:relative;
+  width:260px;
+  height:260px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  animation:float 5s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-15px)}
+}
+
+.core{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:radial-gradient(circle,#0b1a3a,#02040c);
+  box-shadow:0 0 60px var(--neon),0 0 120px var(--pink);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  animation:coreGlow 6s infinite alternate;
+}
+@keyframes coreGlow{
+  0%{box-shadow:0 0 60px var(--neon)}
+  50%{box-shadow:0 0 120px var(--pink)}
+  100%{box-shadow:0 0 60px var(--neon)}
+}
+
+.core span{
+  font-size:2.4rem;
+  font-weight:900;
+  color:var(--neon);
+  text-shadow:0 0 20px var(--neon),0 0 40px var(--pink);
+}
+
+/* CLICK EXPLOSION */
+.explode{
+  animation:explode .8s forwards;
+}
+@keyframes explode{
+  to{
+    transform:scale(4);
+    opacity:0;
+    filter:blur(20px);
+  }
+}
+
+.hint{
+  margin-top:30px;
+  opacity:.7;
+  letter-spacing:.4em;
+  font-size:.8rem;
+}
+
+/* ===== WINDOWS ===== */
+#windows{display:none;position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.window{
+  width:300px;
+  background:linear-gradient(180deg,#0f1740,#0b1024);
+  border-radius:22px;
+  padding:24px;
+}
+input,select,button{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+}
+button{
+  background:linear-gradient(135deg,var(--pink),var(--neon));
+  font-weight:900;
+  cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
-<div id="landing" onclick="this.style.display='none';windows.style.display='flex'">
-  <h1>K-NET</h1>
+<div id="landing" onclick="enterApp()">
+  <div class="energy"></div>
+  <div id="sphere">
+    <div class="core"><span>K-NET</span></div>
+  </div>
+  <div class="hint">CLICK TO CONNECT</div>
 </div>
 
 <div id="windows">
   <div class="window">
     <h3>Вход</h3>
     <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" type="password" placeholder="Пароль">
+    <input id="loginPass" type="password">
     <button onclick="login()">Войти</button>
     <hr>
     <input id="regEmail" placeholder="Email">
@@ -168,18 +210,7 @@ button{background:linear-gradient(135deg,#ff6aff,#2aa8ff);font-weight:900;cursor
   </div>
 </div>
 
-<div id="app">
-  <div class="sidebar">
-    <select id="roomSelect"></select>
-    <button onclick="logout()">Выход</button>
-  </div>
-  <div class="content">
-    <div class="messages" id="messages"></div>
-    <textarea id="chatText" placeholder="Сообщение..."></textarea>
-    <button onclick="sendMessage()">Отправить</button>
-  </div>
-</div>
-
 </body>
 </html>
+
 
