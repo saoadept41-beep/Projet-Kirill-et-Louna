@@ -19,10 +19,10 @@ html,body{
 #nebulaCanvas{
   position:fixed;
   inset:0;
-  z-index:-2;
+  z-index:-1;
+  display:block;
 }
 
-/* Туманная сфера */
 #sphere{
   position:absolute;
   top:50%;
@@ -32,13 +32,13 @@ html,body{
   margin-left:-140px;
   margin-top:-140px;
   border-radius:50%;
-  background:radial-gradient(circle at 50% 50%, rgba(122,162,255,0.5), rgba(0,0,0,0.0) 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(122,162,255,0.5), rgba(0,0,0,0.0) 70%);
   box-shadow:0 0 80px rgba(122,162,255,0.5),0 0 160px rgba(122,162,255,0.3);
   cursor:pointer;
-  animation:pulse 3s infinite alternate;
   display:flex;
   align-items:center;
   justify-content:center;
+  animation:pulse 3s infinite alternate;
 }
 
 #logo{
@@ -163,46 +163,53 @@ window.register = async ()=>{
   location.href='system.html';
 };
 
-/* ================= NEBULA SPHERE PARTICLES ================= */
+/* ================= NEBULA SPHERE ================= */
 const canvas=document.getElementById('nebulaCanvas');
 const ctx=canvas.getContext('2d');
-canvas.width=innerWidth; canvas.height=innerHeight;
+
+function resize(){canvas.width=innerWidth; canvas.height=innerHeight;}
+resize();
+window.onresize=resize;
 
 let particles=[];
-for(let i=0;i<200;i++){
+for(let i=0;i<150;i++){
   particles.push({
-    x:canvas.width/2 + (Math.random()-0.5)*200,
-    y:canvas.height/2 + (Math.random()-0.5)*200,
-    r:Math.random()*2+1,
-    dx:(Math.random()-0.5)*0.5,
-    dy:(Math.random()-0.5)*0.5
+    x:canvas.width/2 + (Math.random()-0.5)*120,
+    y:canvas.height/2 + (Math.random()-0.5)*120,
+    r:Math.random()*4+2,
+    dx:(Math.random()-0.5)*0.2,
+    dy:(Math.random()-0.5)*0.2,
+    alpha:Math.random()*0.5+0.2
   });
 }
 
-function animate(){
-  ctx.fillStyle='rgba(1,2,10,0.2)';
+function draw(){
+  ctx.fillStyle='rgba(1,2,10,0.15)';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   particles.forEach(p=>{
     p.x+=p.dx; p.y+=p.dy;
-    if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
-    if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
-    let grad=ctx.createRadialGradient(p.x,p.y,p.r/2,p.x,p.y,p.r);
-    grad.addColorStop(0,'rgba(122,162,255,0.5)');
+    if(p.x<canvas.width/2-150)p.dx=Math.abs(p.dx);
+    if(p.x>canvas.width/2+150)p.dx=-Math.abs(p.dx);
+    if(p.y<canvas.height/2-150)p.dy=Math.abs(p.dy);
+    if(p.y>canvas.height/2+150)p.dy=-Math.abs(p.dy);
+    let grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+    grad.addColorStop(0,'rgba(122,162,255,'+p.alpha+')');
     grad.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=grad;
     ctx.beginPath();
     ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     ctx.fill();
   });
-  requestAnimationFrame(animate);
+  requestAnimationFrame(draw);
 }
-animate();
+draw();
 
-/* ===== CLICK TRANSITION ===== */
+/* CLICK TRANSITION */
 sphere.onclick=()=>{
-  sphere.style.transform='scale(6)';
+  sphere.style.transition='transform 0.8s, opacity 0.8s';
+  sphere.style.transform='scale(5)';
   sphere.style.opacity='0';
-  setTimeout(()=>{document.getElementById('auth').classList.add('show');},800);
+  setTimeout(()=>document.getElementById('auth').classList.add('show'),800);
 };
 </script>
 
