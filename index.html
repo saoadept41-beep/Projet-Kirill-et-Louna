@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <title>K-NET • Neon Network</title>
@@ -92,6 +92,7 @@ body{
   justify-content:center;
   gap:40px;
   pointer-events:none;
+  z-index:5;
 }
 .window{
   width:280px;
@@ -156,7 +157,6 @@ body.login-mode #darkOverlay{
 
 <body>
 
-<!-- Dark overlay -->
 <div id="darkOverlay"></div>
 
 <!-- LANDING -->
@@ -173,7 +173,7 @@ body.login-mode #darkOverlay{
   <!-- Login Window -->
   <div class="window" id="loginWin">
     <h3>Connexion</h3>
-    <input id="login" placeholder="Login">
+    <input id="login" placeholder="Email">
     <input id="pass" type="password" placeholder="Password">
     <button onclick="login()">ENTER</button>
     <div class="success" id="msgLogin"></div>
@@ -183,7 +183,7 @@ body.login-mode #darkOverlay{
   <!-- Register Window -->
   <div class="window" id="registerWin">
     <h3>Inscription</h3>
-    <input id="regLogin" placeholder="Login">
+    <input id="regLogin" placeholder="Email">
     <input id="regPass" type="password" placeholder="Password">
     <button onclick="register()">REGISTER</button>
     <div class="success" id="msgRegister"></div>
@@ -191,40 +191,70 @@ body.login-mode #darkOverlay{
   </div>
 </div>
 
-<script>
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "ТВОЙ_API_KEY",
+  authDomain: "ТВОЙ_PROJECT.firebaseapp.com",
+  databaseURL: "ТВОЙ_DATABASE_URL",
+  projectId: "ТВОЙ_PROJECT",
+  storageBucket: "ТВОЙ_PROJECT.appspot.com",
+  messagingSenderId: "ТВОЙ_SENDER_ID",
+  appId: "ТВОЙ_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Landing -> show login
 function openWindows(){
   document.body.classList.add("login-mode");
-  document.getElementById("landing").style.opacity="0";
+  landing.style.opacity="0";
   setTimeout(()=>{
-    document.getElementById("landing").remove();
-    document.getElementById("loginWin").classList.add("show");
+    landing.remove();
+    loginWin.classList.add("show");
   },700);
 }
 
+// Show windows
 function showRegister(){
-  document.getElementById("loginWin").classList.remove("show");
-  setTimeout(()=>document.getElementById("registerWin").classList.add("show"),200);
+  loginWin.classList.remove("show");
+  setTimeout(()=>registerWin.classList.add("show"),200);
 }
 function showLogin(){
-  document.getElementById("registerWin").classList.remove("show");
-  setTimeout(()=>document.getElementById("loginWin").classList.add("show"),200);
+  registerWin.classList.remove("show");
+  setTimeout(()=>loginWin.classList.add("show"),200);
 }
 
-// Simple localStorage for demo
+// Firebase login
 function login(){
-  const l = login.value;
-  const p = pass.value;
-  if(!l || !p) return;
-  localStorage.setItem("knet_user",JSON.stringify({login:l}));
-  msgLogin.innerText="✔ Bienvenue, "+l;
+  const email = login.value;
+  const password = pass.value;
+  signInWithEmailAndPassword(auth,email,password)
+  .then((userCredential)=>{
+    msgLogin.innerText = "✔ Bienvenue, "+email;
+    console.log("User logged in:", userCredential.user);
+  })
+  .catch((error)=>{
+    msgLogin.innerText = "❌ "+error.message;
+  });
 }
 
+// Firebase register
 function register(){
-  const l = regLogin.value;
-  const p = regPass.value;
-  if(!l || !p) return;
-  localStorage.setItem("knet_user",JSON.stringify({login:l}));
-  msgRegister.innerText="✔ Compte créé: "+l;
+  const email = regLogin.value;
+  const password = regPass.value;
+  createUserWithEmailAndPassword(auth,email,password)
+  .then((userCredential)=>{
+    msgRegister.innerText = "✔ Compte créé: "+email;
+    console.log("User registered:", userCredential.user);
+  })
+  .catch((error)=>{
+    msgRegister.innerText = "❌ "+error.message;
+  });
 }
 </script>
 
