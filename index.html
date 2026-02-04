@@ -1,23 +1,22 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<title>K-NET • Neon Network</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<title>K-NET • Réseau Neon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, get, off, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-/* ================= FIREBASE ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
   authDomain: "projet-56900.firebaseapp.com",
   databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "projet-56900",
-  storageBucket: "projet-56900.appspot.com",
+  storageBucket: "projet-56900.firebasestorage.app",
   messagingSenderId: "753669702381",
   appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
@@ -26,330 +25,209 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-let currentUser = null;
-let currentRole = null;
-let currentNick = null;
-let currentRoom = "Global";
-let unsubscribeMessages = null;
+let currentUser=null,currentRole=null,currentNick=null,currentRoom='Global';
 
-/* ================= AUTH ================= */
-window.register = async () => {
-  const email = regEmail.value;
-  const pass = regPass.value;
-  const nick = regNick.value;
-  const role = regRole.value;
-
-  if(!email || !pass || !nick || !role){
-    alert("Заполните все поля");
-    return;
-  }
-
-  try{
-    const cred = await createUserWithEmailAndPassword(auth,email,pass);
-    currentUser = cred.user;
-    currentNick = nick;
-    currentRole = role;
-
-    await set(ref(db,'users/'+currentUser.uid),{ nick, role });
-    setOnline();
-
-    alert(`Добро пожаловать, ${nick}!`);
-    showApp();
-  }catch(e){
-    alert(e.message);
-  }
+window.register=async()=>{
+  const email=regEmail.value,pass=regPass.value,nick=regNick.value,role=regRole.value;
+  if(!email||!pass||!nick||!role)return alert('Remplissez tous les champs');
+  const cred=await createUserWithEmailAndPassword(auth,email,pass);
+  currentUser=cred.user;
+  await set(ref(db,'users/'+currentUser.uid),{nick,role});
 };
 
-window.login = async () => {
-  try{
-    const cred = await signInWithEmailAndPassword(auth,loginEmail.value,loginPass.value);
-    currentUser = cred.user;
-
-    const snap = await get(ref(db,'users/'+currentUser.uid));
-    if(!snap.exists()) return alert("Профиль не найден");
-
-    currentNick = snap.val().nick;
-    currentRole = snap.val().role;
-
-    setOnline();
-    showApp();
-  }catch(e){ alert(e.message); }
+window.login=async()=>{
+  const cred=await signInWithEmailAndPassword(auth,loginEmail.value,loginPass.value);
+  currentUser=cred.user;
+  const snap=await get(ref(db,'users/'+currentUser.uid));
+  currentNick=snap.val().nick;
+  currentRole=snap.val().role;
+  showApp();
 };
 
-window.logout = async () => {
-  await signOut(auth);
-  location.reload();
-};
+window.logout=async()=>{await signOut(auth);location.reload();};
 
-function setOnline(){
-  const statusRef = ref(db,'status/'+currentUser.uid);
-  set(statusRef,{ nick:currentNick, role:currentRole, online:true, lastSeen:serverTimestamp() });
-  onDisconnect(statusRef).update({ online:false, lastSeen:serverTimestamp() });
-}
-
-/* ================= UI ================= */
 function showApp(){
   landing.style.display='none';
   windows.style.display='none';
   appUI.style.display='flex';
-
-  userName.value = currentNick;
-  userRole.value = currentRole;
-
+  userName.value=currentNick;
+  userRole.value=currentRole;
   loadRooms();
 }
 
-/* ================= ROOMS ================= */
 function loadRooms(){
   roomSelect.innerHTML='';
-  addRoom('Global');
-
-  if(currentRole === 'Administrateur'){
-    ['Chauffeur','Logisticien','Organisateur','Mécanicien'].forEach(addRoom);
-  } else addRoom(currentRole);
-
-  roomSelect.onchange = () => {
-    currentRoom = roomSelect.value;
-    loadMessages();
-  };
-
-  currentRoom = roomSelect.value;
+  ['Global',currentRole].filter((v,i,a)=>a.indexOf(v)===i).forEach(r=>{
+    const o=document.createElement('option');
+    o.value=o.textContent=r;
+    roomSelect.appendChild(o);
+  });
+  roomSelect.onchange=()=>{currentRoom=roomSelect.value;loadMessages();};
   loadMessages();
 }
 
-function addRoom(name){
-  const o = document.createElement('option');
-  o.value = o.textContent = name;
-  roomSelect.appendChild(o);
-}
-
-/* ================= CHAT ================= */
-window.sendMessage = () => {
-  if(!chatText.value.trim()) return;
-
+window.sendMessage=()=>{
+  if(!chatText.value.trim())return;
   push(ref(db,'messages/'+currentRoom),{
-    uid: currentUser.uid,
-    nick: currentNick,
-    role: currentRole,
-    text: chatText.value,
-    time: new Date().toLocaleTimeString()
+    uid:currentUser.uid,
+    nick:currentNick,
+    role:currentRole,
+    text:chatText.value,
+    time:serverTimestamp()
   });
-
   chatText.value='';
+  chatText.style.height='56px';
 };
 
 function loadMessages(){
-  if(unsubscribeMessages) off(unsubscribeMessages);
-
-  messages.innerHTML='';
-  const messagesRef = ref(db,'messages/'+currentRoom);
-
-  onValue(messagesRef, snap => {
+  const messagesRef=ref(db,'messages/'+currentRoom);
+  onValue(messagesRef,snap=>{
     messages.innerHTML='';
     snap.forEach(c=>{
-      const m = c.val();
-      const d = document.createElement('div');
-      d.className = 'message'+(m.uid===currentUser.uid?' me':'');
-      d.innerHTML = `<b>${m.nick}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+      const m=c.val();
+      const d=document.createElement('div');
+      d.className='message'+(m.uid===currentUser.uid?' me':'');
+      d.innerHTML=`<b>${m.nick}</b><span class="role">${m.role}</span><br>${m.text}`;
       messages.appendChild(d);
     });
-    messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop=messages.scrollHeight;
   });
 }
 
-chatText.addEventListener('keydown',e=>{
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+chatText.addEventListener('input',()=>{
+  chatText.style.height='auto';
+  chatText.style.height=chatText.scrollHeight+'px';
 });
-
-/* ================= TABS ================= */
-window.showTab = (id,el)=>{
-  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-};
-
-;
-
-if(localStorage.getItem('theme')==='light'){
-  document.body.classList.add('light');
-}
 </script>
 
 <style>
-:root{
-  /* ULTRA DARK NAVY — ONLY DARK */
-  --bg:#01030a;
-  --bgGlow:#04091f;
-  --panel:#050a2a;
-  --panel2:#060d35;
-  --border:#0b1a55;
-  --text:#e6ecff;
-  --neon:#2a6bff;
-  --neon2:#5fa0ff;
-}
-
-
-*{box-sizing:border-box}
+:root{--bg:#01031a;--panel:#05113c;--border:#0b1a55;--text:#e6ecff;--neon:#2a6bff;}
+*{box-sizing:border-box;font-family:Segoe UI,Arial}
 body{
   margin:0;
-  font-family:Segoe UI,Arial;
-  background:radial-gradient(circle at 30% 10%,var(--bgGlow),var(--bg) 70%);
+  background:radial-gradient(circle,var(--panel),var(--bg));
   color:var(--text);
-  overflow:hidden;
-  transition:background 1s,color .5s;
-}
+  height:100vh;
 }
 
-/* LANDING */
-#landing{
-  position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;cursor:pointer;z-index:10;
-}
-.energy{
-  position:absolute;
-  width:900px;height:900px;
-  border-radius:50%;
-  background:conic-gradient(from 0deg,var(--neon),transparent 70%);
-  filter:blur(80px);
-  animation:spin 10s linear infinite;
-  opacity:.9;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sphere{
-  width:260px;height:260px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  animation:float 5s ease-in-out infinite;
-}
-@keyframes float{50%{transform:translateY(-20px)}}
-.sphere-core{
-  width:180px;height:180px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%,var(--panel2),var(--bg));
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 120px var(--neon);
-  animation:pulse 4s ease-in-out infinite, rotateCore 20s linear infinite;
-}
-@keyframes rotateCore{to{transform:rotate(360deg)}}
-@keyframes pulse{50%{box-shadow:0 0 120px var(--neon2)}}
-
-/* WINDOWS */
-#windows{position:fixed;inset:0;display:none;align-items:center;justify-content:center}
-.window{width:280px;padding:24px;border-radius:22px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border)}
-input,select,textarea{width:100%;margin-top:12px;padding:14px;border-radius:14px;border:1px solid var(--border);background:#02040c;color:var(--text)}
-button{margin-top:16px;padding:14px;border:none;border-radius:16px;width:100%;font-weight:900;cursor:pointer;background:linear-gradient(135deg,var(--neon2),var(--neon));transition:.3s}
-button:hover{box-shadow:0 0 20px var(--neon2)}
+/* AUTH */
+#windows,#landing{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.window{width:360px;padding:32px;border-radius:24px;background:#020617}
 
 /* APP */
-#appUI{display:none;height:100vh}
+#appUI{
+  display:none;
+  height:100vh;
+}
+
 .sidebar{
-  width:250px;
-  padding:26px;
-  background:linear-gradient(180deg,rgba(5,10,40,0.9),rgba(2,4,20,0.95));
-  border-right:1px solid rgba(60,100,255,0.25);
-  box-shadow:inset -10px 0 40px rgba(0,0,0,0.6);
+  width:240px;
+  padding:20px;
+  background:#020617;
+  border-right:1px solid var(--border);
 }
-.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05070f}
-.content{flex:1;padding:32px;overflow-y:auto}
-section{
-  max-width:900px;
-  padding:28px;
-  border-radius:26px;
-  border:1px solid rgba(80,120,255,0.25);
-  background:linear-gradient(180deg,rgba(15,25,70,0.85),rgba(5,10,40,0.95));
-  box-shadow:0 20px 60px rgba(0,0,0,0.6), inset 0 0 40px rgba(60,120,255,0.05);
-  backdrop-filter: blur(18px);
+
+.content{
+  flex:1;
+  height:100vh;
+  overflow:hidden;
+  padding:24px;
 }
-.hidden{display:none}
+
+.chat-layout{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  gap:14px;
+}
+
+.chat-header{
+  position:sticky;
+  top:0;
+}
+
 .messages{
-  height:320px;
+  flex:1;
   overflow-y:auto;
-  background:radial-gradient(circle at top,rgba(20,40,120,0.4),rgba(5,10,30,0.95));
-  border-radius:20px;
-  padding:16px;
-  border:1px solid rgba(80,120,255,0.25);
-  box-shadow:inset 0 0 30px rgba(0,0,0,0.7);
-}
-.message{
-  margin-bottom:14px;
-  padding:14px 16px;
+  padding:14px;
   border-radius:18px;
-  background:linear-gradient(135deg,rgba(20,40,120,0.75),rgba(10,20,60,0.9));
-  box-shadow:0 10px 30px rgba(0,0,0,0.6);
-  animation:messageIn .35s ease-out;
+  background:#020617;
 }
+
+.message{
+  max-width:80%;
+  padding:12px 16px;
+  margin-bottom:12px;
+  border-radius:16px;
+  background:#0b1a55;
+}
+
 .message.me{
-  background:linear-gradient(135deg,rgba(60,120,255,0.9),rgba(30,60,180,0.9));
-  color:#02030a;
+  margin-left:auto;
+  background:var(--neon);
+  color:#020617;
 }
-@keyframes messageIn{
-  from{opacity:0;transform:translateY(10px) scale(.97)}
-  to{opacity:1;transform:none}
+
+.chat-input{
+  display:flex;
+  gap:12px;
 }
-.message.me{background:#1e2a66}
-@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1}}
+
+textarea{
+  flex:1;
+  resize:none;
+  height:56px;
+  border-radius:14px;
+  padding:14px;
+}
+
+button{
+  width:140px;
+  border-radius:14px;
+  background:var(--neon);
+  border:none;
+  font-weight:700;
+}
+.role{
+  font-size:.7rem;
+  opacity:.6;
+  margin-left:6px;
+}
 </style>
-</head>
+
 <body>
 
-<div id="landing" onclick="this.style.display='none';windows.style.display='flex'">
-  <div class="energy"></div>
-  <div class="sphere"><div class="sphere-core"><h1>K‑NET</h1></div></div>
-  <div style="margin-top:30px;letter-spacing:.3em;opacity:.7">CLICK TO CONNECT</div>
-</div>
-
 <div id="windows">
-  <div class="window" id="authWindow">
-    <h3 id="authTitle">Вход</h3>
+  <div class="window">
+    <h3>Connexion</h3>
     <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" type="password" placeholder="Password">
-    <button onclick="login()">Войти</button>
-    <p style="text-align:center;margin-top:14px;opacity:.7">Нет аккаунта?</p>
-    <button style="background:none;border:1px solid var(--border)" onclick="switchAuth()">Регистрация</button>
-
-    <div id="registerBlock" style="display:none;margin-top:20px">
-      <hr style="border-color:var(--border);margin:20px 0">
-      <h3>Регистрация</h3>
-      <input id="regEmail" placeholder="Email">
-      <input id="regPass" type="password" placeholder="Password">
-      <input id="regNick" placeholder="Nickname">
-      <select id="regRole">
-        <option value="">Role</option>
-        <option>Chauffeur</option>
-        <option>Logisticien</option>
-        <option>Organisateur</option>
-        <option>Mécanicien</option>
-        <option>Administrateur</option>
-      </select>
-      <button onclick="register()">Создать аккаунт</button>
-    </div>
+    <input id="loginPass" type="password" placeholder="Mot de passe">
+    <button onclick="login()">Entrer</button>
   </div>
 </div>
 
 <div id="appUI">
   <div class="sidebar">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <strong>K-NET</strong>
-      
-    </div>
-    <div class="menu">
-      <button class="active" onclick="showTab('global',this)">🌐 Global</button>
-      <button onclick="showTab('profile',this)">👤 Profile</button>
-      <button onclick="logout()">🚪 Exit</button>
-    </div>
+    <b>K-NET</b><br><br>
+    <button onclick="logout()">Déconnexion</button>
   </div>
+
   <div class="content">
-    <section id="global">
-      <select id="roomSelect"></select>
+    <section class="chat-layout">
+      <div class="chat-header">
+        <select id="roomSelect"></select>
+      </div>
+
       <div class="messages" id="messages"></div>
-      <textarea id="chatText" placeholder="Message..."></textarea>
-      <button onclick="sendMessage()">Send</button>
-    </section>
-    <section id="profile" class="hidden">
-      <input id="userName">
-      <input id="userRole" disabled>
+
+      <div class="chat-input">
+        <textarea id="chatText" placeholder="Message..."></textarea>
+        <button onclick="sendMessage()">Envoyer</button>
+      </div>
     </section>
   </div>
 </div>
 
 </body>
 </html>
+
