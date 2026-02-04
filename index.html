@@ -5,19 +5,18 @@
 <title>K-NET • Réseau Neon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Firebase SDK -->
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, get, off, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, get, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+/* === CONFIG === */
 const firebaseConfig = {
   apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
   authDomain: "projet-56900.firebaseapp.com",
   databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "projet-56900",
-  storageBucket: "projet-56900.firebasestorage.app",
-  messagingSenderId: "753669702381",
   appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
 
@@ -25,39 +24,55 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-let currentUser=null,currentRole=null,currentNick=null,currentRoom='Global';
+let currentUser=null, currentNick=null, currentRole=null, currentRoom='Global';
 
-window.register=async()=>{
-  const email=regEmail.value,pass=regPass.value,nick=regNick.value,role=regRole.value;
-  if(!email||!pass||!nick||!role)return alert('Remplissez tous les champs');
-  const cred=await createUserWithEmailAndPassword(auth,email,pass);
-  currentUser=cred.user;
-  await set(ref(db,'users/'+currentUser.uid),{nick,role});
+/* === AUTH === */
+window.login = async () => {
+  try{
+    const cred = await signInWithEmailAndPassword(auth, loginEmail.value, loginPass.value);
+    currentUser = cred.user;
+  }catch(e){ alert(e.message); }
 };
 
-window.login=async()=>{
-  const cred=await signInWithEmailAndPassword(auth,loginEmail.value,loginPass.value);
-  currentUser=cred.user;
-  const snap=await get(ref(db,'users/'+currentUser.uid));
-  currentNick=snap.val().nick;
-  currentRole=snap.val().role;
-  showApp();
+window.register = async () => {
+  if(!regEmail.value||!regPass.value||!regNick.value||!regRole.value)
+    return alert("Tous les champs sont requis");
+
+  const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
+  await set(ref(db,'users/'+cred.user.uid),{
+    nick: regNick.value,
+    role: regRole.value
+  });
 };
 
-window.logout=async()=>{await signOut(auth);location.reload();};
+window.logout = async ()=>{
+  await signOut(auth);
+  location.reload();
+};
 
-function showApp(){
+onAuthStateChanged(auth, async user=>{
+  if(!user) return;
+  currentUser = user;
+  const snap = await get(ref(db,'users/'+user.uid));
+  if(!snap.exists()) return alert("Profil introuvable");
+
+  currentNick = snap.val().nick;
+  currentRole = snap.val().role;
+
+  enterApp();
+});
+
+/* === APP === */
+function enterApp(){
   landing.style.display='none';
   windows.style.display='none';
   appUI.style.display='flex';
-  userName.value=currentNick;
-  userRole.value=currentRole;
   loadRooms();
 }
 
 function loadRooms(){
   roomSelect.innerHTML='';
-  ['Global',currentRole].filter((v,i,a)=>a.indexOf(v)===i).forEach(r=>{
+  ['Global', currentRole].forEach(r=>{
     const o=document.createElement('option');
     o.value=o.textContent=r;
     roomSelect.appendChild(o);
@@ -66,143 +81,187 @@ function loadRooms(){
   loadMessages();
 }
 
-window.sendMessage=()=>{
+window.sendMessage = ()=>{
   if(!chatText.value.trim())return;
   push(ref(db,'messages/'+currentRoom),{
-    uid:currentUser.uid,
     nick:currentNick,
     role:currentRole,
+    uid:currentUser.uid,
     text:chatText.value,
     time:serverTimestamp()
   });
   chatText.value='';
-  chatText.style.height='56px';
 };
 
 function loadMessages(){
-  const messagesRef=ref(db,'messages/'+currentRoom);
-  onValue(messagesRef,snap=>{
+  const r = ref(db,'messages/'+currentRoom);
+  onValue(r,snap=>{
     messages.innerHTML='';
     snap.forEach(c=>{
       const m=c.val();
       const d=document.createElement('div');
       d.className='message'+(m.uid===currentUser.uid?' me':'');
-      d.innerHTML=`<b>${m.nick}</b><span class="role">${m.role}</span><br>${m.text}`;
+      d.innerHTML=`<b>${m.nick}</b> <span>${m.role}</span><br>${m.text}`;
       messages.appendChild(d);
     });
     messages.scrollTop=messages.scrollHeight;
   });
 }
-
-chatText.addEventListener('input',()=>{
-  chatText.style.height='auto';
-  chatText.style.height=chatText.scrollHeight+'px';
-});
 </script>
 
 <style>
-:root{--bg:#01031a;--panel:#05113c;--border:#0b1a55;--text:#e6ecff;--neon:#2a6bff;}
-*{box-sizing:border-box;font-family:Segoe UI,Arial}
+:root{
+  --bg:#01031a;
+  --panel:#040a25;
+  --neon:#2a6bff;
+  --text:#e6ecff;
+}
+*{margin:0;box-sizing:border-box;font-family:Segoe UI,Arial}
 body{
-  margin:0;
-  background:radial-gradient(circle,var(--panel),var(--bg));
-  color:var(--text);
   height:100vh;
+  background:radial-gradient(circle at center,#040a25,#01031a);
+  color:var(--text);
+  overflow:hidden;
 }
 
-/* AUTH */
-#windows,#landing{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-.window{width:360px;padding:32px;border-radius:24px;background:#020617}
+/* === LANDING === */
+#landing{
+  position:fixed;inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+}
+.energy{
+  position:absolute;
+  width:900px;height:900px;
+  background:conic-gradient(var(--neon),transparent 70%);
+  filter:blur(100px);
+  animation:spin 14s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* APP */
+.sphere{
+  width:280px;height:280px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at 30% 30%,#1a3cff,#020617);
+  box-shadow:0 0 160px var(--neon);
+  animation:pulse 4s infinite;
+}
+@keyframes pulse{50%{box-shadow:0 0 200px #5fa0ff}}
+
+.logo{
+  font-size:2.2rem;
+  font-weight:900;
+  letter-spacing:.3em;
+}
+
+/* === AUTH === */
+#windows{
+  display:none;
+  position:fixed;inset:0;
+  backdrop-filter:blur(16px);
+  align-items:center;
+  justify-content:center;
+}
+.window{
+  width:360px;
+  padding:32px;
+  background:#020617;
+  border-radius:24px;
+  box-shadow:0 0 80px rgba(0,0,0,.8);
+}
+input,select,textarea{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  border-radius:14px;
+  background:#01031a;
+  border:1px solid #0b1a55;
+  color:white;
+}
+button{
+  width:100%;
+  margin-top:14px;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#5fa0ff,#2a6bff);
+  font-weight:900;
+  cursor:pointer;
+}
+
+/* === APP === */
 #appUI{
   display:none;
   height:100vh;
 }
-
 .sidebar{
   width:240px;
-  padding:20px;
   background:#020617;
-  border-right:1px solid var(--border);
+  padding:20px;
 }
-
 .content{
   flex:1;
-  height:100vh;
-  overflow:hidden;
   padding:24px;
+  display:flex;
 }
-
-.chat-layout{
+.chat{
   display:flex;
   flex-direction:column;
-  height:100%;
-  gap:14px;
+  width:100%;
 }
-
-.chat-header{
-  position:sticky;
-  top:0;
-}
-
 .messages{
   flex:1;
   overflow-y:auto;
-  padding:14px;
-  border-radius:18px;
-  background:#020617;
+  margin:16px 0;
 }
-
 .message{
-  max-width:80%;
-  padding:12px 16px;
-  margin-bottom:12px;
-  border-radius:16px;
   background:#0b1a55;
+  padding:12px 16px;
+  border-radius:16px;
+  margin-bottom:10px;
+  max-width:75%;
 }
-
 .message.me{
-  margin-left:auto;
-  background:var(--neon);
+  background:#2a6bff;
   color:#020617;
-}
-
-.chat-input{
-  display:flex;
-  gap:12px;
-}
-
-textarea{
-  flex:1;
-  resize:none;
-  height:56px;
-  border-radius:14px;
-  padding:14px;
-}
-
-button{
-  width:140px;
-  border-radius:14px;
-  background:var(--neon);
-  border:none;
-  font-weight:700;
-}
-.role{
-  font-size:.7rem;
-  opacity:.6;
-  margin-left:6px;
+  margin-left:auto;
 }
 </style>
 
 <body>
 
+<div id="landing" onclick="landing.style.display='none';windows.style.display='flex'">
+  <div class="energy"></div>
+  <div class="sphere"><div class="logo">K-NET</div></div>
+  <p style="margin-top:30px;opacity:.7">CLICK TO CONNECT</p>
+</div>
+
 <div id="windows">
   <div class="window">
     <h3>Connexion</h3>
     <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" type="password" placeholder="Mot de passe">
+    <input id="loginPass" type="password">
     <button onclick="login()">Entrer</button>
+
+    <hr style="margin:20px 0">
+
+    <h3>Inscription</h3>
+    <input id="regEmail" placeholder="Email">
+    <input id="regPass" type="password">
+    <input id="regNick" placeholder="Pseudo">
+    <select id="regRole">
+      <option value="">Rôle</option>
+      <option>Chauffeur</option>
+      <option>Logisticien</option>
+      <option>Organisateur</option>
+      <option>Mécanicien</option>
+    </select>
+    <button onclick="register()">Créer le compte</button>
   </div>
 </div>
 
@@ -211,23 +270,15 @@ button{
     <b>K-NET</b><br><br>
     <button onclick="logout()">Déconnexion</button>
   </div>
-
   <div class="content">
-    <section class="chat-layout">
-      <div class="chat-header">
-        <select id="roomSelect"></select>
-      </div>
-
+    <div class="chat">
+      <select id="roomSelect"></select>
       <div class="messages" id="messages"></div>
-
-      <div class="chat-input">
-        <textarea id="chatText" placeholder="Message..."></textarea>
-        <button onclick="sendMessage()">Envoyer</button>
-      </div>
-    </section>
+      <textarea id="chatText"></textarea>
+      <button onclick="sendMessage()">Envoyer</button>
+    </div>
   </div>
 </div>
 
 </body>
 </html>
-
