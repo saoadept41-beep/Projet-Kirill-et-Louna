@@ -5,240 +5,242 @@
 <title>K-NET • Neon Network</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- FAVICON -->
-<link rel="icon" type="image/svg+xml"
-href='data:image/svg+xml,
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-<rect width="100" height="100" rx="20" fill="black"/>
-<text x="50%" y="65%" text-anchor="middle"
-font-size="70" fill="cyan" font-family="Arial" font-weight="900">K</text>
-</svg>'>
-
 <style>
 :root{
-  --bg:#05060a; --panel:#0b1020; --panel2:#0f1733; --border:#1e2a55;
-  --text:#eaf0ff; --muted:#9aa4c7; --neon:#00f6ff; --neon2:#7c7cff;
+  --bg:#05070f;
+  --panel:#0b1024;
+  --panel2:#0f1740;
+  --border:#1b2a66;
+  --text:#e6ecff;
+  --muted:#8c96c9;
+  --neon:#1ea0ff;
+  --neon-soft:#0b4cff;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Segoe UI,Arial;background:radial-gradient(circle at top,#101b44,#05060a 70%);color:var(--text);display:flex;min-height:100vh;}
-.sidebar{width:260px;background:linear-gradient(180deg,#05060a,#080c1a);border-right:1px solid var(--border);padding:24px;}
-.logo{display:flex;align-items:center;gap:14px;margin-bottom:40px;}
-.logo-circle{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.8rem;color:var(--neon);box-shadow:0 0 10px var(--neon),0 0 25px rgba(0,246,255,.7);border:1px solid var(--neon);animation:pulse 3s infinite;}
-.logo span{font-size:1.3rem;letter-spacing:.25em;font-weight:900;color:var(--neon);}
-@keyframes pulse{0%,100%{box-shadow:0 0 10px var(--neon)}50%{box-shadow:0 0 25px var(--neon)}}
-.menu button{width:100%;padding:14px;margin-bottom:10px;border-radius:16px;border:1px solid transparent;background:transparent;color:var(--text);text-align:left;cursor:pointer;transition:.3s;}
-.menu button:hover{border-color:var(--neon);box-shadow:0 0 10px rgba(0,246,255,.4);}
-.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05060a;font-weight:900;}
-.content{flex:1;padding:32px}
-section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:24px;padding:24px;animation:fade .4s ease;}
+
+body{
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);
+  color:var(--text);
+  min-height:100vh;
+  overflow:hidden;
+}
+
+/* ===== LANDING ===== */
+#landing{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center,#070d25,#02030a 75%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  cursor:pointer;
+  z-index:100;
+}
+
+/* light */
+.light-beam{
+  position:absolute;
+  top:-40%;
+  width:140%;
+  height:80%;
+  background:radial-gradient(circle,rgba(30,160,255,.35),transparent 70%);
+  filter:blur(110px);
+  animation:beamPulse 5s ease-in-out infinite;
+}
+@keyframes beamPulse{
+  0%,100%{opacity:.3}
+  50%{opacity:.8}
+}
+
+/* energy */
+.energy-field{
+  position:absolute;
+  width:700px;
+  height:700px;
+  border-radius:50%;
+  background:conic-gradient(
+    rgba(30,160,255,.25),
+    transparent,
+    rgba(11,76,255,.25),
+    transparent
+  );
+  animation:spin 14s linear infinite;
+  filter:blur(35px);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* sphere */
+.sphere{
+  position:relative;
+  width:280px;
+  height:280px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-24px)}
+}
+
+/* glow */
+.sphere-glow{
+  position:absolute;
+  inset:-45px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(30,160,255,.45),transparent 70%);
+  filter:blur(45px);
+  animation:glowPulse 4s infinite;
+}
+@keyframes glowPulse{
+  0%,100%{opacity:.5}
+  50%{opacity:1}
+}
+
+/* core */
+.sphere-core{
+  width:190px;
+  height:190px;
+  border-radius:50%;
+  background:radial-gradient(circle at top,#0b1a3a,#02040c);
+  box-shadow:
+    inset 0 0 35px rgba(30,160,255,.35),
+    0 0 55px rgba(30,160,255,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* text */
+.sphere-core span{
+  font-size:2.4rem;
+  font-weight:900;
+  letter-spacing:.32em;
+  color:#2aa8ff;
+  text-shadow:
+    0 0 8px rgba(42,168,255,.9),
+    0 0 22px rgba(30,160,255,.8);
+}
+
+.hint{
+  margin-top:42px;
+  font-size:.75rem;
+  letter-spacing:.45em;
+  color:var(--muted);
+  opacity:.7;
+  animation:blink 2.2s infinite;
+}
+@keyframes blink{
+  0%,100%{opacity:.25}
+  50%{opacity:1}
+}
+
+.fadeOut{
+  animation:fadeOut 1s forwards;
+}
+@keyframes fadeOut{
+  to{opacity:0;transform:scale(1.25)}
+}
+
+/* ===== APP ===== */
+#app{
+  display:flex;
+  height:100vh;
+}
 .hidden{display:none}
-@keyframes fade{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
-input,textarea,select{width:100%;padding:14px;margin-top:14px;background:#05060a;border:1px solid var(--border);border-radius:16px;color:var(--text);}
-button.main{margin-top:18px;padding:14px;width:100%;border:none;border-radius:18px;background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05060a;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,246,255,.6);}
-.messages{height:320px;overflow-y:auto;background:#05060a;border-radius:18px;padding:14px;}
-.message{background:var(--panel);padding:12px 16px;border-radius:16px;margin-bottom:12px;}
-.message.me{background:#14205a;box-shadow:0 0 10px rgba(124,124,255,.5);}
-.message small{display:block;color:var(--muted);font-size:.75rem;}
+
+.sidebar{
+  width:260px;
+  background:linear-gradient(180deg,#05070f,#080c1f);
+  border-right:1px solid var(--border);
+  padding:24px;
+}
+
+.menu button{
+  width:100%;
+  padding:14px;
+  margin-bottom:10px;
+  background:none;
+  border-radius:16px;
+  border:1px solid transparent;
+  color:var(--text);
+  cursor:pointer;
+  transition:.3s;
+}
+.menu button:hover{
+  border-color:var(--neon);
+}
+.menu button.active{
+  background:linear-gradient(135deg,var(--neon-soft),var(--neon));
+  color:#02030a;
+  font-weight:900;
+}
+
+.content{
+  flex:1;
+  padding:36px;
+}
+
+section{
+  max-width:900px;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:28px;
+  box-shadow:0 0 40px rgba(30,160,255,.15);
+}
 </style>
 </head>
 
 <body>
-<div class="sidebar">
-  <div class="logo">
-    <div class="logo-circle">K</div>
-    <span>K-NET</span>
+
+<div id="landing" onclick="enterSite()">
+  <div class="light-beam"></div>
+  <div class="energy-field"></div>
+
+  <div class="sphere">
+    <div class="sphere-glow"></div>
+    <div class="sphere-core">
+      <span>K-NET</span>
+    </div>
   </div>
-  <div class="menu">
-    <button onclick="showTab('auth')" class="active">🔐 Connexion</button>
-    <button onclick="showTab('chat')">💬 Discussions</button>
-    <button onclick="showTab('profile')">👤 Profil</button>
-    <button onclick="logout()">🚪 Déconnexion</button>
+
+  <div class="hint">CLICK TO ENTER</div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="sidebar">
+    <div class="menu">
+      <button class="active">🔐 Connexion</button>
+      <button>💬 Discussions</button>
+      <button>👤 Profil</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <section>
+      <h2>Bienvenue sur K-NET</h2>
+      <p>Neon Network — plateforme de communication nouvelle génération.</p>
+    </section>
   </div>
 </div>
 
-<div class="content">
-  <section id="auth">
-    <input id="email" placeholder="Adresse e-mail">
-    <input id="password" type="password" placeholder="Mot de passe">
-    <select id="role">
-      <option value="">Choisissez un rôle</option>
-      <option>Chauffeur</option>
-      <option>Logisticien</option>
-      <option>Organisateur</option>
-      <option>Mécanicien</option>
-      <option>Administrateur</option>
-    </select>
-    <button class="main" onclick="login()">Se connecter</button>
-    <button class="main" onclick="register()">Créer un compte</button>
-  </section>
+<script>
+function enterSite(){
+  const landing = document.getElementById("landing");
+  const app = document.getElementById("app");
 
-  <section id="chat" class="hidden">
-    <select id="roomSelect"></select>
-    <div class="messages" id="messages"></div>
-    <textarea id="text" placeholder="Votre message…"></textarea>
-    <button class="main" onclick="sendMessage()">Envoyer</button>
-  </section>
-
-  <section id="profile" class="hidden">
-    <input id="name" placeholder="Nom affiché">
-    <input id="userRole" disabled>
-  </section>
-</div>
-
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, off, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
-  authDomain: "projet-56900.firebaseapp.com",
-  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "projet-56900",
-  storageBucket: "projet-56900.appspot.com",
-  messagingSenderId: "753669702381",
-  appId: "1:753669702381:web:0ac180682fba00c68542e4"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-let currentUser = null;
-let currentRole = null;
-let currentRoom = null;
-
-/* ===== UI ===== */
-function showTab(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
+  landing.classList.add("fadeOut");
+  setTimeout(()=>{
+    landing.remove();
+    app.classList.remove("hidden");
+  },1000);
 }
-
-/* ===== AUTH ===== */
-function register(){
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-  const role = document.getElementById("role");
-
-  if(!email.value || !password.value || !role.value){
-    alert("Veuillez remplir email, mot de passe et rôle");
-    return;
-  }
-
-  createUserWithEmailAndPassword(auth, email.value, password.value)
-  .then(userCredential=>{
-    currentUser = userCredential.user;
-    currentRole = role.value;
-    set(ref(db, 'users/' + currentUser.uid), {
-      name: "User",
-      role: currentRole
-    });
-    alert("Inscription réussie: " + email.value);
-    showTab('chat');
-    loadRooms();
-  })
-  .catch(error=>{
-    alert(error.code + "\n" + error.message);
-    console.error(error);
-  });
-}
-
-function login(){
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-
-  signInWithEmailAndPassword(auth, email.value, password.value)
-  .then(userCredential=>{
-    currentUser = userCredential.user;
-    get(ref(db, 'users/' + currentUser.uid)).then(snapshot=>{
-      if(snapshot.exists()){
-        currentRole = snapshot.val().role;
-        document.getElementById("userRole").value = currentRole;
-        document.getElementById("name").value = snapshot.val().name;
-        loadRooms();
-        showTab('chat');
-      }
-    });
-  })
-  .catch(error=>{
-    alert(error.code + "\n" + error.message);
-  });
-}
-
-function logout(){
-  signOut(auth).then(()=>{
-    currentUser = null;
-    currentRole = null;
-    currentRoom = null;
-    showTab('auth');
-  });
-}
-
-/* ===== ROOMS ===== */
-function loadRooms(){
-  const roomSelect = document.getElementById("roomSelect");
-  roomSelect.innerHTML = "";
-  addRoom("Global");
-  if(currentRole === "Administrateur"){
-    ["Chauffeur","Logisticien","Organisateur","Mécanicien"].forEach(addRoom);
-  } else if(currentRole === "Utilisateur") {
-    addRoom("Global");
-  } else {
-    addRoom(currentRole);
-  }
-
-  currentRoom = roomSelect.value;
-  roomSelect.onchange = ()=>{ currentRoom = roomSelect.value; loadMessages(); }
-  loadMessages();
-}
-
-function addRoom(room){
-  const roomSelect = document.getElementById("roomSelect");
-  const option = document.createElement("option");
-  option.value = option.textContent = room;
-  roomSelect.appendChild(option);
-}
-
-/* ===== CHAT ===== */
-function sendMessage(){
-  const text = document.getElementById("text");
-  if(!text.value.trim()) return;
-  push(ref(db, 'messages/' + currentRoom), {
-    uid: currentUser.uid,
-    name: document.getElementById("name").value,
-    role: currentRole,
-    text: text.value,
-    time: new Date().toLocaleTimeString()
-  });
-  text.value = "";
-}
-
-function loadMessages(){
-  const messagesEl = document.getElementById("messages");
-  const messagesRef = ref(db, 'messages/' + currentRoom);
-  off(messagesRef);
-  onValue(messagesRef, snapshot=>{
-    messagesEl.innerHTML = "";
-    snapshot.forEach(child=>{
-      const m = child.val();
-      const div = document.createElement("div");
-      div.className = "message" + (m.uid === currentUser.uid ? " me" : "");
-      div.innerHTML = `<b>${m.name}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
-      messagesEl.appendChild(div);
-    });
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  });
-}
-
-/* ===== Make functions global for HTML onclick ===== */
-window.register = register;
-window.login = login;
-window.logout = logout;
-window.sendMessage = sendMessage;
-window.showTab = showTab;
 </script>
 
 </body>
