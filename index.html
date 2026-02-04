@@ -2,166 +2,107 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • God Mode</title>
+<title>K-NET • Cosmic Ultimate v5</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#01020a;
+  --panel:#02040d;
+  --accent:#7aa2ff;
+  --text:#dbe6ff;
+}
+html, body {margin:0; padding:0; width:100%; height:100%; font-family: 'Orbitron', sans-serif; overflow:hidden;}
+
+/* BACKGROUND & SPHERE */
+canvas#bgCanvas {position:fixed; inset:0; z-index:-2;}
+#centerSphere {position:fixed; top:50%; left:50%; width:250px; height:250px; margin-left:-125px; margin-top:-125px; border-radius:50%; background:radial-gradient(circle, rgba(122,162,255,0.6), rgba(0,0,0,0)); box-shadow:0 0 60px rgba(122,162,255,0.5),0 0 120px rgba(122,162,255,0.3); animation:pulse 2s infinite alternate; z-index:-1; pointer-events:none;}
+@keyframes pulse {0% {transform:scale(0.95);} 100% {transform:scale(1.05);}}
+
+/* SCREENS */
+.screen {position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:transparent;}
+.hidden {display:none;}
+.fade {opacity:0; transition:opacity 0.5s;}
+.fade.show {opacity:1;}
+
+/* AUTH */
+.authBox,input,button{width:100%; padding:14px; margin-top:12px; border-radius:12px;}
+.authBox{background:rgba(5,8,20,.95); padding:36px; text-align:center; border:1px solid rgba(80,160,255,.25);}
+button{background:linear-gradient(135deg,#7aa2ff,#4c6fff); cursor:pointer; color:#fff; font-weight:700; border:none; transition:0.3s;}
+button:hover{box-shadow:0 0 25px var(--accent); transform:scale(1.05);}
+.logo{font-size:2rem;font-weight:800;color:var(--accent); margin-bottom:12px; text-shadow:0 0 12px #7aa2ff;}
+
+/* WELCOME */
+#welcomeScreen h1{font-size:2.5rem; margin-bottom:16px; text-shadow:0 0 15px #7aa2ff;}
+#welcomeScreen p{color:#aabfff; text-align:center;}
+
+/* SYSTEM */
+#systemScreen{display:flex; flex-direction:row; width:100%; height:100vh; z-index:1;}
+.sidebar{width:260px; padding:24px; background:rgba(5,8,20,.96); border-right:1px solid rgba(80,160,255,.25); display:flex; flex-direction:column;}
+.content{flex:1; padding:32px; overflow-y:auto; position:relative;}
+.messages{height:300px; overflow-y:auto; background:rgba(0,10,30,.9); border-radius:16px; padding:16px; margin-bottom:12px; transition:opacity 0.5s;}
+.message{padding:10px; border-radius:14px; background:rgba(10,20,50,.6); margin-bottom:8px; transition:0.3s;}
+.message.me{background:rgba(60,120,255,.8); color:#02030a;}
+textarea{width:100%; padding:12px; border-radius:12px; background:rgba(5,8,20,.85); color:var(--text); border:1px solid rgba(80,160,255,.25);}
+#profile input{width:100%; padding:12px; border-radius:12px; margin-bottom:12px; background:rgba(5,8,20,.85); color:var(--text); border:1px solid rgba(80,160,255,.25);}
+.menu button.active{box-shadow:0 0 25px var(--accent);}
+
+/* EXTRA EFFECTS */
+.menu button{backdrop-filter:blur(4px);}
+.content, .sidebar{transition: all 0.5s ease;}
+</style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-/* ===== ВСТАВЬ СВОЙ FIREBASE CONFIG ===== */
-const firebaseConfig = {
-  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
-  authDomain: "projet-56900.firebaseapp.com",
-  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "projet-56900",
-  storageBucket: "projet-56900.firebasestorage.app",
-  messagingSenderId: "753669702381",
-  appId: "1:753669702381:web:0ac180682fba00c68542e4",
-  measurementId: "G-M9X20GDLQN"
-};
-
+const firebaseConfig = { /* твой Firebase config */ };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-let currentUser=null,currentRole=null,currentNick=null,currentRoom='Global',unsubscribeMessages=null;
+let currentUser=null,currentNick=null,currentRole=null,currentRoom='Global';
+window.register = async()=>{};
+window.login = async()=>{};
+window.logout = async()=>{await signOut(auth); location.reload();};
+function loadRooms(){}
+function sendMessage(){}
+function loadMessages(){}
 
-/* ===== REGISTER ===== */
-window.register = async () => {
-  const email = regEmail.value, pass = regPass.value, nick = regNick.value, role = regRole.value;
-  if(!email || !pass || !nick || !role){alert('Заполните все поля'); return;}
-  try{
-    const cred = await createUserWithEmailAndPassword(auth,email,pass);
-    currentUser = cred.user; currentNick = nick; currentRole = role;
-    await set(ref(db,'users/'+currentUser.uid),{nick,role});
-    showWelcome();
-  }catch(e){alert(e.message);}
-};
-
-/* ===== LOGIN ===== */
-window.login = async () => {
-  try{
-    const cred = await signInWithEmailAndPassword(auth,loginEmail.value,loginPass.value);
-    currentUser = cred.user;
-    const snap = await ref(db,'users/'+currentUser.uid).get();
-    const data = (await snap.get()).val();
-    currentNick = data.nick; currentRole = data.role;
-    showSystem();
-  }catch(e){alert(e.message);}
-};
-
-/* ===== LOGOUT ===== */
-window.logout = async () => { await signOut(auth); location.reload(); };
-
-/* ===== SHOW WELCOME ===== */
-function showWelcome(){
-  authScreen.style.display='none';
-  welcomeScreen.style.display='flex';
-}
-
-/* ===== SHOW SYSTEM ===== */
-function showSystem(){
-  authScreen.style.display='none';
-  welcomeScreen.style.display='none';
-  systemScreen.style.display='flex';
-  loadRooms();
-}
-
-/* ===== ROOMS ===== */
-function loadRooms(){
-  roomSelect.innerHTML='';
-  addRoom('Global');
-  if(currentRole==='Administrateur') ['Chauffeur','Logisticien','Organisateur','Mécanicien'].forEach(addRoom);
-  else addRoom(currentRole);
-  roomSelect.onchange=()=>{currentRoom=roomSelect.value; loadMessages();};
-  currentRoom = roomSelect.value;
-  loadMessages();
-}
-function addRoom(name){const o=document.createElement('option'); o.value=o.textContent=name; roomSelect.appendChild(o);}
-
-/* ===== CHAT ===== */
-window.sendMessage = () => {
-  if(!chatText.value.trim()) return;
-  push(ref(db,'messages/'+currentRoom),{
-    uid:currentUser.uid,
-    nick:currentNick,
-    role:currentRole,
-    text:chatText.value,
-    time:new Date().toLocaleTimeString()
-  });
-  chatText.value='';
-};
-function loadMessages(){
-  if(unsubscribeMessages) off(unsubscribeMessages);
-  messages.innerHTML='';
-  const messagesRef = ref(db,'messages/'+currentRoom);
-  onValue(messagesRef,snap=>{
-    messages.innerHTML='';
-    snap.forEach(c=>{
-      const m = c.val();
-      const d = document.createElement('div');
-      d.className='message'+(m.uid===currentUser.uid?' me':'');
-      d.innerHTML=`<b>${m.nick}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
-      messages.appendChild(d);
-    });
-    messages.scrollTop=messages.scrollHeight;
-  });
-}
-
-/* ===== TAB SWITCH ===== */
 window.showTab = (id,el)=>{
-  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('show'));
+  document.querySelectorAll('section').forEach(s=>s.classList.add('fade'));
+  setTimeout(()=>{document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+  const target=document.getElementById(id);
+  target.classList.remove('hidden');
+  setTimeout(()=>target.classList.add('show'),50);},50);
   document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 };
 
-/* ===== AUTH STATE ===== */
-onAuthStateChanged(auth,user=>{
-  if(user){currentUser=user; get(ref(db,'users/'+user.uid)).then(snap=>{
-    if(snap.exists()){currentNick=snap.val().nick; currentRole=snap.val().role; showSystem(); }
-  });}
-});
+onAuthStateChanged(auth,user=>{if(user){currentUser=user;}});
+
+window.onload=()=>{
+  const canvas=document.createElement('canvas');
+  canvas.id='bgCanvas';
+  document.body.appendChild(canvas);
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const stars=Array.from({length:300},()=>({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*1.5+0.5, dx:(Math.random()-0.5)*0.3, dy:(Math.random()-0.5)*0.3}));
+  function animate(){
+    ctx.fillStyle='rgba(1,2,10,0.3)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s=>{s.x+=s.dx;s.y+=s.dy;if(s.x<0)s.x=canvas.width;if(s.x>canvas.width)s.x=0;if(s.y<0)s.y=canvas.height;if(s.y>canvas.height)s.y=0;ctx.fillStyle='white';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();});
+    requestAnimationFrame(animate);
+  }
+  animate();
+};
 </script>
-
-<style>
-:root{
-  --bg:#01020a; --panel:#02040d; --accent:#7aa2ff; --text:#dbe6ff;
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Orbitron}
-body{background:radial-gradient(circle,#02040d,#01020a);color:var(--text);overflow:hidden}
-
-/* AUTH */
-#authScreen,#welcomeScreen,#systemScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
-.authBox,input,button{width:100%;padding:14px;margin-top:12px;border-radius:12px;}
-.authBox{background:rgba(5,8,20,.95);padding:36px;text-align:center;border:1px solid rgba(80,160,255,.25);}
-button{background:linear-gradient(135deg,#7aa2ff,#4c6fff);cursor:pointer;color:#fff;font-weight:700;}
-button:hover{box-shadow:0 0 25px var(--accent);transform:scale(1.03);}
-.logo{font-size:2rem;font-weight:800;color:var(--accent);margin-bottom:12px;text-shadow:0 0 12px #7aa2ff;}
-
-/* WELCOME */
-#welcomeScreen{display:none;flex-direction:column;text-align:center;}
-#welcomeScreen h1{font-size:2.5rem;margin-bottom:16px;}
-#welcomeScreen button{width:220px;margin-top:20px;}
-
-/* SYSTEM */
-#systemScreen{display:none;flex-direction:row;width:100%;height:100vh;}
-.sidebar{width:260px;padding:24px;background:rgba(5,8,20,.96);border-right:1px solid rgba(80,160,255,.25);}
-.content{flex:1;padding:32px;overflow-y:auto;}
-.messages{height:300px;overflow-y:auto;background:rgba(0,10,30,.9);border-radius:16px;padding:16px;margin-bottom:12px;}
-.message{padding:10px;border-radius:14px;background:rgba(10,20,50,.6);margin-bottom:8px;}
-.message.me{background:rgba(60,120,255,.8);color:#02030a;}
-.hidden{display:none;}
-</style>
-
+</head>
 <body>
-
-<!-- AUTH -->
-<div id="authScreen">
+<div id="centerSphere"></div>
+<div id="authScreen" class="screen fade show">
   <div class="authBox">
     <div class="logo">K-NET</div>
     <input id="loginEmail" placeholder="Email">
@@ -171,27 +112,16 @@ button:hover{box-shadow:0 0 25px var(--accent);transform:scale(1.03);}
     <input id="regEmail" placeholder="Email">
     <input id="regPass" type="password" placeholder="Password">
     <input id="regNick" placeholder="Nickname">
-    <select id="regRole">
-      <option value="">Role</option>
-      <option>Chauffeur</option>
-      <option>Logisticien</option>
-      <option>Organisateur</option>
-      <option>Mécanicien</option>
-      <option>Administrateur</option>
-    </select>
+    <select id="regRole"><option value="">Role</option><option>Chauffeur</option><option>Logisticien</option><option>Organisateur</option><option>Mécanicien</option><option>Administrateur</option></select>
     <button onclick="register()">REGISTER</button>
   </div>
 </div>
-
-<!-- WELCOME -->
-<div id="welcomeScreen">
+<div id="welcomeScreen" class="screen hidden fade">
   <h1>WELCOME TO K-NET</h1>
-  <p>You are now part of a closed neural network designed for coordination and secure communication.</p>
-  <button onclick="welcomeScreen.style.display='none'; systemScreen.style.display='flex'">ENTER SYSTEM</button>
+  <p>Closed neural network for secure communication.</p>
+  <button onclick="welcomeScreen.classList.remove('show'); setTimeout(()=>{systemScreen.classList.remove('hidden'); systemScreen.classList.add('show');},50)">ENTER SYSTEM</button>
 </div>
-
-<!-- SYSTEM -->
-<div id="systemScreen">
+<div id="systemScreen" class="screen hidden fade">
   <div class="sidebar">
     <strong>K-NET</strong>
     <div class="menu">
@@ -202,17 +132,17 @@ button:hover{box-shadow:0 0 25px var(--accent);transform:scale(1.03);}
     <select id="roomSelect" style="margin-top:12px;"></select>
   </div>
   <div class="content">
-    <section id="global">
+    <section id="global" class="fade show">
       <div class="messages" id="messages"></div>
       <textarea id="chatText" placeholder="Message..."></textarea>
       <button onclick="sendMessage()">Send</button>
     </section>
-    <section id="profile" class="hidden">
+    <section id="profile" class="hidden fade">
       <input id="userName" disabled placeholder="Nickname">
       <input id="userRole" disabled placeholder="Role">
     </section>
   </div>
 </div>
-
 </body>
 </html>
+
