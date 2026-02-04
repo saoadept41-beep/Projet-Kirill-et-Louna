@@ -22,7 +22,7 @@ body{
   overflow:hidden;
 }
 
-/* ===== LANDING ===== */
+/* LANDING */
 #landing{
   position:fixed; inset:0;
   background:radial-gradient(circle,#070d25,#02030a 75%);
@@ -41,7 +41,7 @@ body{
 .sphere-core span{font-size:2.2rem;font-weight:900;letter-spacing:.3em;color:#2aa8ff;text-shadow:0 0 20px var(--neon);}
 .hint{margin-top:30px;opacity:.7;letter-spacing:.4em;font-size:.8rem;}
 
-/* ===== WINDOWS ===== */
+/* WINDOWS LOGIN/REGISTER */
 #windows{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; gap:40px; pointer-events:none;}
 .window{width:280px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:22px;padding:24px;opacity:0;transform:translateY(80px) scale(.9);transition:.8s ease, opacity .8s ease;}
 .window.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
@@ -49,15 +49,16 @@ input{width:100%;padding:14px;margin-top:12px;background:#02040c;border:1px soli
 button{width:100%;margin-top:16px;padding:14px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--neon2),var(--neon));font-weight:900;cursor:pointer;}
 .success{color:#6affb1;text-align:center;margin-top:14px;}
 
-/* ===== APP ===== */
+/* APP */
 #app{display:flex; height:100vh; opacity:0; transition:opacity .8s ease;}
 .sidebar{width:260px;background:linear-gradient(180deg,#05070f,#080c1a);border-right:1px solid var(--border);padding:24px;}
 .menu button{width:100%;padding:14px;margin-bottom:10px;background:none;border-radius:16px;border:1px solid transparent;color:var(--text);cursor:pointer;transition:.3s;}
 .menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05070f;font-weight:900;}
 .content{flex:1;padding:32px;overflow-y:auto;}
 section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:20px;}
+.hidden{display:none;}
 
-/* CHAT BOX */
+/* CHAT */
 .messages{height:300px;overflow-y:auto;background:#05070f;border-radius:16px;padding:12px;margin-top:12px;}
 .message{padding:8px 12px;border-radius:12px;margin-bottom:10px;background:#0b1a3a;}
 .message.me{background:#1e2a66;}
@@ -76,19 +77,19 @@ textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;
   <div class="hint">CLICK TO CONNECT</div>
 </div>
 
-<!-- WINDOWS LOGIN/REGISTER -->
+<!-- LOGIN/REGISTER WINDOWS -->
 <div id="windows">
   <div class="window" id="loginWin">
     <h3>Connexion</h3>
-    <input id="login" placeholder="Email">
-    <input id="pass" type="password" placeholder="Password">
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPass" type="password" placeholder="Password">
     <button onclick="login()">ENTER</button>
     <div class="success" id="msgLogin"></div>
     <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showRegister()">Créer un compte</p>
   </div>
   <div class="window" id="registerWin">
     <h3>Inscription</h3>
-    <input id="regLogin" placeholder="Email">
+    <input id="regEmail" placeholder="Email">
     <input id="regPass" type="password" placeholder="Password">
     <button onclick="register()">REGISTER</button>
     <div class="success" id="msgRegister"></div>
@@ -126,8 +127,28 @@ textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;
   </div>
 </div>
 
-<script>
-// окна landing/login/register
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
+  authDomain: "projet-56900.firebaseapp.com",
+  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "projet-56900",
+  storageBucket: "projet-56900.appspot.com",
+  messagingSenderId: "753669702381",
+  appId: "1:753669702381:web:0ac180682fba00c68542e4",
+  measurementId: "G-M9X20GDLQN"
+};
+
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+const auth = getAuth(appFB);
+
+// ELEMENTS
 const landing = document.getElementById("landing");
 const loginWin = document.getElementById("loginWin");
 const registerWin = document.getElementById("registerWin");
@@ -135,38 +156,51 @@ const msgLogin = document.getElementById("msgLogin");
 const msgRegister = document.getElementById("msgRegister");
 const app = document.getElementById("app");
 
+// LANDING
 function openWindows(){ landing.style.opacity="0"; setTimeout(()=>landing.style.display="none",500); loginWin.classList.add("show"); }
 function showRegister(){ loginWin.classList.remove("show"); setTimeout(()=>registerWin.classList.add("show"),200); }
 function showLogin(){ registerWin.classList.remove("show"); setTimeout(()=>loginWin.classList.add("show"),200); }
 
-// простая демонстрация login/register
-function login(){
-  const email = document.getElementById("login").value;
-  const passw = document.getElementById("pass").value;
-  if(email && passw){
-    msgLogin.innerText="✔ Bienvenue, "+email;
-    setTimeout(()=>enterApp(email),500);
-  }else msgLogin.innerText="❌ Remplissez les champs";
-}
+// AUTH
 function register(){
-  const email = document.getElementById("regLogin").value;
+  const email = document.getElementById("regEmail").value;
   const passw = document.getElementById("regPass").value;
-  if(email && passw){
-    msgRegister.innerText="✔ Compte créé: "+email;
-    setTimeout(()=>enterApp(email),500);
-  }else msgRegister.innerText="❌ Remplissez les champs";
+  if(!email || !passw){ msgRegister.innerText="❌ Remplissez les champs"; return; }
+  createUserWithEmailAndPassword(auth,email,passw)
+    .then(user=>{
+      msgRegister.innerText="✔ Compte créé: "+email;
+      set(ref(db,'users/'+user.user.uid), {email:email,role:'Utilisateur'});
+      setTimeout(()=>enterApp(email,user.user.uid),500);
+    })
+    .catch(err=>msgRegister.innerText=err.message);
 }
 
-// переход на приложение
-function enterApp(email){
+function login(){
+  const email = document.getElementById("loginEmail").value;
+  const passw = document.getElementById("loginPass").value;
+  if(!email || !passw){ msgLogin.innerText="❌ Remplissez les champs"; return; }
+  signInWithEmailAndPassword(auth,email,passw)
+    .then(user=>{
+      msgLogin.innerText="✔ Bienvenue, "+email;
+      setTimeout(()=>enterApp(email,user.user.uid),500);
+    })
+    .catch(err=>msgLogin.innerText=err.message);
+}
+
+// ENTER APP
+function enterApp(email,uid){
   loginWin.classList.remove("show");
   registerWin.classList.remove("show");
   app.style.opacity=1;
   document.getElementById("userName").value=email;
-  document.getElementById("userRole").value="Utilisateur";
+  // read role from database
+  const userRef = ref(db,'users/'+uid+'/role');
+  onValue(userRef,snap=>{
+    if(snap.exists()) document.getElementById("userRole").value=snap.val();
+  });
 }
 
-// вкладки
+// TABS
 function showTab(id){
   document.querySelectorAll(".content section").forEach(s=>s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
@@ -174,31 +208,43 @@ function showTab(id){
   event.target.classList.add("active");
 }
 
-// chat demo
+// CHAT
 function sendMessage(room){
   const text = document.getElementById(room+"Text").value;
   if(!text) return;
   const messagesEl = document.getElementById(room+"Messages");
-  const div = document.createElement("div");
-  div.className="message me";
-  div.innerHTML=`<b>Moi</b><br>${text}<small>${new Date().toLocaleTimeString()}</small>`;
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop=messagesEl.scrollHeight;
+  push(ref(db,'messages/'+room),{
+    text:text,
+    time:new Date().toLocaleTimeString(),
+    uid:auth.currentUser.uid,
+    name:document.getElementById("userName").value
+  });
   document.getElementById(room+"Text").value="";
 }
+// load messages
+function loadMessages(room){
+  const messagesEl = document.getElementById(room+"Messages");
+  const messagesRef = ref(db,'messages/'+room);
+  onValue(messagesRef,snapshot=>{
+    messagesEl.innerHTML="";
+    snapshot.forEach(child=>{
+      const m = child.val();
+      const div=document.createElement("div");
+      div.className = "message"+(m.uid===auth.currentUser.uid?" me":"");
+      div.innerHTML=`<b>${m.name}</b><br>${m.text}<small>${m.time}</small>`;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop=messagesEl.scrollHeight;
+    });
+  });
+}
+// observe chat rooms
+setInterval(()=>{['global','admins'].forEach(loadMessages);},1000);
 
-// profile
+// PROFILE
 function saveProfile(){
   const name = document.getElementById("userName").value;
   alert("Profil sauvegardé: "+name);
 }
 </script>
-
-</body>
-</html>
-
-}
-</script>
-
 </body>
 </html>
