@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>K-NET • Neon Network</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 :root{
   --bg:#05070f;
@@ -12,7 +11,6 @@
   --panel2:#0f1740;
   --border:#1b2a66;
   --text:#e6ecff;
-  --muted:#8c96c9;
   --neon:#2aa8ff;
 }
 *{box-sizing:border-box}
@@ -35,6 +33,7 @@ body{
   flex-direction:column;
   cursor:pointer;
   z-index:10;
+  transition: opacity .5s;
 }
 .energy{
   position:absolute;
@@ -92,7 +91,6 @@ body{
   justify-content:center;
   gap:40px;
   pointer-events:none;
-  z-index:5;
 }
 .window{
   width:280px;
@@ -102,15 +100,13 @@ body{
   padding:24px;
   opacity:0;
   transform:translateY(80px) scale(.9);
-  transition:.8s ease;
+  transition:.8s ease, opacity .8s ease;
 }
 .window.show{
   opacity:1;
   transform:translateY(0) scale(1);
   pointer-events:auto;
 }
-
-/* ===== FORM ===== */
 input{
   width:100%;
   padding:14px;
@@ -135,29 +131,9 @@ button{
   text-align:center;
   margin-top:14px;
 }
-
-/* ===== DARK LOGIN MODE ===== */
-body.login-mode{
-  background:radial-gradient(circle at top,#040814,#010205 75%);
-}
-#darkOverlay{
-  position:fixed;
-  inset:0;
-  background:radial-gradient(circle,transparent 40%,rgba(0,0,0,.7));
-  pointer-events:none;
-  opacity:0;
-  transition:.8s ease;
-  z-index:1;
-}
-body.login-mode #darkOverlay{
-  opacity:1;
-}
 </style>
 </head>
-
 <body>
-
-<div id="darkOverlay"></div>
 
 <!-- LANDING -->
 <div id="landing" onclick="openWindows()">
@@ -170,7 +146,7 @@ body.login-mode #darkOverlay{
 
 <!-- WINDOWS -->
 <div id="windows">
-  <!-- Login Window -->
+  <!-- Login -->
   <div class="window" id="loginWin">
     <h3>Connexion</h3>
     <input id="login" placeholder="Email">
@@ -180,7 +156,7 @@ body.login-mode #darkOverlay{
     <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="showRegister()">Créer un compte</p>
   </div>
 
-  <!-- Register Window -->
+  <!-- Register -->
   <div class="window" id="registerWin">
     <h3>Inscription</h3>
     <input id="regLogin" placeholder="Email">
@@ -191,35 +167,21 @@ body.login-mode #darkOverlay{
   </div>
 </div>
 
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+<script>
+// переменные
+const landing = document.getElementById("landing");
+const loginWin = document.getElementById("loginWin");
+const registerWin = document.getElementById("registerWin");
+const msgLogin = document.getElementById("msgLogin");
+const msgRegister = document.getElementById("msgRegister");
 
-const firebaseConfig = {
-  apiKey: "ТВОЙ_API_KEY",
-  authDomain: "ТВОЙ_PROJECT.firebaseapp.com",
-  databaseURL: "ТВОЙ_DATABASE_URL",
-  projectId: "ТВОЙ_PROJECT",
-  storageBucket: "ТВОЙ_PROJECT.appspot.com",
-  messagingSenderId: "ТВОЙ_SENDER_ID",
-  appId: "ТВОЙ_APP_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// Landing -> show login
+// показываем окна
 function openWindows(){
-  document.body.classList.add("login-mode");
-  landing.style.opacity="0";
-  setTimeout(()=>{
-    landing.remove();
-    loginWin.classList.add("show");
-  },700);
+  landing.style.opacity = "0";
+  setTimeout(()=>landing.style.display="none",500);
+  loginWin.classList.add("show");
 }
 
-// Show windows
 function showRegister(){
   loginWin.classList.remove("show");
   setTimeout(()=>registerWin.classList.add("show"),200);
@@ -229,32 +191,28 @@ function showLogin(){
   setTimeout(()=>loginWin.classList.add("show"),200);
 }
 
-// Firebase login
+// Простая локальная проверка (для демонстрации)
 function login(){
-  const email = login.value;
-  const password = pass.value;
-  signInWithEmailAndPassword(auth,email,password)
-  .then((userCredential)=>{
+  const email = document.getElementById("login").value;
+  const passw = document.getElementById("pass").value;
+  if(email && passw){
     msgLogin.innerText = "✔ Bienvenue, "+email;
-    console.log("User logged in:", userCredential.user);
-  })
-  .catch((error)=>{
-    msgLogin.innerText = "❌ "+error.message;
-  });
+    setTimeout(()=>alert("Тут будет переход на приложение!"),500);
+  } else msgLogin.innerText="❌ Remplissez les champs";
 }
-
-// Firebase register
 function register(){
-  const email = regLogin.value;
-  const password = regPass.value;
-  createUserWithEmailAndPassword(auth,email,password)
-  .then((userCredential)=>{
+  const email = document.getElementById("regLogin").value;
+  const passw = document.getElementById("regPass").value;
+  if(email && passw){
     msgRegister.innerText = "✔ Compte créé: "+email;
-    console.log("User registered:", userCredential.user);
-  })
-  .catch((error)=>{
-    msgRegister.innerText = "❌ "+error.message;
-  });
+    setTimeout(()=>alert("Тут будет переход на приложение!"),500);
+  } else msgRegister.innerText="❌ Remplissez les champs";
+}
+</script>
+
+</body>
+</html>
+
 }
 </script>
 
