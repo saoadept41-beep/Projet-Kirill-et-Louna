@@ -1,131 +1,354 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>K-NET</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<title>K-NET • Neon Network</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, get, off, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+/* ================= FIREBASE ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
+  authDomain: "projet-56900.firebaseapp.com",
+  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "projet-56900",
+  storageBucket: "projet-56900.appspot.com",
+  messagingSenderId: "753669702381",
+  appId: "1:753669702381:web:0ac180682fba00c68542e4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentRole = null;
+let currentNick = null;
+let currentRoom = "Global";
+let unsubscribeMessages = null;
+
+/* ================= AUTH ================= */
+window.register = async () => {
+  const email = regEmail.value;
+  const pass = regPass.value;
+  const nick = regNick.value;
+  const role = regRole.value;
+
+  if(!email || !pass || !nick || !role){
+    alert("Заполните все поля");
+    return;
+  }
+
+  try{
+    const cred = await createUserWithEmailAndPassword(auth,email,pass);
+    currentUser = cred.user;
+    currentNick = nick;
+    currentRole = role;
+
+    await set(ref(db,'users/'+currentUser.uid),{ nick, role });
+    setOnline();
+
+    alert(`Добро пожаловать, ${nick}!`);
+    showApp();
+  }catch(e){
+    alert(e.message);
+  }
+};
+
+window.login = async () => {
+  try{
+    const cred = await signInWithEmailAndPassword(auth,loginEmail.value,loginPass.value);
+    currentUser = cred.user;
+
+    const snap = await get(ref(db,'users/'+currentUser.uid));
+    if(!snap.exists()) return alert("Профиль не найден");
+
+    currentNick = snap.val().nick;
+    currentRole = snap.val().role;
+
+    setOnline();
+    showApp();
+  }catch(e){ alert(e.message); }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+
+function setOnline(){
+  const statusRef = ref(db,'status/'+currentUser.uid);
+  set(statusRef,{ nick:currentNick, role:currentRole, online:true, lastSeen:serverTimestamp() });
+  onDisconnect(statusRef).update({ online:false, lastSeen:serverTimestamp() });
+}
+
+/* ================= UI ================= */
+function showApp(){
+  landing.style.display='none';
+  windows.style.display='none';
+  appUI.style.display='flex';
+
+  userName.value = currentNick;
+  userRole.value = currentRole;
+
+  loadRooms();
+}
+
+/* ================= ROOMS ================= */
+function loadRooms(){
+  roomSelect.innerHTML='';
+  addRoom('Global');
+
+  if(currentRole === 'Administrateur'){
+    ['Chauffeur','Logisticien','Organisateur','Mécanicien'].forEach(addRoom);
+  } else addRoom(currentRole);
+
+  roomSelect.onchange = () => {
+    currentRoom = roomSelect.value;
+    loadMessages();
+  };
+
+  currentRoom = roomSelect.value;
+  loadMessages();
+}
+
+function addRoom(name){
+  const o = document.createElement('option');
+  o.value = o.textContent = name;
+  roomSelect.appendChild(o);
+}
+
+/* ================= CHAT ================= */
+window.sendMessage = () => {
+  if(!chatText.value.trim()) return;
+
+  push(ref(db,'messages/'+currentRoom),{
+    uid: currentUser.uid,
+    nick: currentNick,
+    role: currentRole,
+    text: chatText.value,
+    time: new Date().toLocaleTimeString()
+  });
+
+  chatText.value='';
+};
+
+function loadMessages(){
+  if(unsubscribeMessages) off(unsubscribeMessages);
+
+  messages.innerHTML='';
+  const messagesRef = ref(db,'messages/'+currentRoom);
+
+  onValue(messagesRef, snap => {
+    messages.innerHTML='';
+    snap.forEach(c=>{
+      const m = c.val();
+      const d = document.createElement('div');
+      d.className = 'message'+(m.uid===currentUser.uid?' me':'');
+      d.innerHTML = `<b>${m.nick}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+      messages.appendChild(d);
+    });
+    messages.scrollTop = messages.scrollHeight;
+  });
+}
+
+chatText.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+
+/* ================= TABS ================= */
+window.showTab = (id,el)=>{
+  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+};
+
+;
+
+if(localStorage.getItem('theme')==='light'){
+  document.body.classList.add('light');
+}
+</script>
 
 <style>
-*{box-sizing:border-box;font-family:Segoe UI,system-ui}
+:root{
+  /* ULTRA DARK NAVY — ONLY DARK */
+  --bg:#01030a;
+  --bgGlow:#04091f;
+  --panel:#050a2a;
+  --panel2:#060d35;
+  --border:#0b1a55;
+  --text:#e6ecff;
+  --neon:#2a6bff;
+  --neon2:#5fa0ff;
+}
+
+
+*{box-sizing:border-box}
 body{
   margin:0;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:linear-gradient(135deg,#dff1ff,#ffffff);
+  font-family:Segoe UI,Arial;
+  background:radial-gradient(circle at 30% 10%,var(--bgGlow),var(--bg) 70%);
+  color:var(--text);
+  overflow:hidden;
+  transition:background 1s,color .5s;
+}
 }
 
-/* CARD */
-.card{
-  width:340px;
-  padding:28px 22px 32px;
-  border-radius:28px;
-  background:linear-gradient(180deg,#0f2b5a,#0b1f42);
-  box-shadow:0 30px 80px rgba(20,60,120,.35);
-  position:relative;
+/* LANDING */
+#landing{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;cursor:pointer;z-index:10;
 }
-
-/* TITLE */
-.card h2{
-  color:#eaf3ff;
-  margin-bottom:18px;
-}
-
-/* INPUTS */
-.input{
-  width:100%;
-  padding:14px 18px;
-  border-radius:18px;
-  border:none;
-  margin-bottom:14px;
-  background:linear-gradient(135deg,#eef7ff,#dbeeff);
-  font-size:14px;
-  outline:none;
-}
-
-/* SELECT */
-select.input{
-  appearance:none;
-  cursor:pointer;
-}
-
-/* BUTTON */
-.btn{
-  width:100%;
-  margin-top:14px;
-  padding:15px;
-  border-radius:20px;
-  border:none;
-  font-weight:700;
-  font-size:15px;
-  color:#061a3a;
-  background:linear-gradient(135deg,#a78bfa,#4da3ff);
-  cursor:pointer;
-  box-shadow:0 10px 25px rgba(90,120,255,.45);
-  transition:.25s;
-}
-.btn:hover{transform:translateY(-1px)}
-
-/* SPHERE */
-.sphere{
+.energy{
   position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:140px;
-  height:140px;
+  width:900px;height:900px;
   border-radius:50%;
-  background:radial-gradient(circle at 30% 30%,#101a2d,#020814);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#4da3ff;
-  font-size:26px;
-  font-weight:900;
-  letter-spacing:.15em;
-  box-shadow:
-    0 0 40px rgba(77,163,255,.6),
-    inset 0 0 30px rgba(0,0,0,.8);
-  pointer-events:none;
+  background:conic-gradient(from 0deg,var(--neon),transparent 70%);
+  filter:blur(80px);
+  animation:spin 10s linear infinite;
+  opacity:.9;
 }
+@keyframes spin{to{transform:rotate(360deg)}}
+.sphere{
+  width:260px;height:260px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  animation:float 5s ease-in-out infinite;
+}
+@keyframes float{50%{transform:translateY(-20px)}}
+.sphere-core{
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,var(--panel2),var(--bg));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 120px var(--neon);
+  animation:pulse 4s ease-in-out infinite, rotateCore 20s linear infinite;
+}
+@keyframes rotateCore{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{box-shadow:0 0 120px var(--neon2)}}
 
-/* TEXT */
-.hint{
-  margin-top:10px;
-  text-align:center;
-  font-size:11px;
-  letter-spacing:.35em;
-  color:#b8d4ff;
-  opacity:.7;
+/* WINDOWS */
+#windows{position:fixed;inset:0;display:none;align-items:center;justify-content:center}
+.window{width:280px;padding:24px;border-radius:22px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border)}
+input,select,textarea{width:100%;margin-top:12px;padding:14px;border-radius:14px;border:1px solid var(--border);background:#02040c;color:var(--text)}
+button{margin-top:16px;padding:14px;border:none;border-radius:16px;width:100%;font-weight:900;cursor:pointer;background:linear-gradient(135deg,var(--neon2),var(--neon));transition:.3s}
+button:hover{box-shadow:0 0 20px var(--neon2)}
+
+/* APP */
+#appUI{display:none;height:100vh}
+.sidebar{
+  width:250px;
+  padding:26px;
+  background:linear-gradient(180deg,rgba(5,10,40,0.9),rgba(2,4,20,0.95));
+  border-right:1px solid rgba(60,100,255,0.25);
+  box-shadow:inset -10px 0 40px rgba(0,0,0,0.6);
 }
+.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05070f}
+.content{flex:1;padding:32px;overflow-y:auto}
+section{
+  max-width:900px;
+  padding:28px;
+  border-radius:26px;
+  border:1px solid rgba(80,120,255,0.25);
+  background:linear-gradient(180deg,rgba(15,25,70,0.85),rgba(5,10,40,0.95));
+  box-shadow:0 20px 60px rgba(0,0,0,0.6), inset 0 0 40px rgba(60,120,255,0.05);
+  backdrop-filter: blur(18px);
+}
+.hidden{display:none}
+.messages{
+  height:320px;
+  overflow-y:auto;
+  background:radial-gradient(circle at top,rgba(20,40,120,0.4),rgba(5,10,30,0.95));
+  border-radius:20px;
+  padding:16px;
+  border:1px solid rgba(80,120,255,0.25);
+  box-shadow:inset 0 0 30px rgba(0,0,0,0.7);
+}
+.message{
+  margin-bottom:14px;
+  padding:14px 16px;
+  border-radius:18px;
+  background:linear-gradient(135deg,rgba(20,40,120,0.75),rgba(10,20,60,0.9));
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  animation:messageIn .35s ease-out;
+}
+.message.me{
+  background:linear-gradient(135deg,rgba(60,120,255,0.9),rgba(30,60,180,0.9));
+  color:#02030a;
+}
+@keyframes messageIn{
+  from{opacity:0;transform:translateY(10px) scale(.97)}
+  to{opacity:1;transform:none}
+}
+.message.me{background:#1e2a66}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1}}
 </style>
 </head>
-
 <body>
 
-<div class="card">
-  <h2>Вход</h2>
+<div id="landing" onclick="this.style.display='none';windows.style.display='flex'">
+  <div class="energy"></div>
+  <div class="sphere"><div class="sphere-core"><h1>K‑NET</h1></div></div>
+  <div style="margin-top:30px;letter-spacing:.3em;opacity:.7">CLICK TO CONNECT</div>
+</div>
 
-  <input class="input" placeholder="Email">
-  <input class="input" type="password" placeholder="Пароль">
+<div id="windows">
+  <div class="window" id="authWindow">
+    <h3 id="authTitle">Вход</h3>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPass" type="password" placeholder="Password">
+    <button onclick="login()">Войти</button>
+    <p style="text-align:center;margin-top:14px;opacity:.7">Нет аккаунта?</p>
+    <button style="background:none;border:1px solid var(--border)" onclick="switchAuth()">Регистрация</button>
 
-  <div style="height:70px"></div>
+    <div id="registerBlock" style="display:none;margin-top:20px">
+      <hr style="border-color:var(--border);margin:20px 0">
+      <h3>Регистрация</h3>
+      <input id="regEmail" placeholder="Email">
+      <input id="regPass" type="password" placeholder="Password">
+      <input id="regNick" placeholder="Nickname">
+      <select id="regRole">
+        <option value="">Role</option>
+        <option>Chauffeur</option>
+        <option>Logisticien</option>
+        <option>Organisateur</option>
+        <option>Mécanicien</option>
+        <option>Administrateur</option>
+      </select>
+      <button onclick="register()">Создать аккаунт</button>
+    </div>
+  </div>
+</div>
 
-  <input class="input" placeholder="Ник">
-
-  <select class="input">
-    <option>Водитель</option>
-    <option>Логистик</option>
-    <option>Механик</option>
-    <option>Организатор</option>
-  </select>
-
-  <button class="btn">Регистрация</button>
-
-  <div class="hint">CLICK TO CONNECT</div>
-
-  <div class="sphere">K-NET</div>
+<div id="appUI">
+  <div class="sidebar">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <strong>K-NET</strong>
+      
+    </div>
+    <div class="menu">
+      <button class="active" onclick="showTab('global',this)">🌐 Global</button>
+      <button onclick="showTab('profile',this)">👤 Profile</button>
+      <button onclick="logout()">🚪 Exit</button>
+    </div>
+  </div>
+  <div class="content">
+    <section id="global">
+      <select id="roomSelect"></select>
+      <div class="messages" id="messages"></div>
+      <textarea id="chatText" placeholder="Message..."></textarea>
+      <button onclick="sendMessage()">Send</button>
+    </section>
+    <section id="profile" class="hidden">
+      <input id="userName">
+      <input id="userRole" disabled>
+    </section>
+  </div>
 </div>
 
 </body>
