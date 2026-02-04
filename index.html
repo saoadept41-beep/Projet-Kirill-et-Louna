@@ -2,219 +2,137 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • Core System</title>
+<title>K-NET • Neural Gate</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --accent:#7aa2ff;
-  --bg:#02030f;
-  --panel:rgba(8,12,35,.92);
-  --text:#dbe6ff;
-}
-
-*{box-sizing:border-box}
 html,body{
   margin:0;
   width:100%;
   height:100%;
-  background:var(--bg);
-  font-family:'Orbitron',sans-serif;
   overflow:hidden;
-  color:var(--text);
+  background:#01020a;
+  font-family:'Orbitron',sans-serif;
 }
 
-/* ===== THREE CANVAS ===== */
-canvas{
+#nebulaCanvas{
   position:fixed;
   inset:0;
   z-index:-2;
 }
 
-/* ===== HUD ===== */
-#hud{
+/* Туманная сфера */
+#sphere{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:280px;
+  height:280px;
+  margin-left:-140px;
+  margin-top:-140px;
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, rgba(122,162,255,0.5), rgba(0,0,0,0.0) 70%);
+  box-shadow:0 0 80px rgba(122,162,255,0.5),0 0 160px rgba(122,162,255,0.3);
+  cursor:pointer;
+  animation:pulse 3s infinite alternate;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#logo{
+  font-size:3rem;
+  font-weight:900;
+  color:#7aa2ff;
+  text-shadow:0 0 25px #7aa2ff,0 0 50px #7aa2ff;
+  pointer-events:none;
+  user-select:none;
+}
+
+@keyframes pulse{
+  0%{transform:scale(0.95);}
+  100%{transform:scale(1.05);}
+}
+
+/* AUTH */
+#auth{
   position:fixed;
   inset:0;
   display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:1s;
+  background:rgba(2,3,15,0.85);
 }
 
-/* SIDEBAR */
-#sidebar{
-  width:260px;
-  background:var(--panel);
-  border-right:1px solid rgba(122,162,255,.25);
-  padding:24px;
+#auth.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.authBox{
+  width:360px;
+  padding:36px;
+  border-radius:22px;
+  background:rgba(8,12,35,0.95);
+  border:1px solid rgba(122,162,255,0.35);
+  box-shadow:0 0 60px rgba(0,0,0,0.8);
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:14px;
 }
 
-.logo{
-  font-size:1.8rem;
-  font-weight:900;
-  color:var(--accent);
-  text-shadow:0 0 15px var(--accent);
-}
-
-.menu button{
-  background:none;
-  border:1px solid rgba(122,162,255,.25);
-  color:var(--text);
-  padding:12px;
-  border-radius:12px;
-  cursor:pointer;
-  transition:.3s;
-}
-
-.menu button:hover,
-.menu button.active{
-  box-shadow:0 0 20px var(--accent);
-}
-
-/* CONTENT */
-#content{
-  flex:1;
-  padding:28px;
-  display:flex;
-  flex-direction:column;
-}
-
-/* CHAT */
-#messages{
-  flex:1;
-  background:rgba(5,10,30,.85);
-  border-radius:18px;
-  padding:16px;
-  overflow-y:auto;
-  margin-bottom:14px;
-}
-
-.message{
-  margin-bottom:10px;
-  padding:10px 14px;
-  border-radius:14px;
-  background:rgba(20,30,70,.7);
-  animation:fadeUp .3s ease;
-}
-
-.message.me{
-  background:linear-gradient(135deg,#7aa2ff,#4c6fff);
-  color:#02030a;
-}
-
-@keyframes fadeUp{
-  from{opacity:0; transform:translateY(10px)}
-  to{opacity:1}
-}
-
-textarea,button{
+input,select,button{
+  width:100%;
   padding:14px;
   border-radius:14px;
-  border:1px solid rgba(122,162,255,.3);
-  background:rgba(10,15,40,.95);
+  border:1px solid rgba(122,162,255,0.3);
+  background:rgba(10,15,40,0.95);
   color:#fff;
   font-family:inherit;
 }
 
-textarea{
-  resize:none;
-  height:60px;
-  margin-bottom:10px;
-}
-
 button{
-  cursor:pointer;
   font-weight:700;
+  cursor:pointer;
   background:linear-gradient(135deg,#7aa2ff,#9b7aff);
   border:none;
 }
-
-/* PROFILE */
-#profile{
-  margin-top:20px;
-  padding:16px;
-  border-radius:16px;
-  background:rgba(10,15,40,.8);
-  border:1px solid rgba(122,162,255,.25);
-}
 </style>
 </head>
-
 <body>
 
-<!-- THREE -->
-<script>
-const scene=new THREE.Scene();
-const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100);
-camera.position.z=6;
+<canvas id="nebulaCanvas"></canvas>
 
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setSize(innerWidth,innerHeight);
-document.body.appendChild(renderer.domElement);
+<div id="sphere">
+  <div id="logo">K-NET</div>
+</div>
 
-/* SPHERE CORE */
-const sphere=new THREE.Mesh(
-  new THREE.SphereGeometry(2,64,64),
-  new THREE.MeshStandardMaterial({
-    color:0x2233ff,
-    emissive:0x7aa2ff,
-    emissiveIntensity:0.6,
-    metalness:0.7,
-    roughness:0.3
-  })
-);
-scene.add(sphere);
-
-/* LIGHT */
-scene.add(new THREE.PointLight(0x7aa2ff,2,15));
-scene.add(new THREE.AmbientLight(0x404060));
-
-function animate(){
-  requestAnimationFrame(animate);
-  sphere.rotation.y+=0.0015;
-  renderer.render(scene,camera);
-}
-animate();
-
-onresize=()=>{
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-};
-</script>
-
-<!-- HUD -->
-<div id="hud">
-  <div id="sidebar">
-    <div class="logo">K-NET</div>
-
-    <div class="menu">
-      <button class="active">🌐 Global</button>
-      <button>👤 Profile</button>
-      <button onclick="logout()">🚪 Logout</button>
-    </div>
-
-    <div id="profile">
-      <div><strong id="nick">—</strong></div>
-      <div id="role" style="opacity:.7"></div>
-    </div>
-  </div>
-
-  <div id="content">
-    <div id="messages"></div>
-    <textarea id="text" placeholder="Сообщение…"></textarea>
-    <button onclick="send()">Send</button>
+<div id="auth">
+  <div class="authBox">
+    <h2 style="text-align:center;color:#7aa2ff">Neural Access</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <input id="nick" placeholder="Nickname">
+    <select id="role">
+      <option value="">Выберите роль</option>
+      <option value="Chauffeur">🚗 Chauffeur</option>
+      <option value="Logisticien">📦 Logisticien</option>
+      <option value="Mécanicien">🛠 Mécanicien</option>
+      <option value="Organisateur">📋 Organisateur</option>
+    </select>
+    <button onclick="register()">ENTER SYSTEM</button>
   </div>
 </div>
 
 <script type="module">
-/* ===== FIREBASE ===== */
+/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
@@ -230,47 +148,61 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
 
-let me=null;
+/* ===== ROLE ===== */
+async function assignRole(uid,nick,selectedRole){
+  const snap = await get(ref(db,'users'));
+  let role = !snap.exists() ? 'Administrateur' : selectedRole;
+  if(role!=='Administrateur' && !selectedRole){ alert('Выберите роль'); throw 'NO_ROLE'; }
+  await set(ref(db,'users/'+uid),{nick,role,createdAt:Date.now()});
+}
 
-onAuthStateChanged(auth,u=>{
-  if(!u) location.href='index.html';
-  me=u;
-});
-
-/* LOAD PROFILE */
-onValue(ref(db,'users'),snap=>{
-  const data=snap.child(me.uid).val();
-  if(!data) return;
-  nick.textContent=data.nick;
-  role.textContent=data.role;
-});
-
-/* CHAT */
-onValue(ref(db,'messages'),snap=>{
-  messages.innerHTML='';
-  snap.forEach(m=>{
-    const d=m.val();
-    const div=document.createElement('div');
-    div.className='message'+(d.uid===me.uid?' me':'');
-    div.innerHTML=`<strong>${d.nick}</strong><br>${d.text}`;
-    messages.appendChild(div);
-  });
-  messages.scrollTop=messages.scrollHeight;
-});
-
-window.send=()=>{
-  if(!text.value) return;
-  push(ref(db,'messages'),{
-    uid:me.uid,
-    nick:nick.textContent,
-    text:text.value,
-    time:Date.now()
-  });
-  text.value='';
+window.register = async ()=>{
+  const e=email.value,p=password.value,n=nick.value,r=role.value;
+  const cred = await createUserWithEmailAndPassword(auth,e,p);
+  await assignRole(cred.user.uid,n,r);
+  location.href='system.html';
 };
 
-window.logout=()=>{
-  signOut(auth);
+/* ================= NEBULA SPHERE PARTICLES ================= */
+const canvas=document.getElementById('nebulaCanvas');
+const ctx=canvas.getContext('2d');
+canvas.width=innerWidth; canvas.height=innerHeight;
+
+let particles=[];
+for(let i=0;i<200;i++){
+  particles.push({
+    x:canvas.width/2 + (Math.random()-0.5)*200,
+    y:canvas.height/2 + (Math.random()-0.5)*200,
+    r:Math.random()*2+1,
+    dx:(Math.random()-0.5)*0.5,
+    dy:(Math.random()-0.5)*0.5
+  });
+}
+
+function animate(){
+  ctx.fillStyle='rgba(1,2,10,0.2)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x+=p.dx; p.y+=p.dy;
+    if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+    if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+    let grad=ctx.createRadialGradient(p.x,p.y,p.r/2,p.x,p.y,p.r);
+    grad.addColorStop(0,'rgba(122,162,255,0.5)');
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ===== CLICK TRANSITION ===== */
+sphere.onclick=()=>{
+  sphere.style.transform='scale(6)';
+  sphere.style.opacity='0';
+  setTimeout(()=>{document.getElementById('auth').classList.add('show');},800);
 };
 </script>
 
