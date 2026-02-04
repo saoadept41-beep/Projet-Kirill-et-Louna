@@ -2,111 +2,123 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • Neon Network</title>
+<title>K-NET</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Firebase SDK -->
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, set, push, onValue, get, off } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { 
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+/* ===== Firebase ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
   authDomain: "projet-56900.firebaseapp.com",
   databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "projet-56900",
-  storageBucket: "projet-56900.appspot.com",
   messagingSenderId: "753669702381",
   appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
+/* ===== State ===== */
 let currentUser = null;
-let currentRole = null;
-let currentNick = null;
+let currentNick = "";
+let currentRole = "";
 let currentRoom = "Global";
+let messagesRef = null;
 
-/* ===== FUNCTIONS ===== */
-window.register = function() {
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPass").value;
-  const nick = document.getElementById("regNick").value;
-  const role = document.getElementById("regRole").value;
+/* ===== AUTH ===== */
+window.register = async () => {
+  const email = regEmail.value;
+  const pass = regPass.value;
+  const nick = regNick.value;
+  const role = regRole.value;
 
   if(!email || !pass || !nick || !role){
-    alert("Veuillez remplir tous les champs !");
+    alert("Tous les champs sont obligatoires");
     return;
   }
 
-  createUserWithEmailAndPassword(auth,email,pass)
-    .then(userCredential=>{
-      currentUser = userCredential.user;
-      currentRole = role;
-      currentNick = nick;
+  const cred = await createUserWithEmailAndPassword(auth,email,pass);
+  currentUser = cred.user;
 
-      set(ref(db,'users/'+currentUser.uid),{
-        nick: currentNick,
-        role: currentRole
-      });
-
-      alert(`Bienvenue ${currentNick} !\n\nCe site est destiné à la communication interne d'une entreprise ou d'un établissement.\nMerci d'être respectueux, et en cas de problème contactez l'administrateur.\nMerci pour votre aide à améliorer le site !`);
-      showApp();
-    })
-    .catch(error=>{
-      alert(error.message);
-      console.error(error);
-    });
-}
-
-window.login = function() {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
-
-  if(!email || !pass){ alert("Remplissez tous les champs !"); return; }
-
-  signInWithEmailAndPassword(auth,email,pass)
-    .then(userCredential=>{
-      currentUser = userCredential.user;
-      get(ref(db,'users/'+currentUser.uid)).then(snapshot=>{
-        if(snapshot.exists()){
-          currentNick = snapshot.val().nick;
-          currentRole = snapshot.val().role;
-          showApp();
-        }
-      });
-    })
-    .catch(error=>{
-      alert(error.message);
-    });
-}
-
-window.logout = function(){
-  signOut(auth).then(()=>{
-    currentUser = null;
-    currentRole = null;
-    currentNick = null;
-    location.reload();
+  await set(ref(db,"users/"+currentUser.uid),{
+    nick,
+    role
   });
-}
 
-/* ===== UI FUNCTIONS ===== */
+  currentNick = nick;
+  currentRole = role;
+  showApp();
+};
+
+window.login = async () => {
+  const email = loginEmail.value;
+  const pass = loginPass.value;
+
+  const cred = await signInWithEmailAndPassword(auth,email,pass);
+  currentUser = cred.user;
+
+  const snap = await get(ref(db,"users/"+currentUser.uid));
+  currentNick = snap.val().nick;
+  currentRole = snap.val().role;
+
+  showApp();
+};
+
+window.googleLogin = async () => {
+  const result = await signInWithPopup(auth,provider);
+  currentUser = result.user;
+
+  const uref = ref(db,"users/"+currentUser.uid);
+  const snap = await get(uref);
+
+  if(!snap.exists()){
+    await set(uref,{
+      nick: currentUser.displayName || "GoogleUser",
+      role: "Chauffeur"
+    });
+    currentNick = currentUser.displayName || "GoogleUser";
+    currentRole = "Chauffeur";
+  } else {
+    currentNick = snap.val().nick;
+    currentRole = snap.val().role;
+  }
+  showApp();
+};
+
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+
+/* ===== UI ===== */
 function showApp(){
-  document.getElementById("landing").style.display="none";
-  document.getElementById("loginWin").style.display="none";
-  document.getElementById("registerWin").style.display="none";
-  document.getElementById("app").style.display="flex";
+  landing.style.display="none";
+  windows.style.display="none";
+  appDiv.style.display="flex";
   loadRooms();
 }
 
-/* ===== ROOM + CHAT ===== */
+/* ===== ROOMS ===== */
 function loadRooms(){
-  const roomSelect = document.getElementById("roomSelect");
   roomSelect.innerHTML="";
   addRoom("Global");
-  if(currentRole==="Administrateur"){
-    ["Chauffeur","Logisticien","Organisateur","Mécanicien"].forEach(addRoom);
+
+  if(currentRole === "Administrateur"){
+    ["Chauffeur","Logisticien","Organisateur","Mécanicien","Admins"].forEach(addRoom);
   } else {
     addRoom(currentRole);
   }
@@ -114,158 +126,102 @@ function loadRooms(){
   roomSelect.onchange = ()=>{
     currentRoom = roomSelect.value;
     loadMessages();
-  }
+  };
+
   currentRoom = roomSelect.value;
   loadMessages();
 }
 
-function addRoom(room){
-  const option = document.createElement("option");
-  option.value = option.textContent = room;
-  document.getElementById("roomSelect").appendChild(option);
+function addRoom(r){
+  const o = document.createElement("option");
+  o.value=o.textContent=r;
+  roomSelect.appendChild(o);
 }
 
-window.sendMessage = function(){
-  const text = document.getElementById("chatText");
-  if(!text.value.trim()) return;
-  push(ref(db,'messages/'+currentRoom),{
+/* ===== MESSAGES ===== */
+window.sendMessage = ()=>{
+  if(!chatText.value.trim()) return;
+
+  push(ref(db,"messages/"+currentRoom),{
     uid: currentUser.uid,
     nick: currentNick,
     role: currentRole,
-    text: text.value,
+    text: chatText.value,
     time: new Date().toLocaleTimeString()
   });
-  text.value="";
-}
+  chatText.value="";
+};
 
 function loadMessages(){
-  const messagesEl = document.getElementById("messages");
-  const messagesRef = ref(db,'messages/'+currentRoom);
-  messagesEl.innerHTML="";
-  onValue(messagesRef, snapshot=>{
-    messagesEl.innerHTML="";
-    snapshot.forEach(child=>{
-      const m = child.val();
-      const div = document.createElement("div");
-      div.className = "message"+(m.uid===currentUser.uid?" me":"");
-      div.innerHTML=`<b>${m.nick}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
-      messagesEl.appendChild(div);
-    });
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  });
-}
+  if(messagesRef) off(messagesRef);
+  messages.innerHTML="";
 
-/* TAB SWITCH */
-window.showTab = function(id){
-  document.querySelectorAll(".content section").forEach(s=>s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
+  messagesRef = ref(db,"messages/"+currentRoom);
+  onValue(messagesRef,snap=>{
+    messages.innerHTML="";
+    snap.forEach(c=>{
+      const m=c.val();
+      const d=document.createElement("div");
+      d.className="message"+(m.uid===currentUser.uid?" me":"");
+      d.innerHTML=`<b>${m.nick}</b> (${m.role})<br>${m.text}<small>${m.time}</small>`;
+      messages.appendChild(d);
+    });
+    messages.scrollTop=messages.scrollHeight;
+  });
 }
 </script>
 
 <style>
-:root{
-  --bg:#05070f; --panel:#0b1024; --panel2:#0f1740; --border:#1b2a66;
-  --text:#e6ecff; --neon:#2aa8ff; --neon2:#1e6cff;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Segoe UI,Arial;background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);color:var(--text);overflow:hidden;}
-
-/* Landing Sphere */
-#landing{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; background:radial-gradient(circle,#070d25,#02030a 75%); cursor:pointer; z-index:10; transition:.5s;}
-.energy{position:absolute;width:700px;height:700px;border-radius:50%;background:conic-gradient(rgba(42,168,255,.3),transparent);filter:blur(40px);animation:spin 14s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sphere{position:relative;width:260px;height:260px;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:float 5s ease-in-out infinite;}
-@keyframes float{50%{transform:translateY(-20px)}}
-.sphere-core{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,#0b1a3a,#02040c);box-shadow:0 0 60px var(--neon);display:flex;align-items:center;justify-content:center;}
-.sphere-core span{font-size:2.2rem;font-weight:900;letter-spacing:.3em;color:#2aa8ff;text-shadow:0 0 20px var(--neon);}
-.hint{margin-top:30px;opacity:.7;letter-spacing:.4em;font-size:.8rem;}
-
-/* Windows */
-#windows{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; gap:40px;}
-.window{width:280px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:22px;padding:24px;opacity:1;}
-input{width:100%;padding:14px;margin-top:12px;background:#02040c;border:1px solid var(--border);border-radius:14px;color:var(--text);}
-button{width:100%;margin-top:16px;padding:14px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--neon2),var(--neon));font-weight:900;cursor:pointer;}
-.success{color:#6affb1;text-align:center;margin-top:14px;}
-
-/* App */
-#app{display:none;height:100vh;}
-.sidebar{width:260px;background:linear-gradient(180deg,#05070f,#080c1a);border-right:1px solid var(--border);padding:24px;}
-.menu button{width:100%;padding:14px;margin-bottom:10px;background:none;border-radius:16px;border:1px solid transparent;color:var(--text);cursor:pointer;transition:.3s;}
-.menu button.active{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#05070f;font-weight:900;}
-.content{flex:1;padding:32px;overflow-y:auto;}
-section{max-width:900px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:20px;}
-.messages{height:300px;overflow-y:auto;background:#05070f;border-radius:16px;padding:12px;margin-top:12px;}
-.message{padding:8px 12px;border-radius:12px;margin-bottom:10px;background:#0b1a3a;}
-.message.me{background:#1e2a66;}
-.message small{display:block;color:var(--text);font-size:.75rem;}
-textarea{width:100%;height:60px;margin-top:12px;padding:10px;border-radius:12px;border:1px solid var(--border);background:#02040c;color:var(--text);}
+body{margin:0;background:#05070f;color:#e6ecff;font-family:Segoe UI}
+.hidden{display:none}
+#app{display:none;height:100vh}
+.sidebar{width:220px;background:#060a1d;padding:20px}
+button{padding:12px;border-radius:12px;border:none;background:#7f8cff;color:#000;font-weight:700;cursor:pointer}
+.content{flex:1;padding:20px}
+.messages{height:320px;background:#02040c;border-radius:12px;padding:10px;overflow-y:auto}
+.message{background:#0b1a3a;margin-bottom:8px;padding:8px;border-radius:10px}
+.message.me{background:#1e2a66}
 </style>
+</head>
 
 <body>
 
-<!-- Landing -->
-<div id="landing" onclick="document.getElementById('landing').style.display='none';document.getElementById('windows').style.display='flex'">
-  <div class="energy"></div>
-  <div class="sphere"><div class="sphere-core"><span>K-NET</span></div></div>
-  <div class="hint">CLICK TO CONNECT</div>
+<div id="landing" onclick="this.style.display='none';windows.style.display='flex';" style="height:100vh;display:flex;align-items:center;justify-content:center;">
+<h1>K-NET</h1>
 </div>
 
-<!-- Login/Register Windows -->
-<div id="windows">
-  <div class="window" id="loginWin">
-    <h3>Connexion</h3>
+<div id="windows" style="display:none;gap:20px;justify-content:center;">
+  <div>
     <input id="loginEmail" placeholder="Email">
     <input id="loginPass" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="loginWin.style.display='none';registerWin.style.display='block'">Créer un compte</p>
+    <button onclick="googleLogin()">Google</button>
   </div>
-  <div class="window" id="registerWin" style="display:none">
-    <h3>Inscription</h3>
+
+  <div>
     <input id="regEmail" placeholder="Email">
-    <input id="regPass" type="password" placeholder="Password">
-    <input id="regNick" placeholder="Nom affiché">
+    <input id="regPass" type="password">
+    <input id="regNick" placeholder="Nick">
     <select id="regRole">
-      <option value="">Choisir un rôle</option>
+      <option value="">Rôle</option>
       <option>Chauffeur</option>
       <option>Logisticien</option>
       <option>Organisateur</option>
       <option>Mécanicien</option>
-      <option>Administrateur</option>
     </select>
     <button onclick="register()">Register</button>
-    <p style="text-align:center;margin-top:10px;cursor:pointer;color:var(--neon);" onclick="registerWin.style.display='none';loginWin.style.display='block'">Déjà inscrit ? Login</p>
   </div>
 </div>
 
-<!-- Main App -->
-<div id="app">
+<div id="app" style="display:flex" id="appDiv">
   <div class="sidebar">
-    <div class="menu">
-      <button class="active" onclick="showTab('global')">🌐 Général</button>
-      <button onclick="showTab('admins')">🛡 Admins</button>
-      <button onclick="showTab('profile')">👤 Profil</button>
-      <button onclick="logout()">🚪 Déconnexion</button>
-    </div>
+    <button onclick="logout()">Logout</button>
   </div>
   <div class="content">
-    <section id="global"><h3>Chat Global</h3>
-      <select id="roomSelect"></select>
-      <div class="messages" id="messages"></div>
-      <textarea id="chatText" placeholder="Écrire un message..."></textarea>
-      <button onclick="sendMessage()">Envoyer</button>
-    </section>
-    <section id="admins" class="hidden"><h3>Chat Admins</h3>
-      <div class="messages" id="adminMessages"></div>
-      <textarea id="adminText" placeholder="Écrire un message..."></textarea>
-      <button onclick="sendMessage()">Envoyer</button>
-    </section>
-    <section id="profile" class="hidden"><h3>Profil</h3>
-      <input id="userName" placeholder="Nom affiché">
-      <input id="userRole" placeholder="Rôle" disabled>
-      <button onclick="alert('Profil sauvegardé !')">Sauvegarder</button>
-    </section>
+    <select id="roomSelect"></select>
+    <div class="messages" id="messages"></div>
+    <textarea id="chatText"></textarea>
+    <button onclick="sendMessage()">Envoyer</button>
   </div>
 </div>
 
