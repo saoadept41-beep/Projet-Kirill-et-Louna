@@ -2,215 +2,131 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • Neon Network</title>
+<title>K-NET</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-const ADMIN_EMAIL = "kirillmirisnik@gamil.com";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
-  authDomain: "projet-56900.firebaseapp.com",
-  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "projet-56900",
-  storageBucket: "projet-56900.appspot.com",
-  messagingSenderId: "753669702381",
-  appId: "1:753669702381:web:0ac180682fba00c68542e4"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-let user, role, nick, room="Global";
-
-/* ===== AUTH ===== */
-window.register = async ()=>{
-  if(regRole.value==="Администратор") return alert("Админ назначается вручную");
-  const c = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
-  await set(ref(db,"users/"+c.user.uid),{nick:regNick.value, role:regRole.value});
-  autoLogin(c.user);
-};
-
-window.login = async ()=>{
-  const c = await signInWithEmailAndPassword(auth, loginEmail.value, loginPass.value);
-  autoLogin(c.user);
-};
-
-async function autoLogin(u){
-  user=u;
-  const s = await get(ref(db,"users/"+u.uid));
-  nick = s.val()?.nick || "Admin";
-  role = (u.email===ADMIN_EMAIL)?"Администратор":s.val()?.role;
-  enterApp();
-}
-
-window.logout=()=>signOut(auth).then(()=>location.reload());
-
-/* ===== ENTER EFFECT ===== */
-function enterApp(){
-  document.getElementById("sphere").classList.add("explode");
-  setTimeout(()=>{
-    landing.style.display="none";
-    windows.style.display="flex";
-  },800);
-}
-</script>
-
 <style>
-:root{
-  --bg:#05070f;
-  --panel:#0b1024;
-  --neon:#2aa8ff;
-  --pink:#ff6aff;
-}
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;font-family:Segoe UI,system-ui}
 body{
-  font-family:Segoe UI;
-  background:radial-gradient(circle at top,#0d1b3d,#05070f 70%);
-  color:#e6ecff;
-  overflow:hidden;
-}
-
-/* ===== LANDING SPHERE ===== */
-#landing{
-  position:fixed;
-  inset:0;
+  margin:0;
+  min-height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
-  flex-direction:column;
-  cursor:pointer;
-  z-index:10;
+  align-items:center;
+  background:linear-gradient(135deg,#dff1ff,#ffffff);
 }
-.energy{
-  position:absolute;
-  width:700px;
-  height:700px;
-  border-radius:50%;
-  background:conic-gradient(rgba(42,168,255,.4),transparent);
-  filter:blur(50px);
-  animation:spin 14s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
 
-#sphere{
+/* CARD */
+.card{
+  width:340px;
+  padding:28px 22px 32px;
+  border-radius:28px;
+  background:linear-gradient(180deg,#0f2b5a,#0b1f42);
+  box-shadow:0 30px 80px rgba(20,60,120,.35);
   position:relative;
-  width:260px;
-  height:260px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation:float 5s ease-in-out infinite;
-}
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-15px)}
 }
 
-.core{
-  width:180px;
-  height:180px;
-  border-radius:50%;
-  background:radial-gradient(circle,#0b1a3a,#02040c);
-  box-shadow:0 0 60px var(--neon),0 0 120px var(--pink);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  animation:coreGlow 6s infinite alternate;
-}
-@keyframes coreGlow{
-  0%{box-shadow:0 0 60px var(--neon)}
-  50%{box-shadow:0 0 120px var(--pink)}
-  100%{box-shadow:0 0 60px var(--neon)}
+/* TITLE */
+.card h2{
+  color:#eaf3ff;
+  margin-bottom:18px;
 }
 
-.core span{
-  font-size:2.4rem;
-  font-weight:900;
-  color:var(--neon);
-  text-shadow:0 0 20px var(--neon),0 0 40px var(--pink);
-}
-
-/* CLICK EXPLOSION */
-.explode{
-  animation:explode .8s forwards;
-}
-@keyframes explode{
-  to{
-    transform:scale(4);
-    opacity:0;
-    filter:blur(20px);
-  }
-}
-
-.hint{
-  margin-top:30px;
-  opacity:.7;
-  letter-spacing:.4em;
-  font-size:.8rem;
-}
-
-/* ===== WINDOWS ===== */
-#windows{display:none;position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-.window{
-  width:300px;
-  background:linear-gradient(180deg,#0f1740,#0b1024);
-  border-radius:22px;
-  padding:24px;
-}
-input,select,button{
+/* INPUTS */
+.input{
   width:100%;
-  margin-top:12px;
-  padding:14px;
-  border-radius:14px;
+  padding:14px 18px;
+  border-radius:18px;
   border:none;
+  margin-bottom:14px;
+  background:linear-gradient(135deg,#eef7ff,#dbeeff);
+  font-size:14px;
+  outline:none;
 }
-button{
-  background:linear-gradient(135deg,var(--pink),var(--neon));
-  font-weight:900;
+
+/* SELECT */
+select.input{
+  appearance:none;
   cursor:pointer;
+}
+
+/* BUTTON */
+.btn{
+  width:100%;
+  margin-top:14px;
+  padding:15px;
+  border-radius:20px;
+  border:none;
+  font-weight:700;
+  font-size:15px;
+  color:#061a3a;
+  background:linear-gradient(135deg,#a78bfa,#4da3ff);
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(90,120,255,.45);
+  transition:.25s;
+}
+.btn:hover{transform:translateY(-1px)}
+
+/* SPHERE */
+.sphere{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#101a2d,#020814);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#4da3ff;
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:.15em;
+  box-shadow:
+    0 0 40px rgba(77,163,255,.6),
+    inset 0 0 30px rgba(0,0,0,.8);
+  pointer-events:none;
+}
+
+/* TEXT */
+.hint{
+  margin-top:10px;
+  text-align:center;
+  font-size:11px;
+  letter-spacing:.35em;
+  color:#b8d4ff;
+  opacity:.7;
 }
 </style>
 </head>
 
 <body>
 
-<div id="landing" onclick="enterApp()">
-  <div class="energy"></div>
-  <div id="sphere">
-    <div class="core"><span>K-NET</span></div>
-  </div>
-  <div class="hint">CLICK TO CONNECT</div>
-</div>
+<div class="card">
+  <h2>Вход</h2>
 
-<div id="windows">
-  <div class="window">
-    <h3>Вход</h3>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPass" type="password">
-    <button onclick="login()">Войти</button>
-    <hr>
-    <input id="regEmail" placeholder="Email">
-    <input id="regPass" placeholder="Пароль">
-    <input id="regNick" placeholder="Ник">
-    <select id="regRole">
-      <option>Водитель</option>
-      <option>Логистик</option>
-      <option>Механик</option>
-      <option>Организатор</option>
-    </select>
-    <button onclick="register()">Регистрация</button>
-  </div>
+  <input class="input" placeholder="Email">
+  <input class="input" type="password" placeholder="Пароль">
+
+  <div style="height:70px"></div>
+
+  <input class="input" placeholder="Ник">
+
+  <select class="input">
+    <option>Водитель</option>
+    <option>Логистик</option>
+    <option>Механик</option>
+    <option>Организатор</option>
+  </select>
+
+  <button class="btn">Регистрация</button>
+
+  <div class="hint">CLICK TO CONNECT</div>
+
+  <div class="sphere">K-NET</div>
 </div>
 
 </body>
 </html>
-
-
