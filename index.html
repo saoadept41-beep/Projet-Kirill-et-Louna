@@ -2,206 +2,204 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • Neural Secure Network</title>
+<title>K-NET • Neural Control System</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+/* 🔴 INSERT YOUR FIREBASE CONFIG HERE */
+const firebaseConfig = {
+  apiKey: "PASTE",
+  authDomain: "PASTE",
+  projectId: "PASTE",
+  appId: "PASTE"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.login = async () => {
+  try{
+    await signInWithEmailAndPassword(auth,email.value,password.value);
+    enterSystem();
+  }catch(e){ alert(e.message); }
+};
+
+window.register = async () => {
+  try{
+    await createUserWithEmailAndPassword(auth,email.value,password.value);
+    enterSystem();
+  }catch(e){ alert(e.message); }
+};
+
+function enterSystem(){
+  authScreen.classList.add("fadeOut");
+  setTimeout(()=>{
+    authScreen.style.display="none";
+    system.style.display="flex";
+  },1200);
+}
+</script>
+
 <style>
-/* ================= RESET ================= */
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;font-family:Inter,Segoe UI,Arial}
-
-/* ================= VARIABLES ================= */
 :root{
-  --bg:#05070f;
-  --deep:#02040c;
-  --panel:#0a1025;
-  --neon:#2a6bff;
-  --neon2:#6fb0ff;
-  --purple:#7b5cff;
-  --text:#e6ecff;
-  --line:rgba(120,160,255,.15);
+  --neon:#4da6ff;
+  --bg:#02040c;
 }
-
-/* ================= BODY ================= */
+*{box-sizing:border-box;margin:0;padding:0;font-family:Orbitron}
 body{
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,.02),
-      rgba(255,255,255,.02) 1px,
-      transparent 1px,
-      transparent 4px
-    ),
-    radial-gradient(circle at center,#0a1025,#05070f 70%);
-  color:var(--text);
+  background:radial-gradient(circle at center,#0b1235,#02030a);
+  color:#cfe6ff;
+  overflow:hidden;
 }
 
-/* ================= NOISE ================= */
-body::after{
-  content:"";
+/* ===== BIOS ===== */
+#bios{
   position:fixed;inset:0;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
-  pointer-events:none;
+  background:black;color:#00ffd0;
+  padding:40px;font-size:14px;
 }
+#bios span{
+  display:block;opacity:0;
+  animation:show .6s forwards;
+}
+@keyframes show{to{opacity:1}}
 
-/* ================= CENTER ================= */
-.center{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.scan{
+  position:absolute;inset:0;
+  background:linear-gradient(transparent 45%,rgba(0,255,255,.2),transparent 55%);
+  animation:scan 2s infinite;
 }
+@keyframes scan{to{background-position:0 100%}}
 
-/* ================= ENERGY RINGS ================= */
-.ring{
-  position:absolute;
-  width:900px;height:900px;
-  border-radius:50%;
-  background:conic-gradient(from 0deg,var(--neon),transparent 70%);
-  filter:blur(120px);
-  animation:spin 18s linear infinite;
-  opacity:.8;
-}
-.ring.slow{animation-duration:40s;opacity:.4}
-.ring.fast{animation-duration:10s;opacity:.9}
+.hidden{display:none}
 
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ================= CORE ================= */
-.core{
-  position:relative;
-  width:320px;height:320px;
-  border-radius:50%;
-  background:
-    radial-gradient(circle at 30% 30%,#2a6bff,#020617 70%);
-  box-shadow:
-    0 0 200px rgba(90,140,255,.9),
-    inset 0 0 60px rgba(255,255,255,.2);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation:pulse 4s ease-in-out infinite;
+/* ===== AUTH ===== */
+#authScreen{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle,#050b25,#01010a);
 }
-
-@keyframes pulse{
-  50%{
-    box-shadow:
-      0 0 260px rgba(120,180,255,1),
-      inset 0 0 90px rgba(255,255,255,.25);
-  }
-}
-
-/* ================= HUD ================= */
-.core::before,
-.core::after{
-  content:"";
-  position:absolute;
-  inset:-40px;
-  border-radius:50%;
-  border:1px dashed var(--line);
-  animation:spin 60s linear infinite reverse;
-}
-.core::after{
-  inset:-70px;
-  animation-duration:120s;
-}
-
-/* ================= LOGO ================= */
-.logo{
-  width:200px;
-}
-.logo path{
-  fill:none;
-  stroke:url(#grad);
-  stroke-width:4;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  filter:drop-shadow(0 0 18px var(--neon));
-  stroke-dasharray:1000;
-  stroke-dashoffset:1000;
-  animation:draw 3.5s ease forwards;
-}
-
-@keyframes draw{
-  to{stroke-dashoffset:0}
-}
-
-/* ================= TEXT ================= */
-.title{
-  position:absolute;
-  bottom:120px;
+.authBox{
+  width:360px;
+  padding:36px;
+  border-radius:22px;
+  background:rgba(5,10,30,.9);
+  border:1px solid rgba(80,160,255,.35);
+  box-shadow:0 0 80px rgba(80,160,255,.35);
   text-align:center;
-  letter-spacing:.5em;
-  font-size:.8rem;
-  opacity:.75;
-  animation:fadeUp 1.5s ease forwards;
 }
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:.75}
-}
-
-/* ================= CTA ================= */
-.cta{
-  position:absolute;
-  bottom:60px;
-  padding:14px 36px;
-  border-radius:40px;
-  border:1px solid var(--line);
-  background:linear-gradient(135deg,rgba(60,120,255,.3),rgba(120,80,255,.3));
-  backdrop-filter:blur(14px);
+.logo{
+  font-size:2.2rem;
+  font-weight:800;
+  color:var(--neon);
   letter-spacing:.3em;
-  font-size:.75rem;
-  cursor:pointer;
-  transition:.4s;
+  margin-bottom:10px;
+  animation:pulse 3s infinite;
 }
-.cta:hover{
-  box-shadow:0 0 40px rgba(120,180,255,.8);
-  transform:translateY(-4px);
+@keyframes pulse{
+  50%{text-shadow:0 0 25px var(--neon)}
+}
+input,button{
+  width:100%;
+  margin-top:14px;
+  padding:14px;
+  border-radius:14px;
+  background:#02040c;
+  border:1px solid #1c2a55;
+  color:#cfe6ff;
+}
+button{
+  background:linear-gradient(135deg,#6fb6ff,#2a6bff);
+  cursor:pointer;
+  font-weight:700;
+}
+button:hover{box-shadow:0 0 25px #5fa0ff}
+
+/* ===== SYSTEM HUD ===== */
+#system{
+  display:none;
+  height:100vh;
+}
+.sidebar{
+  width:260px;
+  padding:24px;
+  background:rgba(5,10,35,.95);
+  border-right:1px solid rgba(80,160,255,.3);
+}
+.content{
+  flex:1;
+  padding:32px;
+}
+
+/* DATA LINES */
+.lines span{
+  position:absolute;
+  width:2px;height:100%;
+  background:linear-gradient(transparent,var(--neon),transparent);
+  animation:flow 3s linear infinite;
+  opacity:.4;
+}
+@keyframes flow{
+  to{transform:translateY(100%)}
+}
+
+/* TRANSITIONS */
+.fadeOut{
+  animation:fade 1.2s forwards;
+}
+@keyframes fade{
+  to{opacity:0;transform:scale(1.1)}
 }
 </style>
 </head>
 
 <body>
 
-<div class="center">
-  <div class="ring slow"></div>
-  <div class="ring"></div>
-  <div class="ring fast"></div>
+<!-- BIOS -->
+<div id="bios">
+  <span style="animation-delay:.3s">K-NET BIOS v4.1</span>
+  <span style="animation-delay:.6s">Initializing secure neural node...</span>
+  <span style="animation-delay:.9s">Loading cryptographic layers...</span>
+  <span style="animation-delay:1.2s">AUTH MODULE READY</span>
+  <div class="scan"></div>
+</div>
 
-  <div class="core">
-    <!-- LOGO -->
-    <svg class="logo" viewBox="0 0 240 80">
-      <defs>
-        <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#6fb0ff"/>
-          <stop offset="100%" stop-color="#7b5cff"/>
-        </linearGradient>
-      </defs>
-
-      <!-- K -->
-      <path d="M10 70 V10 M10 40 L40 10 M10 40 L40 70"/>
-      <!-- - -->
-      <path d="M55 40 H75"/>
-      <!-- N -->
-      <path d="M90 70 V10 L130 70 V10"/>
-      <!-- E -->
-      <path d="M155 10 V70 M155 10 H190 M155 40 H185 M155 70 H190"/>
-      <!-- T -->
-      <path d="M205 10 H235 M220 10 V70"/>
-    </svg>
-  </div>
-
-  <div class="title">
-    SECURE · NEURAL · NETWORK
-  </div>
-
-  <div class="cta">
-    ENTER K-NET
+<!-- AUTH -->
+<div id="authScreen" class="hidden">
+  <div class="authBox">
+    <div class="logo">K-NET</div>
+    <p style="opacity:.7">Secure Neural Network</p>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">LOGIN</button>
+    <button onclick="register()">REGISTER</button>
   </div>
 </div>
 
+<!-- SYSTEM -->
+<div id="system">
+  <div class="sidebar">
+    <h3>K-NET</h3>
+    <p style="opacity:.6">Connected</p>
+  </div>
+  <div class="content">
+    <h1>ACCESS GRANTED</h1>
+    <p>Neural link established. Welcome to K-NET.</p>
+  </div>
+</div>
+
+<script>
+setTimeout(()=>{
+  bios.classList.add("hidden");
+  authScreen.classList.remove("hidden");
+},3000);
+</script>
+
 </body>
 </html>
+
