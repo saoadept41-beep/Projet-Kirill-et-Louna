@@ -7,52 +7,80 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 
 <style>
+:root{
+  --neon:#7aa2ff;
+  --violet:#9b7aff;
+}
+
 html,body{
   margin:0;
   width:100%;
   height:100%;
-  overflow:hidden;
   background:#01020a;
+  overflow:hidden;
   font-family:'Orbitron',sans-serif;
+  color:white;
 }
 
+/* BACKGROUND */
 #nebulaCanvas{
   position:fixed;
   inset:0;
-  z-index:-1;
-  display:block;
+  z-index:-2;
 }
 
+/* SCAN LINE */
+.scan{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(122,162,255,.04) 50%,
+    transparent 100%
+  );
+  animation:scan 6s linear infinite;
+  pointer-events:none;
+}
+
+@keyframes scan{
+  0%{transform:translateY(-100%)}
+  100%{transform:translateY(100%)}
+}
+
+/* SPHERE */
 #sphere{
   position:absolute;
   top:50%;
   left:50%;
-  width:280px;
-  height:280px;
-  margin-left:-140px;
-  margin-top:-140px;
+  width:300px;
+  height:300px;
+  transform:translate(-50%,-50%);
   border-radius:50%;
-  background: radial-gradient(circle at 50% 50%, rgba(122,162,255,0.5), rgba(0,0,0,0.0) 70%);
-  box-shadow:0 0 80px rgba(122,162,255,0.5),0 0 160px rgba(122,162,255,0.3);
-  cursor:pointer;
+  background:
+    radial-gradient(circle at 30% 30%, #9b7aff, transparent 60%),
+    radial-gradient(circle at 70% 70%, #7aa2ff, transparent 60%);
+  box-shadow:
+    0 0 60px rgba(122,162,255,.8),
+    0 0 140px rgba(155,122,255,.5);
+  animation:float 4s ease-in-out infinite alternate;
   display:flex;
   align-items:center;
   justify-content:center;
-  animation:pulse 3s infinite alternate;
+  cursor:pointer;
+}
+
+@keyframes float{
+  from{transform:translate(-50%,-50%) scale(.95)}
+  to{transform:translate(-50%,-50%) scale(1.05)}
 }
 
 #logo{
-  font-size:3rem;
+  font-size:3.2rem;
   font-weight:900;
-  color:#7aa2ff;
-  text-shadow:0 0 25px #7aa2ff,0 0 50px #7aa2ff;
-  pointer-events:none;
-  user-select:none;
-}
-
-@keyframes pulse{
-  0%{transform:scale(0.95);}
-  100%{transform:scale(1.05);}
+  text-shadow:
+    0 0 20px var(--neon),
+    0 0 40px var(--violet);
 }
 
 /* AUTH */
@@ -62,10 +90,10 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
+  background:rgba(1,2,10,.9);
   opacity:0;
   pointer-events:none;
   transition:1s;
-  background:rgba(2,3,15,0.85);
 }
 
 #auth.show{
@@ -76,58 +104,66 @@ html,body{
 .authBox{
   width:360px;
   padding:36px;
-  border-radius:22px;
-  background:rgba(8,12,35,0.95);
-  border:1px solid rgba(122,162,255,0.35);
-  box-shadow:0 0 60px rgba(0,0,0,0.8);
+  border-radius:24px;
+  background:rgba(8,12,35,.97);
+  box-shadow:0 0 60px rgba(0,0,0,.9);
+  border:1px solid rgba(122,162,255,.4);
   display:flex;
   flex-direction:column;
   gap:14px;
 }
 
+/* INPUTS */
 input,select,button{
   width:100%;
   padding:14px;
   border-radius:14px;
-  border:1px solid rgba(122,162,255,0.3);
-  background:rgba(10,15,40,0.95);
-  color:#fff;
+  background:rgba(10,15,40,.95);
+  border:1px solid rgba(122,162,255,.3);
+  color:white;
   font-family:inherit;
 }
 
 button{
+  background:linear-gradient(135deg,var(--neon),var(--violet));
   font-weight:700;
   cursor:pointer;
-  background:linear-gradient(135deg,#7aa2ff,#9b7aff);
-  border:none;
+}
+
+.googleBtn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background:rgba(10,15,40,.95);
 }
 
 .tabs{
   display:flex;
   justify-content:space-around;
-  margin-bottom:14px;
 }
 
 .tab{
   cursor:pointer;
-  font-weight:700;
   padding:10px;
   border-radius:12px;
-  transition:0.3s;
 }
 
 .tab.active{
-  background:rgba(122,162,255,0.2);
+  background:rgba(122,162,255,.2);
 }
+
 #errorMsg{
-  color:#ff6b6b;
   text-align:center;
+  color:#ff6b6b;
 }
 </style>
 </head>
+
 <body>
 
 <canvas id="nebulaCanvas"></canvas>
+<div class="scan"></div>
 
 <div id="sphere">
   <div id="logo">K-NET</div>
@@ -135,6 +171,7 @@ button{
 
 <div id="auth">
   <div class="authBox">
+
     <div class="tabs">
       <div class="tab active" id="tabLogin">Login</div>
       <div class="tab" id="tabRegister">Register</div>
@@ -146,156 +183,49 @@ button{
       <button id="loginBtn">Login</button>
     </div>
 
-    <div id="registerForm" style="display:none;">
+    <div id="registerForm" style="display:none">
       <input id="regEmail" placeholder="Email">
       <input id="regPassword" type="password" placeholder="Password">
       <input id="regNick" placeholder="Nickname">
       <select id="regRole">
-        <option value="">Выберите роль</option>
-        <option value="Chauffeur">🚗 Chauffeur</option>
-        <option value="Logisticien">📦 Logisticien</option>
-        <option value="Mécanicien">🛠 Mécanicien</option>
-        <option value="Organisateur">📋 Organisateur</option>
+        <option value="">Role</option>
+        <option>Chauffeur</option>
+        <option>Logisticien</option>
+        <option>Mécanicien</option>
+        <option>Organisateur</option>
       </select>
       <button id="registerBtn">Register</button>
     </div>
+
+    <button id="googleBtn" class="googleBtn">Continue with Google</button>
 
     <div id="errorMsg"></div>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-/* ================= FIREBASE ================= */
-const firebaseConfig={
-  apiKey:"AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
-  authDomain:"projet-56900.firebaseapp.com",
-  databaseURL:"https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId:"projet-56900",
-  storageBucket:"projet-56900.firebasestorage.app",
-  messagingSenderId:"753669702381",
-  appId:"1:753669702381:web:0ac180682fba00c68542e4",
-  measurementId:"G-M9X20GDLQN"
-};
-
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getDatabase(app);
-
-/* ================= NEBULA PARTICLES ================= */
-const canvas=document.getElementById('nebulaCanvas');
-const ctx=canvas.getContext('2d');
-function resize(){canvas.width=innerWidth; canvas.height=innerHeight;}
-resize(); window.onresize=resize;
-
-let particles=[];
-for(let i=0;i<150;i++){
-  particles.push({x:canvas.width/2 + (Math.random()-0.5)*120, y:canvas.height/2 + (Math.random()-0.5)*120, r:Math.random()*4+2, dx:(Math.random()-0.5)*0.2, dy:(Math.random()-0.5)*0.2, alpha:Math.random()*0.5+0.2});
-}
-
-function draw(){
-  ctx.fillStyle='rgba(1,2,10,0.15)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>{
-    p.x+=p.dx; p.y+=p.dy;
-    if(p.x<canvas.width/2-150)p.dx=Math.abs(p.dx);
-    if(p.x>canvas.width/2+150)p.dx=-Math.abs(p.dx);
-    if(p.y<canvas.height/2-150)p.dy=Math.abs(p.dy);
-    if(p.y>canvas.height/2+150)p.dy=-Math.abs(p.dy);
-    let grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
-    grad.addColorStop(0,'rgba(122,162,255,'+p.alpha+')');
-    grad.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=grad;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fill();
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-
-/* ================= CLICK TRANSITION ================= */
+<script>
 const sphere=document.getElementById('sphere');
-const authDiv=document.getElementById('auth');
+const auth=document.getElementById('auth');
+
 sphere.onclick=()=>{
-  sphere.style.transition='transform 0.8s, opacity 0.8s';
-  sphere.style.transform='scale(5)';
+  sphere.style.transition='1s';
+  sphere.style.transform='translate(-50%,-50%) scale(6)';
   sphere.style.opacity='0';
-  setTimeout(()=>authDiv.classList.add('show'),800);
+  setTimeout(()=>auth.classList.add('show'),800);
 };
 
-/* ================= TAB SWITCH ================= */
-const tabLogin=document.getElementById('tabLogin');
-const tabRegister=document.getElementById('tabRegister');
-const loginForm=document.getElementById('loginForm');
-const registerForm=document.getElementById('registerForm');
+/* tabs */
 tabLogin.onclick=()=>{
   tabLogin.classList.add('active');
   tabRegister.classList.remove('active');
   loginForm.style.display='block';
   registerForm.style.display='none';
-  errorMsg.textContent='';
 };
 tabRegister.onclick=()=>{
   tabRegister.classList.add('active');
   tabLogin.classList.remove('active');
   loginForm.style.display='none';
   registerForm.style.display='block';
-  errorMsg.textContent='';
-};
-
-/* ================= REGISTRATION ================= */
-const registerBtn=document.getElementById('registerBtn');
-const loginBtn=document.getElementById('loginBtn');
-const errorMsg=document.getElementById('errorMsg');
-
-registerBtn.onclick=async ()=>{
-  errorMsg.textContent='';
-  const email=document.getElementById('regEmail').value;
-  const password=document.getElementById('regPassword').value;
-  const nick=document.getElementById('regNick').value;
-  const role=document.getElementById('regRole').value;
-
-  if(!email || !password || !nick || !role){
-    errorMsg.textContent='Заполните все поля!';
-    return;
-  }
-
-  try{
-    const cred=await createUserWithEmailAndPassword(auth,email,password);
-    const usersSnap=await get(ref(db,'users'));
-    let finalRole = !usersSnap.exists() ? 'Administrateur' : role;
-    await set(ref(db,'users/'+cred.user.uid),{nick, role:finalRole, createdAt:Date.now()});
-    location.href='system.html';
-  }catch(err){
-    if(err.code==='auth/email-already-in-use'){
-      errorMsg.textContent='Этот email уже зарегистрирован! Войдите.';
-    } else {
-      errorMsg.textContent=err.message;
-    }
-  }
-};
-
-/* ================= LOGIN ================= */
-loginBtn.onclick=async ()=>{
-  errorMsg.textContent='';
-  const email=document.getElementById('loginEmail').value;
-  const password=document.getElementById('loginPassword').value;
-
-  if(!email || !password){
-    errorMsg.textContent='Заполните все поля!';
-    return;
-  }
-
-  try{
-    await signInWithEmailAndPassword(auth,email,password);
-    location.href='system.html';
-  }catch(err){
-    errorMsg.textContent='Ошибка входа: '+err.message;
-  }
 };
 </script>
 
