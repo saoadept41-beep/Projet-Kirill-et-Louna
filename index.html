@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>K-NET • Neural Gate</title>
+<title>GUDHUB • Neural Gate</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 
@@ -11,7 +11,6 @@
   --neon:#7aa2ff;
   --violet:#9b7aff;
 }
-
 html,body{
   margin:0;
   width:100%;
@@ -21,33 +20,24 @@ html,body{
   font-family:'Orbitron',sans-serif;
   color:white;
 }
-
 /* BACKGROUND */
 #nebulaCanvas{
   position:fixed;
   inset:0;
   z-index:-2;
 }
-
 /* SCAN LINE */
 .scan{
   position:fixed;
   inset:0;
-  background:linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(122,162,255,.04) 50%,
-    transparent 100%
-  );
+  background:linear-gradient(to bottom, transparent 0%, rgba(122,162,255,.04) 50%, transparent 100%);
   animation:scan 6s linear infinite;
   pointer-events:none;
 }
-
 @keyframes scan{
   0%{transform:translateY(-100%)}
   100%{transform:translateY(100%)}
 }
-
 /* SPHERE */
 #sphere{
   position:absolute;
@@ -57,32 +47,23 @@ html,body{
   height:300px;
   transform:translate(-50%,-50%);
   border-radius:50%;
-  background:
-    radial-gradient(circle at 30% 30%, #9b7aff, transparent 60%),
-    radial-gradient(circle at 70% 70%, #7aa2ff, transparent 60%);
-  box-shadow:
-    0 0 60px rgba(122,162,255,.8),
-    0 0 140px rgba(155,122,255,.5);
+  background: radial-gradient(circle at 30% 30%, #9b7aff, transparent 60%), radial-gradient(circle at 70% 70%, #7aa2ff, transparent 60%);
+  box-shadow:0 0 60px rgba(122,162,255,.8),0 0 140px rgba(155,122,255,.5);
   animation:float 4s ease-in-out infinite alternate;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
 }
-
 @keyframes float{
   from{transform:translate(-50%,-50%) scale(.95)}
   to{transform:translate(-50%,-50%) scale(1.05)}
 }
-
 #logo{
   font-size:3.2rem;
   font-weight:900;
-  text-shadow:
-    0 0 20px var(--neon),
-    0 0 40px var(--violet);
+  text-shadow:0 0 20px var(--neon),0 0 40px var(--violet);
 }
-
 /* AUTH */
 #auth{
   position:fixed;
@@ -95,12 +76,10 @@ html,body{
   pointer-events:none;
   transition:1s;
 }
-
 #auth.show{
   opacity:1;
   pointer-events:auto;
 }
-
 .authBox{
   width:360px;
   padding:36px;
@@ -112,7 +91,6 @@ html,body{
   flex-direction:column;
   gap:14px;
 }
-
 /* INPUTS */
 input,select,button{
   width:100%;
@@ -123,13 +101,11 @@ input,select,button{
   color:white;
   font-family:inherit;
 }
-
 button{
   background:linear-gradient(135deg,var(--neon),var(--violet));
   font-weight:700;
   cursor:pointer;
 }
-
 .googleBtn{
   display:flex;
   align-items:center;
@@ -137,36 +113,31 @@ button{
   gap:10px;
   background:rgba(10,15,40,.95);
 }
-
 .tabs{
   display:flex;
   justify-content:space-around;
 }
-
 .tab{
   cursor:pointer;
   padding:10px;
   border-radius:12px;
 }
-
 .tab.active{
   background:rgba(122,162,255,.2);
 }
-
 #errorMsg{
   text-align:center;
   color:#ff6b6b;
 }
 </style>
 </head>
-
 <body>
 
 <canvas id="nebulaCanvas"></canvas>
 <div class="scan"></div>
 
 <div id="sphere">
-  <div id="logo">K-NET</div>
+  <div id="logo">GUDHUB</div>
 </div>
 
 <div id="auth">
@@ -198,39 +169,145 @@ button{
     </div>
 
     <button id="googleBtn" class="googleBtn">Continue with Google</button>
-
     <div id="errorMsg"></div>
   </div>
 </div>
 
-<script>
-const sphere=document.getElementById('sphere');
-const auth=document.getElementById('auth');
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-sphere.onclick=()=>{
-  sphere.style.transition='1s';
-  sphere.style.transform='translate(-50%,-50%) scale(6)';
-  sphere.style.opacity='0';
-  setTimeout(()=>auth.classList.add('show'),800);
+/* ================= FIREBASE ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
+  authDomain: "projet-56900.firebaseapp.com",
+  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "projet-56900",
+  storageBucket: "projet-56900.firebasestorage.app",
+  messagingSenderId: "753669702381",
+  appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
 
-/* tabs */
-tabLogin.onclick=()=>{
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+/* ================= GET ELEMENTS ================= */
+const loginBtn = document.getElementById('loginBtn');
+const registerBtn = document.getElementById('registerBtn');
+const googleBtn = document.getElementById('googleBtn');
+const errorMsg = document.getElementById('errorMsg');
+
+const loginEmail = document.getElementById('loginEmail');
+const loginPassword = document.getElementById('loginPassword');
+
+const regEmail = document.getElementById('regEmail');
+const regPassword = document.getElementById('regPassword');
+const regNick = document.getElementById('regNick');
+const regRole = document.getElementById('regRole');
+
+/* ================= AUTH STATE ================= */
+onAuthStateChanged(auth, user => {
+  if (user) {
+    location.href = "system.html"; 
+  }
+});
+
+/* ================= LOGIN ================= */
+loginBtn.onclick = async () => {
+  errorMsg.textContent = '';
+  if (!loginEmail.value || !loginPassword.value) {
+    errorMsg.textContent = 'Заполните все поля!';
+    return;
+  }
+  try {
+    await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+  } catch (err) {
+    errorMsg.textContent = "Ошибка входа: " + err.message;
+  }
+};
+
+/* ================= REGISTER ================= */
+registerBtn.onclick = async () => {
+  errorMsg.textContent = '';
+
+  if (!regEmail.value || !regPassword.value || !regNick.value || !regRole.value) {
+    errorMsg.textContent = "Заполните все поля!";
+    return;
+  }
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPassword.value);
+    const usersSnap = await get(ref(db, "users"));
+    const role = usersSnap.exists() && Object.keys(usersSnap.val()).length > 0 ? regRole.value : "Administrateur";
+
+    await set(ref(db, "users/" + cred.user.uid), {
+      nick: regNick.value,
+      role: role,
+      createdAt: Date.now()
+    });
+
+    alert("Регистрация прошла успешно! Этот сайт предназначен для общения внутри компании или лицея. Если возникнут проблемы, пишите администратору.");
+
+  } catch (err) {
+    errorMsg.textContent = err.message;
+  }
+};
+
+/* ================= GOOGLE LOGIN ================= */
+googleBtn.onclick = async () => {
+  errorMsg.textContent = '';
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const userRef = ref(db, "users/" + user.uid);
+    const snap = await get(userRef);
+
+    if (!snap.exists()) {
+      await set(userRef, {
+        nick: user.displayName || "Google User",
+        role: "Chauffeur",
+        createdAt: Date.now()
+      });
+    }
+
+  } catch (err) {
+    errorMsg.textContent = "Ошибка Google: " + err.message;
+  }
+};
+
+/* ================= SPHERE CLICK ================= */
+const sphere = document.getElementById('sphere');
+const authBox = document.getElementById('auth');
+sphere.onclick = () => {
+  sphere.style.transition = '1s';
+  sphere.style.transform = 'translate(-50%,-50%) scale(6)';
+  sphere.style.opacity = '0';
+  setTimeout(() => authBox.classList.add('show'), 800);
+};
+
+/* ================= TABS ================= */
+const tabLogin = document.getElementById('tabLogin');
+const tabRegister = document.getElementById('tabRegister');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+
+tabLogin.onclick = () => {
   tabLogin.classList.add('active');
   tabRegister.classList.remove('active');
-  loginForm.style.display='block';
-  registerForm.style.display='none';
+  loginForm.style.display = 'block';
+  registerForm.style.display = 'none';
 };
-tabRegister.onclick=()=>{
+tabRegister.onclick = () => {
   tabRegister.classList.add('active');
   tabLogin.classList.remove('active');
-  loginForm.style.display='none';
-  registerForm.style.display='block';
+  loginForm.style.display = 'none';
+  registerForm.style.display = 'block';
 };
 </script>
 
 </body>
 </html>
-
-
 
