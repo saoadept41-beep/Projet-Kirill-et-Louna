@@ -12,40 +12,29 @@
   --violet:#9b7aff;
 }
 
+*{box-sizing:border-box}
+
 html,body{
   margin:0;
   width:100%;
   height:100%;
-  background:#01020a;
+  background:#02030d;
   overflow:hidden;
   font-family:'Orbitron',sans-serif;
   color:white;
 }
 
-/* BACKGROUND */
-#nebulaCanvas{
-  position:fixed;
-  inset:0;
-  z-index:-2;
-}
-
-/* SCAN LINE */
+/* SCAN */
 .scan{
   position:fixed;
   inset:0;
-  background:linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(122,162,255,.04) 50%,
-    transparent 100%
-  );
-  animation:scan 6s linear infinite;
+  background:linear-gradient(transparent,rgba(122,162,255,.05),transparent);
+  animation:scan 7s linear infinite;
   pointer-events:none;
 }
-
 @keyframes scan{
-  0%{transform:translateY(-100%)}
-  100%{transform:translateY(100%)}
+  from{transform:translateY(-100%)}
+  to{transform:translateY(100%)}
 }
 
 /* SPHERE */
@@ -53,34 +42,42 @@ html,body{
   position:absolute;
   top:50%;
   left:50%;
-  width:300px;
-  height:300px;
+  width:min(70vw,320px);
+  height:min(70vw,320px);
   transform:translate(-50%,-50%);
   border-radius:50%;
   background:
-    radial-gradient(circle at 30% 30%, #9b7aff, transparent 60%),
+    radial-gradient(circle at 30% 30%, #bba8ff, transparent 55%),
     radial-gradient(circle at 70% 70%, #7aa2ff, transparent 60%);
   box-shadow:
-    0 0 60px rgba(122,162,255,.8),
-    0 0 140px rgba(155,122,255,.5);
-  animation:float 4s ease-in-out infinite alternate;
+    0 0 80px rgba(122,162,255,.9),
+    inset 0 0 60px rgba(255,255,255,.15);
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  animation:pulse 5s ease-in-out infinite;
 }
-
-@keyframes float{
+#sphere::before{
+  content:'';
+  position:absolute;
+  inset:-25px;
+  border-radius:50%;
+  background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.35), transparent 40%);
+  animation:rotate 14s linear infinite;
+}
+@keyframes pulse{
   from{transform:translate(-50%,-50%) scale(.95)}
   to{transform:translate(-50%,-50%) scale(1.05)}
 }
-
+@keyframes rotate{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
 #logo{
-  font-size:3.2rem;
+  font-size:clamp(2.2rem,5vw,3.4rem);
   font-weight:900;
-  text-shadow:
-    0 0 20px var(--neon),
-    0 0 40px var(--violet);
+  text-shadow:0 0 30px var(--neon),0 0 60px var(--violet);
 }
 
 /* AUTH */
@@ -90,30 +87,29 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:rgba(1,2,10,.9);
+  background:rgba(2,3,13,.95);
   opacity:0;
   pointer-events:none;
   transition:1s;
 }
-
 #auth.show{
   opacity:1;
   pointer-events:auto;
 }
 
 .authBox{
-  width:360px;
+  width:min(92vw,380px);
   padding:36px;
-  border-radius:24px;
-  background:rgba(8,12,35,.97);
-  box-shadow:0 0 60px rgba(0,0,0,.9);
-  border:1px solid rgba(122,162,255,.4);
+  border-radius:26px;
+  background:rgba(10,15,45,.97);
+  border:1px solid rgba(122,162,255,.35);
+  box-shadow:0 0 80px rgba(0,0,0,.8);
   display:flex;
   flex-direction:column;
   gap:14px;
 }
 
-/* INPUTS */
+/* UI */
 input,select,button{
   width:100%;
   padding:14px;
@@ -123,46 +119,36 @@ input,select,button{
   color:white;
   font-family:inherit;
 }
-
 button{
   background:linear-gradient(135deg,var(--neon),var(--violet));
   font-weight:700;
   cursor:pointer;
 }
-
 .googleBtn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  background:rgba(10,15,40,.95);
+  background:rgba(15,20,55,.95);
 }
-
 .tabs{
   display:flex;
   justify-content:space-around;
 }
-
 .tab{
   cursor:pointer;
   padding:10px;
   border-radius:12px;
 }
-
 .tab.active{
-  background:rgba(122,162,255,.2);
+  background:rgba(122,162,255,.25);
 }
-
-#errorMsg{
-  text-align:center;
+#error{
   color:#ff6b6b;
+  text-align:center;
+  font-size:.85rem;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="nebulaCanvas"></canvas>
 <div class="scan"></div>
 
 <div id="sphere">
@@ -186,46 +172,93 @@ button{
     <div id="registerForm" style="display:none">
       <input id="regEmail" placeholder="Email">
       <input id="regPassword" type="password" placeholder="Password">
-      <input id="regNick" placeholder="Nickname">
-      <select id="regRole">
-        <option value="">Role</option>
-        <option>Chauffeur</option>
-        <option>Logisticien</option>
-        <option>Mécanicien</option>
-        <option>Organisateur</option>
-      </select>
       <button id="registerBtn">Register</button>
     </div>
 
     <button id="googleBtn" class="googleBtn">Continue with Google</button>
+    <div id="error"></div>
 
-    <div id="errorMsg"></div>
   </div>
 </div>
 
-<script>
-const sphere=document.getElementById('sphere');
-const auth=document.getElementById('auth');
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-sphere.onclick=()=>{
-  sphere.style.transition='1s';
-  sphere.style.transform='translate(-50%,-50%) scale(6)';
-  sphere.style.opacity='0';
-  setTimeout(()=>auth.classList.add('show'),800);
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyBLbswX9MiSInVqNW12POJ5OmAYKgy2ERw",
+  authDomain: "projet-56900.firebaseapp.com",
+  databaseURL: "https://projet-56900-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "projet-56900",
+  storageBucket: "projet-56900.firebasestorage.app",
+  messagingSenderId: "753669702381",
+  appId: "1:753669702381:web:0ac180682fba00c68542e4"
 };
 
-/* tabs */
+const app = initializeApp(firebaseConfig);
+const authFirebase = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+/* UI */
+const sphere = document.getElementById('sphere');
+const auth = document.getElementById('auth');
+const error = document.getElementById('error');
+
+const tabLogin = document.getElementById('tabLogin');
+const tabRegister = document.getElementById('tabRegister');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+
+sphere.onclick=()=>{
+  sphere.style.transform='translate(-50%,-50%) scale(6)';
+  sphere.style.opacity='0';
+  setTimeout(()=>auth.classList.add('show'),700);
+};
+
 tabLogin.onclick=()=>{
   tabLogin.classList.add('active');
   tabRegister.classList.remove('active');
   loginForm.style.display='block';
   registerForm.style.display='none';
 };
+
 tabRegister.onclick=()=>{
   tabRegister.classList.add('active');
   tabLogin.classList.remove('active');
   loginForm.style.display='none';
   registerForm.style.display='block';
+};
+
+/* AUTH */
+loginBtn.onclick=()=>{
+  signInWithEmailAndPassword(
+    authFirebase,
+    loginEmail.value,
+    loginPassword.value
+  ).then(()=>alert("Logged in"))
+   .catch(e=>error.textContent=e.message);
+};
+
+registerBtn.onclick=()=>{
+  createUserWithEmailAndPassword(
+    authFirebase,
+    regEmail.value,
+    regPassword.value
+  ).then(()=>alert("Account created"))
+   .catch(e=>error.textContent=e.message);
+};
+
+googleBtn.onclick=()=>{
+  signInWithPopup(authFirebase,provider)
+    .then(()=>alert("Google login success"))
+    .catch(e=>error.textContent=e.message);
 };
 </script>
 
